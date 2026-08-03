@@ -50,7 +50,8 @@ struct SettingsView: View {
                     HStack {
                         Text("Notification time").font(.system(size: 13))
                         Spacer()
-                        Stepper(String(format: "%02d:%02d", notificationHour, notificationMinute), value: $notificationHour, in: 0...23)
+                        DatePicker("", selection: reminderTime, displayedComponents: .hourAndMinute)
+                            .labelsHidden()
                             .font(.system(size: 12, design: .monospaced))
                             .fixedSize()
                     }
@@ -193,6 +194,25 @@ struct SettingsView: View {
         .sheet(item: $exportFile) { file in
             ShareSheet(activityItems: [file.url])
         }
+        .onChange(of: notificationsEnabled) { _, _ in ReminderScheduler.sync() }
+        .onChange(of: notificationHour) { _, _ in ReminderScheduler.sync() }
+        .onChange(of: notificationMinute) { _, _ in ReminderScheduler.sync() }
+    }
+
+    private var reminderTime: Binding<Date> {
+        Binding(
+            get: {
+                var components = DateComponents()
+                components.hour = notificationHour
+                components.minute = notificationMinute
+                return Calendar.current.date(from: components) ?? Date()
+            },
+            set: { newValue in
+                let components = Calendar.current.dateComponents([.hour, .minute], from: newValue)
+                notificationHour = components.hour ?? notificationHour
+                notificationMinute = components.minute ?? notificationMinute
+            }
+        )
     }
 
     private func makeExportFile() -> ExportFile {

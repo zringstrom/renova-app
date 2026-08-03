@@ -5,6 +5,7 @@ struct TodayView: View {
     let viewModel: AppViewModel
 
     @AppStorage("displayName") private var displayName = ""
+    @EnvironmentObject private var notificationRouter: NotificationRouter
     @State private var showQuestionnaire = false
     @State private var showMeasurementSession = false
     @State private var openExplainer: RecoveryExplainerTopic?
@@ -50,7 +51,13 @@ struct TodayView: View {
             }
         }
         .background(CGTheme.surface)
-        .onAppear { viewModel.refresh() }
+        .onAppear {
+            viewModel.refresh()
+            handleQuestionnaireRequestIfNeeded()
+        }
+        .onChange(of: notificationRouter.openQuestionnaireRequested) { _, _ in
+            handleQuestionnaireRequestIfNeeded()
+        }
         .sheet(isPresented: $showQuestionnaire, onDismiss: {
             viewModel.refresh()
             if isQuestionnaireDoneToday, !isMeasurementDoneToday {
@@ -61,6 +68,14 @@ struct TodayView: View {
         }
         .sheet(isPresented: $showMeasurementSession, onDismiss: { viewModel.refresh() }) {
             MeasurementSessionView(viewModel: viewModel)
+        }
+    }
+
+    private func handleQuestionnaireRequestIfNeeded() {
+        guard notificationRouter.openQuestionnaireRequested else { return }
+        notificationRouter.openQuestionnaireRequested = false
+        if !isQuestionnaireDoneToday {
+            showQuestionnaire = true
         }
     }
 

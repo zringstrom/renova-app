@@ -13,6 +13,7 @@
 		1D3A9F6C49A2A2E2138B8BEB /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6848CA1E0FC38E22E54D54 /* AppViewModel.swift */; };
 		1D463A5800A0F38FDA6F14D3 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA42BBA16BE5BF6722BEB3A /* OnboardingView.swift */; };
 		1E7ACA0D1F9349684905EF5E /* ControlGridTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D478E96543498D13AE3EDDA /* ControlGridTabBar.swift */; };
+		268ED6FDB9A1D4A69833BB40 /* NotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AEA02BBFC6EF2A1A5905A8 /* NotificationRouter.swift */; };
 		28CCA201337510DDEF255CA6 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407BA9AA4BC8A6CF4104FE68 /* DayDetailView.swift */; };
 		2CB6B90066F57DB7BC8F0C05 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499B3C5777479D689D35D807 /* RootView.swift */; };
 		37B7F795634C1DC59F5AD990 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58BD6CD05109A6D160F161D /* TodayView.swift */; };
@@ -31,6 +32,7 @@
 		9E169AD79E89BCFD0E716E6E /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */; };
 		A7902E02ED7334B9F76E6FC3 /* BaselineLight+Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F1C129E9FD558DC7B39BC /* BaselineLight+Color.swift */; };
 		A898DAEEC7F03003ED07B795 /* BandChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE89128263DBA15BC670E98 /* BandChart.swift */; };
+		A9E297D013ADA2997BE14A2D /* ReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627497518BF96CF02BDD2FA /* ReminderScheduler.swift */; };
 		AF34F02390D3D43C7F5B00CC /* MeasurementSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 205040B9FDA737AF103EEA30 /* MeasurementSessionViewModel.swift */; };
 		B37B254D7466B4D9A83D4503 /* HeartRateClientProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B381017F774112CF46080A3 /* HeartRateClientProtocol.swift */; };
 		C890D93ECE2D5019F2AD5F2D /* ControlGridTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDF1322421C604CE851ED8E /* ControlGridTheme.swift */; };
@@ -64,11 +66,13 @@
 		15CF0EA50C3C75CFF43E2294 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		1F22836ECEE9AB8394AC3DEA /* RecoveryExplainerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryExplainerCard.swift; sourceTree = "<group>"; };
 		205040B9FDA737AF103EEA30 /* MeasurementSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementSessionViewModel.swift; sourceTree = "<group>"; };
+		21AEA02BBFC6EF2A1A5905A8 /* NotificationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRouter.swift; sourceTree = "<group>"; };
 		2D478E96543498D13AE3EDDA /* ControlGridTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridTabBar.swift; sourceTree = "<group>"; };
 		2D630D8E11BC804EC040A2EB /* ExportModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportModels.swift; sourceTree = "<group>"; };
 		3F2D00AAB7EE52A7A2EDF473 /* ControlGridToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridToggle.swift; sourceTree = "<group>"; };
 		407BA9AA4BC8A6CF4104FE68 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
 		4317BF006E901FE9B7AE0A53 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4627497518BF96CF02BDD2FA /* ReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderScheduler.swift; sourceTree = "<group>"; };
 		499B3C5777479D689D35D807 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		4BB31AC8A8E4BAEE928AD657 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
@@ -119,6 +123,15 @@
 				E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */,
 			);
 			path = Shared;
+			sourceTree = "<group>";
+		};
+		10EEA30D6FE5A5C82F9DC0E6 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				21AEA02BBFC6EF2A1A5905A8 /* NotificationRouter.swift */,
+				4627497518BF96CF02BDD2FA /* ReminderScheduler.swift */,
+			);
+			path = Notifications;
 			sourceTree = "<group>";
 		};
 		111660E5ABDF2BFA9F237EAF /* Persistence */ = {
@@ -183,6 +196,7 @@
 				860EB8005EE295C221490ED1 /* Bluetooth */,
 				74CF86334F9F5CCF43A36D0F /* Cues */,
 				94EA7EE91AABE5F4DFED7520 /* Export */,
+				10EEA30D6FE5A5C82F9DC0E6 /* Notifications */,
 				111660E5ABDF2BFA9F237EAF /* Persistence */,
 			);
 			path = Services;
@@ -416,10 +430,12 @@
 				66C1309A9DBC8B5A3351168B /* MeasurementSessionView.swift in Sources */,
 				AF34F02390D3D43C7F5B00CC /* MeasurementSessionViewModel.swift in Sources */,
 				7AED08520DBC918BB1E66450 /* Models.swift in Sources */,
+				268ED6FDB9A1D4A69833BB40 /* NotificationRouter.swift in Sources */,
 				1D463A5800A0F38FDA6F14D3 /* OnboardingView.swift in Sources */,
 				EA9EE65D539109E0C10828A0 /* QuestionnaireView.swift in Sources */,
 				CC818CDEF16D9BD356F8C61F /* RecoveryExplainerCard.swift in Sources */,
 				EFAD93CC9B92A77247D3C062 /* RecoveryExplainers.swift in Sources */,
+				A9E297D013ADA2997BE14A2D /* ReminderScheduler.swift in Sources */,
 				6EBE4217837E0029E83EB4DB /* RenovaApp.swift in Sources */,
 				01B071E3896CE142D06FE995 /* ResultsAnalyzer.swift in Sources */,
 				2CB6B90066F57DB7BC8F0C05 /* RootView.swift in Sources */,

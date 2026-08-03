@@ -240,7 +240,11 @@ struct OnboardingView: View {
                 Text("ALL SYSTEMS SET").font(CGTheme.monoSmall).fontWeight(.bold).foregroundStyle(CGTheme.accent)
             }
             Button {
-                if notificationsEnabled { requestNotificationPermission() }
+                if notificationsEnabled {
+                    requestNotificationPermission()
+                } else {
+                    ReminderScheduler.sync()
+                }
                 onFinished()
             } label: {
                 Text("BEGIN READINESS SCAN")
@@ -262,6 +266,8 @@ struct OnboardingView: View {
     }
 
     private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in
+            ReminderScheduler.sync()
+        }
     }
 }
