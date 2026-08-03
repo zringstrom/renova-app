@@ -9,6 +9,7 @@ struct SettingsView: View {
     @AppStorage("notificationHour") private var notificationHour = 6
     @AppStorage("notificationMinute") private var notificationMinute = 30
     @AppStorage("baselineWindowDays") private var baselineWindowDays = 7
+    @AppStorage("cueStyle") private var cueStyle = CueStyle.both
 
     @State private var showDeleteConfirmation = false
     @State private var exportFile: ExportFile?
@@ -70,6 +71,20 @@ struct SettingsView: View {
                     .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
 
                     HStack {
+                        Text("Session cues").font(.system(size: 13))
+                        Spacer()
+                        Picker("", selection: $cueStyle) {
+                            Text("HAPTIC").tag(CueStyle.haptic)
+                            Text("VOICE").tag(CueStyle.voice)
+                            Text("BOTH").tag(CueStyle.both)
+                        }
+                        .labelsHidden()
+                        .tint(CGTheme.accent)
+                    }
+                    .padding(.horizontal, 14).padding(.vertical, 8)
+                    .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+
+                    HStack {
                         Text("Habit toggles").font(.system(size: 13))
                         Spacer()
                         rockerToggle(isOn: $habitChipsEnabled)
@@ -96,6 +111,22 @@ struct SettingsView: View {
                                 .foregroundStyle(CGTheme.ink)
                             Spacer()
                             Text("JSON").font(.system(size: 10, weight: .bold, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 13)
+                        .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        exportFile = makeExportCSVFile()
+                    } label: {
+                        HStack {
+                            Text("EXPORT DATA")
+                                .font(.system(size: 12.5, weight: .bold, design: .monospaced))
+                                .foregroundStyle(CGTheme.ink)
+                            Spacer()
+                            Text("CSV").font(.system(size: 10, weight: .bold, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
@@ -169,6 +200,16 @@ struct SettingsView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let filename = "renova-export-\(formatter.string(from: Date())).json"
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+        try? data.write(to: url)
+        return ExportFile(url: url)
+    }
+
+    private func makeExportCSVFile() -> ExportFile {
+        let data = viewModel.exportCSV()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let filename = "renova-export-\(formatter.string(from: Date())).csv"
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
         try? data.write(to: url)
         return ExportFile(url: url)

@@ -18,6 +18,7 @@
 		37B7F795634C1DC59F5AD990 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58BD6CD05109A6D160F161D /* TodayView.swift */; };
 		490CEB3941769B1A9CBA4D74 /* ExportModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D630D8E11BC804EC040A2EB /* ExportModels.swift */; };
 		4FC8FC10457250D3829EC8B4 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADEF3E4A6E38A60178F0ACE1 /* AppContainer.swift */; };
+		4FE60082A1C2C8F1A3D2D8DF /* ExportCSV.swift in Sources */ = {isa = PBXBuildFile; fileRef = E23D890514ABE822F713697C /* ExportCSV.swift */; };
 		5022DBB538DB867ED14716E2 /* RecoveryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84DB7888635B9BE68E537DED /* RecoveryKit */; };
 		530BAFCBB042130E6D52B4E0 /* RenovaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9749570BE58C8B6BD257FED3 /* RenovaTests.swift */; };
 		597D27C3B489B039E0C092EC /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F914A1925EA3BCC87CEFD7BF /* MainTabView.swift */; };
@@ -37,6 +38,7 @@
 		CE65EB5ADC339ADF5FB84127 /* ControlGridToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2D00AAB7EE52A7A2EDF473 /* ControlGridToggle.swift */; };
 		DDD6B42F16A771D057FA3B20 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4317BF006E901FE9B7AE0A53 /* Assets.xcassets */; };
 		E13388CAE4743DB0D7253288 /* ScanLineProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F481B6DA03B3540201A210 /* ScanLineProgress.swift */; };
+		E4D4A4BB7D0FAFB75E0BEBE0 /* SessionCueService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC248272DEC07869304FC67 /* SessionCueService.swift */; };
 		EA9EE65D539109E0C10828A0 /* QuestionnaireView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E9F8BC5AA3FCBD4784FD0F4 /* QuestionnaireView.swift */; };
 		EC6A64AA66D25AB7A4D29B9D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB31AC8A8E4BAEE928AD657 /* SettingsView.swift */; };
 		EFAD93CC9B92A77247D3C062 /* RecoveryExplainers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */; };
@@ -82,11 +84,13 @@
 		ADEF3E4A6E38A60178F0ACE1 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		B347E312D54A76D7151A7F7A /* HeartRateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateClient.swift; sourceTree = "<group>"; };
 		B58BD6CD05109A6D160F161D /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		BBC248272DEC07869304FC67 /* SessionCueService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCueService.swift; sourceTree = "<group>"; };
 		C69A0C3307CB0083611F5F52 /* ControlGridSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridSlider.swift; sourceTree = "<group>"; };
 		C7F481B6DA03B3540201A210 /* ScanLineProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanLineProgress.swift; sourceTree = "<group>"; };
 		D065FCAC93EA68E8353970EC /* DayRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayRepository.swift; sourceTree = "<group>"; };
 		D7A32FC9778B48BC7A276399 /* RecoveryKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RecoveryKit; path = Packages/RecoveryKit; sourceTree = SOURCE_ROOT; };
 		DBE89128263DBA15BC670E98 /* BandChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandChart.swift; sourceTree = "<group>"; };
+		E23D890514ABE822F713697C /* ExportCSV.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCSV.swift; sourceTree = "<group>"; };
 		E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryExplainers.swift; sourceTree = "<group>"; };
 		EFDF1322421C604CE851ED8E /* ControlGridTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridTheme.swift; sourceTree = "<group>"; };
 		F2F06FFD8D512DC5984C8C21 /* Renova.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Renova.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -177,6 +181,7 @@
 			isa = PBXGroup;
 			children = (
 				860EB8005EE295C221490ED1 /* Bluetooth */,
+				74CF86334F9F5CCF43A36D0F /* Cues */,
 				94EA7EE91AABE5F4DFED7520 /* Export */,
 				111660E5ABDF2BFA9F237EAF /* Persistence */,
 			);
@@ -189,6 +194,14 @@
 				D7A32FC9778B48BC7A276399 /* RecoveryKit */,
 			);
 			path = Packages;
+			sourceTree = "<group>";
+		};
+		74CF86334F9F5CCF43A36D0F /* Cues */ = {
+			isa = PBXGroup;
+			children = (
+				BBC248272DEC07869304FC67 /* SessionCueService.swift */,
+			);
+			path = Cues;
 			sourceTree = "<group>";
 		};
 		860EB8005EE295C221490ED1 /* Bluetooth */ = {
@@ -227,6 +240,7 @@
 		94EA7EE91AABE5F4DFED7520 /* Export */ = {
 			isa = PBXGroup;
 			children = (
+				E23D890514ABE822F713697C /* ExportCSV.swift */,
 				2D630D8E11BC804EC040A2EB /* ExportModels.swift */,
 			);
 			path = Export;
@@ -392,6 +406,7 @@
 				F987F54A4B26D042A161BB8B /* DailyQuote.swift in Sources */,
 				28CCA201337510DDEF255CA6 /* DayDetailView.swift in Sources */,
 				FA92BB719A264A0896CBD997 /* DayRepository.swift in Sources */,
+				4FE60082A1C2C8F1A3D2D8DF /* ExportCSV.swift in Sources */,
 				490CEB3941769B1A9CBA4D74 /* ExportModels.swift in Sources */,
 				6454E0FEB425782033F159D1 /* HeartRateClient.swift in Sources */,
 				B37B254D7466B4D9A83D4503 /* HeartRateClientProtocol.swift in Sources */,
@@ -409,6 +424,7 @@
 				01B071E3896CE142D06FE995 /* ResultsAnalyzer.swift in Sources */,
 				2CB6B90066F57DB7BC8F0C05 /* RootView.swift in Sources */,
 				E13388CAE4743DB0D7253288 /* ScanLineProgress.swift in Sources */,
+				E4D4A4BB7D0FAFB75E0BEBE0 /* SessionCueService.swift in Sources */,
 				EC6A64AA66D25AB7A4D29B9D /* SettingsView.swift in Sources */,
 				9E169AD79E89BCFD0E716E6E /* ShareSheet.swift in Sources */,
 				37B7F795634C1DC59F5AD990 /* TodayView.swift in Sources */,

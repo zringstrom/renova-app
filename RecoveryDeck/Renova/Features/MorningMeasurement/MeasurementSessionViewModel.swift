@@ -38,6 +38,7 @@ final class MeasurementSessionViewModel {
 
     private var orthostaticSkipped = false
     private let client: HeartRateClientProtocol
+    private let cues: SessionCueService
     private var stateTask: Task<Void, Never>?
     private var sampleTask: Task<Void, Never>?
     private var phaseTask: Task<Void, Never>?
@@ -46,8 +47,9 @@ final class MeasurementSessionViewModel {
     private var lyingRRBuffer: [Double] = []
     private var standingBpmBuffer: [Double] = []
 
-    init(client: HeartRateClientProtocol = HeartRateClient()) {
+    init(client: HeartRateClientProtocol = HeartRateClient(), cues: SessionCueService = SessionCueService()) {
         self.client = client
+        self.cues = cues
         observe()
         client.connect()
     }
@@ -119,6 +121,7 @@ final class MeasurementSessionViewModel {
         phase = .settle
         statusMessage = nil
         phaseElapsedSeconds = 0
+        cues.cue(.settleStart)
         phaseTask = Task {
             for second in 1...15 {
                 try? await Task.sleep(for: .seconds(1))
@@ -138,6 +141,7 @@ final class MeasurementSessionViewModel {
         phase = .lying
         phaseElapsedSeconds = 0
         extensionNote = nil
+        cues.cue(.lyingStart)
         startTicker(["Collecting heartbeats…", "Measuring resting heart rate…", "Almost there…"])
         phaseTask = Task {
             let start = Date()
@@ -165,6 +169,7 @@ final class MeasurementSessionViewModel {
         tickerTask?.cancel()
         statusMessage = nil
         phase = .waitingForStand
+        cues.cue(.standNow)
         // Distinct double-buzz so it reads as "do something now", not a routine tick.
         let generator = UIImpactFeedbackGenerator(style: .heavy)
         generator.impactOccurred()
@@ -184,6 +189,7 @@ final class MeasurementSessionViewModel {
     private func runStanding() {
         phase = .standing
         phaseElapsedSeconds = 0
+        cues.cue(.standingStart)
         startTicker(["Stand still…", "Still measuring…", "Almost done…"])
         phaseTask = Task {
             for second in 1...60 {
@@ -217,6 +223,7 @@ final class MeasurementSessionViewModel {
         }
         phase = .done(rmssdResult, orthoResult)
         client.disconnect()
+        cues.cue(.done)
         celebrate()
     }
 
@@ -226,6 +233,7 @@ final class MeasurementSessionViewModel {
         stateTask?.cancel()
         sampleTask?.cancel()
         client.disconnect()
+        cues.stopSpeaking()
     }
 
     // MARK: - Ticker

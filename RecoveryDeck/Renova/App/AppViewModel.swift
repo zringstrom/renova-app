@@ -60,6 +60,15 @@ final class AppViewModel {
         return (try? encoder.encode(days)) ?? Data()
     }
 
+    /// Same data set as `exportJSON`, flattened to one CSV row per day —
+    /// for spreadsheet users (Numbers/Excel/Sheets).
+    func exportCSV() -> Data {
+        let days = repository.allDays(limit: 100_000)
+            .sorted { $0.localDate < $1.localDate }
+            .map(\.exportRecord)
+        return ExportCSV.build(from: days)
+    }
+
     struct MeasurementAnalysis {
         let rmssd: BaselineStatus?
         let rhr: BaselineStatus?
