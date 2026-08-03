@@ -1,0 +1,1004 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RecoveryDeck — Docs</title><style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a2332;
+    --panel2: #243044;
+    --text: #e7ecf3;
+    --muted: #9aa8bc;
+    --accent: #5b9fd4;
+    --accent2: #7dcea0;
+    --border: #2d3a4f;
+    --code-bg: #0d1117;
+    --th: #1e2a3d;
+    --warn: #e8b86d;
+    --radius: 12px;
+    --font: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f6f9;
+      --panel: #ffffff;
+      --panel2: #eef2f7;
+      --text: #1a2332;
+      --muted: #5a6a7e;
+      --accent: #2b6ea8;
+      --accent2: #2d8a57;
+      --border: #d5dde8;
+      --code-bg: #f0f3f7;
+      --th: #e8eef6;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    font-size: 16px;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: sticky; top: 0; z-index: 10; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+    .toc { display: none; }
+  }
+  .sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 1rem 2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .brand {
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+  }
+  .brand span { color: var(--accent); }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    margin-bottom: 1.25rem;
+  }
+  .nav-docs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+  }
+  .nav-docs button {
+    text-align: left;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .nav-docs button:hover { border-color: var(--accent); }
+  .nav-docs button.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .nav-docs button small {
+    display: block;
+    font-weight: 400;
+    opacity: 0.85;
+    font-size: 0.75rem;
+    margin-top: 0.15rem;
+  }
+  .toc {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+  .toc-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .toc a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.4rem;
+    border-radius: 6px;
+    line-height: 1.3;
+  }
+  .toc a:hover { color: var(--text); background: var(--panel2); }
+  .toc a.toc-h3 { padding-left: 0.9rem; font-size: 0.75rem; }
+  .main {
+    padding: 1.5rem 2rem 4rem;
+    max-width: 920px;
+  }
+  @media (max-width: 600px) {
+    .main { padding: 1rem 1rem 3rem; }
+  }
+  .doc { display: none; }
+  .doc.active { display: block; }
+  .doc h1 {
+    font-size: 1.75rem;
+    letter-spacing: -0.03em;
+    margin: 0 0 0.75rem;
+    line-height: 1.25;
+  }
+  .doc h2 {
+    font-size: 1.3rem;
+    margin: 2rem 0 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    letter-spacing: -0.02em;
+  }
+  .doc h2:first-of-type { border-top: none; }
+  .doc h3 {
+    font-size: 1.05rem;
+    margin: 1.4rem 0 0.5rem;
+    color: var(--accent2);
+  }
+  .doc h4 { font-size: 0.95rem; margin: 1.1rem 0 0.4rem; }
+  .doc p { margin: 0.65rem 0; color: var(--text); }
+  .doc li { margin: 0.3rem 0; }
+  .doc ul, .doc ol { padding-left: 1.35rem; }
+  .doc hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+  .doc strong { color: var(--text); }
+  .doc a { color: var(--accent); }
+  .doc code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--panel2);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+  .doc pre.code {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  .doc pre.code code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+  }
+  .table-wrap {
+    overflow-x: auto;
+    margin: 0.9rem 0 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.88rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--th);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: color-mix(in srgb, var(--panel2) 50%, transparent); }
+  .banner {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .banner strong { color: var(--warn); }
+  .footer-note {
+    margin-top: 3rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+</style></head>
+<body><div class="app"><aside class="sidebar"><div class="brand">Recovery<span>Deck</span></div><div class="tag">Docs v1.3 · ready for approval</div>
+<div class="nav-docs"><button type="button" class="active" data-doc="prd">PRD <small>Product</small></button><button type="button" class="" data-doc="tech">Tech Spec <small>Engineering</small></button><button type="button" class="" data-doc="notes">Review notes <small>Q&A</small></button><button type="button" class="" data-doc="readme">README <small>Index</small></button></div><div class="toc" id="toc-prd" style=""><div class="toc-label">On this page</div><a class="toc-h2" href="#1-summary" data-doc-link>1. Summary</a>
+<a class="toc-h2" href="#2-problem" data-doc-link>2. Problem</a>
+<a class="toc-h2" href="#3-goals-and-non-goals" data-doc-link>3. Goals and non-goals</a>
+<a class="toc-h3" href="#3-1-goals-v3-done-for-personal-daily-use" data-doc-link>3.1 Goals (v3 = “done for personal daily use”)</a>
+<a class="toc-h3" href="#3-2-non-goals-v3" data-doc-link>3.2 Non-goals (v3)</a>
+<a class="toc-h3" href="#3-3-success-metrics-personal" data-doc-link>3.3 Success metrics (personal)</a>
+<a class="toc-h2" href="#4-users" data-doc-link>4. Users</a>
+<a class="toc-h2" href="#5-product-principles" data-doc-link>5. Product principles</a>
+<a class="toc-h2" href="#6-user-experience" data-doc-link>6. User experience</a>
+<a class="toc-h3" href="#6-1-happy-path-full-morning-4-6-minutes" data-doc-link>6.1 Happy path (full morning, ~4–6 minutes)</a>
+<a class="toc-h3" href="#6-2-gating-rules-normative" data-doc-link>6.2 Gating rules (normative)</a>
+<a class="toc-h3" href="#6-3-questionnaire-v3-fields" data-doc-link>6.3 Questionnaire (v3 fields)</a>
+<a class="toc-h3" href="#6-4-measurement-rmssd-replaces-elite-hrv" data-doc-link>6.4 Measurement: rMSSD (replaces Elite HRV)</a>
+<a class="toc-h3" href="#6-5-measurement-orthostatic-couzens-style" data-doc-link>6.5 Measurement: orthostatic (Couzens-style)</a>
+<a class="toc-h3" href="#6-6-results-interpretation-non-prescriptive" data-doc-link>6.6 Results interpretation (non-prescriptive)</a>
+<a class="toc-h3" href="#6-7-history" data-doc-link>6.7 History</a>
+<a class="toc-h3" href="#6-8-notifications" data-doc-link>6.8 Notifications</a>
+<a class="toc-h3" href="#6-9-settings" data-doc-link>6.9 Settings</a>
+<a class="toc-h2" href="#7-information-architecture-screens" data-doc-link>7. Information architecture (screens)</a>
+<a class="toc-h2" href="#8-privacy-and-trust" data-doc-link>8. Privacy and trust</a>
+<a class="toc-h2" href="#9-hardware-and-environment" data-doc-link>9. Hardware and environment</a>
+<a class="toc-h2" href="#10-rollout-plan" data-doc-link>10. Rollout plan</a>
+<a class="toc-h2" href="#11-future-app-store-for-friends" data-doc-link>11. Future: App Store for friends</a>
+<a class="toc-h2" href="#12-product-decisions-locked-for-v3" data-doc-link>12. Product decisions (locked for v3)</a>
+<a class="toc-h2" href="#13-risks-and-mitigations" data-doc-link>13. Risks and mitigations</a>
+<a class="toc-h2" href="#14-out-of-scope-copy-compliance" data-doc-link>14. Out of scope copy / compliance</a>
+<a class="toc-h2" href="#15-approval" data-doc-link>15. Approval</a></div><div class="toc" id="toc-tech" style="display:none"><div class="toc-label">On this page</div><a class="toc-h2" href="#1-overview" data-doc-link>1. Overview</a>
+<a class="toc-h2" href="#2-platform-and-project-setup" data-doc-link>2. Platform and project setup</a>
+<a class="toc-h3" href="#2-1-xcode-project-layout-suggested" data-doc-link>2.1 Xcode project layout (suggested)</a>
+<a class="toc-h2" href="#3-permissions-and-info-plist" data-doc-link>3. Permissions and Info.plist</a>
+<a class="toc-h2" href="#4-bluetooth-polar-h10" data-doc-link>4. Bluetooth / Polar H10</a>
+<a class="toc-h3" href="#4-1-services-and-characteristics" data-doc-link>4.1 Services and characteristics</a>
+<a class="toc-h3" href="#4-2-connection-ux" data-doc-link>4.2 Connection UX</a>
+<a class="toc-h3" href="#4-3-sample-model" data-doc-link>4.3 Sample model</a>
+<a class="toc-h2" href="#5-metric-algorithms" data-doc-link>5. Metric algorithms</a>
+<a class="toc-h3" href="#5-1-rmssd" data-doc-link>5.1 rMSSD</a>
+<a class="toc-h3" href="#5-2-mean-hr-over-a-phase" data-doc-link>5.2 Mean HR over a phase</a>
+<a class="toc-h3" href="#5-3-orthostatic-derived" data-doc-link>5.3 Orthostatic derived</a>
+<a class="toc-h3" href="#5-4-baselines-and-green-yellow-red-couzens-aligned" data-doc-link>5.4 Baselines and green / yellow / red (Couzens-aligned)</a>
+<a class="toc-h2" href="#6-session-state-machines" data-doc-link>6. Session state machines</a>
+<a class="toc-h3" href="#6-1-combined-morning-measurement-flow-v3-primary-locked" data-doc-link>6.1 Combined morning measurement flow (v3 primary — locked)</a>
+<a class="toc-h3" href="#6-2-hrv-only-path" data-doc-link>6.2 HRV-only path</a>
+<a class="toc-h3" href="#6-3-gate-logic-pure-function-unit-test" data-doc-link>6.3 Gate logic (pure function — unit test)</a>
+<a class="toc-h2" href="#7-data-model" data-doc-link>7. Data model</a>
+<a class="toc-h3" href="#7-1-swiftdata-entities-conceptual" data-doc-link>7.1 SwiftData entities (conceptual)</a>
+<a class="toc-h3" href="#7-3-local-analytics-on-device-only" data-doc-link>7.3 Local analytics (on-device only)</a>
+<a class="toc-h3" href="#7-4-future-export-v4-not-implemented" data-doc-link>7.4 Future export (v4+ — not implemented)</a>
+<a class="toc-h3" href="#7-2-completeness" data-doc-link>7.2 Completeness</a>
+<a class="toc-h2" href="#8-persistence-and-privacy" data-doc-link>8. Persistence and privacy</a>
+<a class="toc-h2" href="#9-ui-specifications-behavioral" data-doc-link>9. UI specifications (behavioral)</a>
+<a class="toc-h3" href="#9-1-questionnaire" data-doc-link>9.1 Questionnaire</a>
+<a class="toc-h3" href="#9-2-session-ui" data-doc-link>9.2 Session UI</a>
+<a class="toc-h3" href="#9-3-accessibility" data-doc-link>9.3 Accessibility</a>
+<a class="toc-h3" href="#9-4-appearance" data-doc-link>9.4 Appearance</a>
+<a class="toc-h2" href="#10-notifications" data-doc-link>10. Notifications</a>
+<a class="toc-h2" href="#11-testing-strategy" data-doc-link>11. Testing strategy</a>
+<a class="toc-h3" href="#11-1-unit-tests-required-before-calling-v3-done" data-doc-link>11.1 Unit tests (required before calling v3 done)</a>
+<a class="toc-h3" href="#11-2-manual-test-checklist-h10" data-doc-link>11.2 Manual test checklist (H10)</a>
+<a class="toc-h3" href="#11-3-parallel-elite-hrv-user" data-doc-link>11.3 Parallel Elite HRV (user)</a>
+<a class="toc-h2" href="#12-implementation-milestones" data-doc-link>12. Implementation milestones</a>
+<a class="toc-h2" href="#13-error-catalog-user-visible" data-doc-link>13. Error catalog (user-visible)</a>
+<a class="toc-h2" href="#14-security-notes" data-doc-link>14. Security notes</a>
+<a class="toc-h2" href="#15-app-store-readiness-non-blocking-notes" data-doc-link>15. App Store readiness (non-blocking notes)</a>
+<a class="toc-h2" href="#16-prd-decisions-locked-for-v3" data-doc-link>16. PRD decisions (locked for v3)</a>
+<a class="toc-h2" href="#17-explicit-non-implementations" data-doc-link>17. Explicit non-implementations</a>
+<a class="toc-h2" href="#18-acceptance-criteria-v3" data-doc-link>18. Acceptance criteria (v3)</a>
+<a class="toc-h2" href="#19-references-product-science" data-doc-link>19. References (product science)</a>
+<a class="toc-h2" href="#20-approval" data-doc-link>20. Approval</a></div><div class="toc" id="toc-notes" style="display:none"><div class="toc-label">On this page</div><a class="toc-h2" href="#1-how-long-should-the-orthostatic-test-be-research-vs-our-protocol" data-doc-link>1. How long should the orthostatic test be? Research vs our protocol</a>
+<a class="toc-h3" href="#what-research-clinical-guidelines-use" data-doc-link>What research / clinical guidelines use</a>
+<a class="toc-h3" href="#our-current-v3-protocol" data-doc-link>Our current v3 protocol</a>
+<a class="toc-h3" href="#recommendation" data-doc-link>Recommendation</a>
+<a class="toc-h2" href="#2-evidence-behind-green-yellow-red-signals" data-doc-link>2. Evidence behind green / yellow / red signals</a>
+<a class="toc-h3" href="#honest-answer-current-v1-3" data-doc-link>Honest answer (current v1.3)</a>
+<a class="toc-h3" href="#recommendation" data-doc-link>Recommendation</a>
+<a class="toc-h2" href="#3-analytics-no-sdk-vs-in-app-analytics" data-doc-link>3. Analytics: “no SDK” vs in-app analytics</a>
+<a class="toc-h3" href="#clarification" data-doc-link>Clarification</a>
+<a class="toc-h2" href="#4-trainingpeaks-intervals-icu-sync-later" data-doc-link>4. TrainingPeaks / Intervals.icu sync later</a>
+<a class="toc-h2" href="#5-scale-1-5-vs-1-7" data-doc-link>5. Scale 1–5 vs 1–7</a>
+<a class="toc-h3" href="#research-psychometrics-brief" data-doc-link>Research (psychometrics, brief)</a>
+<a class="toc-h3" href="#recommendation-for-recoverydeck" data-doc-link>Recommendation for RecoveryDeck</a>
+<a class="toc-h2" href="#6-questionnaire-alan-whoop-inspired" data-doc-link>6. Questionnaire: Alan + WHOOP-inspired</a>
+<a class="toc-h3" href="#what-alan-actually-uses-models-archive" data-doc-link>What Alan actually uses / models (archive)</a>
+<a class="toc-h3" href="#whoop-journal-what-you-likely-liked" data-doc-link>WHOOP Journal (what you likely liked)</a>
+<a class="toc-h3" href="#proposed-recoverydeck-questionnaire-v3" data-doc-link>Proposed RecoveryDeck questionnaire (v3)</a>
+<a class="toc-h2" href="#7-name-without-account" data-doc-link>7. Name without account</a>
+<a class="toc-h2" href="#8-friends-will-break-ble-what-that-means" data-doc-link>8. “Friends will break BLE” — what that means</a>
+<a class="toc-h2" href="#9-healthkit-would-it-ever-make-sense" data-doc-link>9. HealthKit — would it ever make sense?</a>
+<a class="toc-h2" href="#product-decisions-updated-2026-08-02-follow-up" data-doc-link>Product decisions (updated 2026-08-02 follow-up)</a>
+<a class="toc-h3" href="#couzens-on-green-yellow-red-short" data-doc-link>Couzens on green / yellow / red (short)</a>
+<a class="toc-h3" href="#ble-friends-will-break-it-plainer" data-doc-link>BLE “friends will break it” (plainer)</a></div><div class="toc" id="toc-readme" style="display:none"><div class="toc-label">On this page</div><a class="toc-h2" href="#documents" data-doc-link>Documents</a>
+<a class="toc-h2" href="#status" data-doc-link>Status</a>
+<a class="toc-h2" href="#hardware" data-doc-link>Hardware</a>
+<a class="toc-h2" href="#privacy" data-doc-link>Privacy</a></div></aside><main class="main">
+<div class="banner"><strong>Draft for approval</strong> — RecoveryDeck v1.3. Docs-only until you request build.</div>
+<article class="doc active" id="doc-prd"><h1 id="product-requirements-document-recoverydeck">Product Requirements Document — RecoveryDeck</h1>
+<p><strong>Product name:</strong> <strong>RecoveryDeck</strong>   <strong>Owner:</strong> Zachery Ringstrom   <strong>Status:</strong> Draft for approval (no implementation until approved)   <strong>Version:</strong> 1.3   <strong>Date:</strong> 2026-08-02   <strong>Changelog 1.2:</strong> Rename RecoveryDeck; local analytics; 1–7 scales; Alan + WHOOP-style questionnaire; optional display name; TP/Intervals future; evidence notes.   <strong>Changelog 1.3:</strong> Keep short orthostatic; G/Y/R reframed to Couzens 7d vs 60d ±1 SD; optional caffeine time/amount + last meal time; HealthKit not v3 confirmed.   <strong>Companion:</strong> <a href="./TECH_SPEC.md"><code>TECH_SPEC.md</code></a> · <a href="./REVIEW_NOTES_RESPONSE.md"><code>REVIEW_NOTES_RESPONSE.md</code></a></p>
+<hr>
+<h2 id="1-summary">1. Summary</h2>
+<p><strong>RecoveryDeck</strong> is a <strong>privacy-first, local-first iOS app</strong> for a single primary user (Zach) that runs a fixed morning ritual:</p>
+<ol>
+<li><strong>Forced questionnaire</strong> (cannot skip into measurements)  </li>
+<li><strong>Polar H10 measurements</strong> that <strong>replace Elite HRV</strong> (rMSSD) and add an <strong>orthostatic HR test</strong>  </li>
+<li><strong>Simple history + traffic-light context</strong> vs personal baselines  </li>
+</ol>
+<p>The app supports Couzens-style <strong>recovery-on-demand</strong> decisions: composite signals (subjective + HRV + RHR + orthostatic), <strong>not</strong> a black-box commercial “readiness score.”</p>
+<p><strong>Scope for first ship:</strong> everything through <strong>v3</strong> (questionnaire gate + H10 rMSSD + H10 orthostatic + local history). Optional App Store distribution for friends is a <strong>future</strong> phase and must not drive v1–v3 feature bloat.</p>
+<hr>
+<h2 id="2-problem">2. Problem</h2>
+<div class="table-wrap"><table><thead><tr><th>Pain</th><th>Today</th></tr></thead><tbody><tr><td>Subjective readiness never logged</td><td>No daily fatigue/mood/soreness/stress answers</td></tr><tr><td>Recovery signals fragmented</td><td>Oura (sleep/RHR/HRV), Elite HRV (1 min rMSSD), training feel — separate apps</td></tr><tr><td>Elite HRV is an extra hop</td><td>User wants <strong>one</strong> morning app that owns rMSSD</td></tr><tr><td>Orthostatic not automated</td><td>Couzens-valued test; no easy 2–3 min guided flow with H10</td></tr><tr><td>Commercial readiness scores untrusted</td><td>Oura Readiness etc. not anchored to “ready for <em>what</em>” (Couzens critique)</td></tr></tbody></table></div>
+<p><strong>Cost of status quo:</strong> decisions about down weeks / easy days under-weight subjective state; orthostatic unused; habit friction.</p>
+<hr>
+<h2 id="3-goals-and-non-goals">3. Goals and non-goals</h2>
+<h3 id="3-1-goals-v3-done-for-personal-daily-use">3.1 Goals (v3 = “done for personal daily use”)</h3>
+<ol>
+<li><strong>Questionnaire-first gate</strong> every local calendar morning before any measurement or stats that reveal trends.  </li>
+<li><strong>Replace Elite HRV</strong> with in-app <strong>~60 s rMSSD</strong> via Polar H10.  </li>
+<li><strong>Guided orthostatic test</strong> (~2–3 min) via H10; store lying avg HR, standing avg HR, peak standing HR, and gaps.  </li>
+<li><strong>RHR</strong> defined as <strong>lying average HR</strong> from the orthostatic (or dedicated lying segment) — primary RHR for the day.  </li>
+<li><strong>Local-first storage</strong>; no account required; <strong>no third-party cloud analytics SDK</strong>; no required cloud.  </li>
+<li><strong>On-device analytics</strong> (adherence, quality fails, completion time, etc.) stored <strong>only on the phone</strong>.  </li>
+<li><strong>History</strong> of questionnaire + metrics with simple <strong>vs personal baseline</strong> indicators (green / yellow / red) — heuristic, not clinical cutoffs (see §6.6).  </li>
+<li><strong>Installable on owner’s iPhone</strong> (Xcode / TestFlight to self).  </li>
+<li>Architecture that <strong>does not block</strong> later App Store, optional display name, or optional TrainingPeaks / Intervals export.  </li>
+<li>Optional <strong>display name</strong> for greetings (not an account).</li>
+</ol>
+<h3 id="3-2-non-goals-v3">3.2 Non-goals (v3)</h3>
+<ul>
+<li>Oura API integration (optional later; notes OK)  </li>
+<li><strong>TrainingPeaks / Intervals.icu sync in v3</strong> — <strong>deferred to v4+ optional</strong>, schema should stay export-friendly  </li>
+<li>HealthKit read/write in v3 (optional later; see REVIEW_NOTES)  </li>
+<li>Coaching dashboard, multi-athlete, teams  </li>
+<li>Diagnosing medical conditions or “overtraining syndrome” as a clinical claim  </li>
+<li>AI / ML readiness models  </li>
+<li>Android  </li>
+<li>Background continuous HR monitoring  </li>
+<li>Social features, login accounts, ads  </li>
+<li>Third-party analytics SDKs that phone home  </li>
+<li>Perfect reproduction of Elite HRV’s proprietary pipeline</li>
+</ul>
+<h3 id="3-3-success-metrics-personal">3.3 Success metrics (personal)</h3>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Target (first 30 days after install)</th></tr></thead><tbody><tr><td>Morning completion rate</td><td>≥ <strong>80%</strong> of days with full questionnaire + rMSSD</td></tr><tr><td>Orthostatic adherence</td><td>≥ <strong>60%</strong> of days (skippable after confirm per locked O1; still count as completed morning if rMSSD saved)</td></tr><tr><td>Elite HRV usage</td><td><strong>Zero</strong> intentional uses after parallel validation week</td></tr><tr><td>Subjective capture</td><td><strong>100%</strong> of measurement days have all required questionnaire fields</td></tr><tr><td>Trust</td><td>User prefers this app’s morning flow over prior stack</td></tr></tbody></table></div>
+<hr>
+<h2 id="4-users">4. Users</h2>
+<div class="table-wrap"><table><thead><tr><th>Persona</th><th>Role</th></tr></thead><tbody><tr><td><strong>Primary: Zach</strong></td><td>Endurance athlete (~18–22 h/wk, AeT-capped base). Owns Oura + Polar H10. Trains with Couzens-informed principles.</td></tr><tr><td><strong>Future: friends</strong></td><td>Possible App Store users; same solo morning ritual; no coach portal in v3.</td></tr></tbody></table></div>
+<p><strong>Assumptions:</strong> iPhone recent enough for current iOS LTS−1; Polar H10; English UI; America/Los_Angeles local calendar days.</p>
+<hr>
+<h2 id="5-product-principles">5. Product principles</h2>
+<ol>
+<li><strong>Gate first, measure second</strong> — No peeking at trends to bias answers.  </li>
+<li><strong>Composite, not oracle</strong> — Show numbers + simple baselines; user decides training.  </li>
+<li><strong>Privacy first</strong> — Data never leaves the device unless user explicitly exports.  </li>
+<li><strong>Repeatable protocol</strong> — Same posture, timing, and order every day.  </li>
+<li><strong>Couzens-aligned language</strong> — Ready to <em>load</em> vs ready to <em>recover</em>; low HRV ≠ ban all easy work.  </li>
+<li><strong>Boring reliability</strong> — Prefer a rock-solid H10 connection over flashy charts.  </li>
+<li><strong>Personal now, public-ready later</strong> — No hard-coded secrets; no medical overclaim.</li>
+</ol>
+<hr>
+<h2 id="6-user-experience">6. User experience</h2>
+<h3 id="6-1-happy-path-full-morning-4-6-minutes">6.1 Happy path (full morning, ~4–6 minutes)</h3>
+<p><strong>v3 primary UX = one combined H10 session</strong> after the questionnaire (not two separate “Start HRV” / “Start Orthostatic” products). Separate re-run of orthostatic-only is allowed only as a recovery path after a failed standing segment.</p>
+<pre class="code"><code>Launch app
+  → If questionnaire incomplete for today:
+        Questionnaire screen (blocking)
+  → Home / Today (post-questionnaire):
+        [Start morning measurement]  → combined: settle → rMSSD → lying HR → stand → done
+        optional: [Skip orthostatic today] only as confirm during/after rMSSD path (see O1)
+  → Results for today + optional “What this might mean” plain-language tips
+  → History available only after questionnaire submitted for today</code></pre>
+<h3 id="6-2-gating-rules-normative">6.2 Gating rules (normative)</h3>
+<div class="table-wrap"><table><thead><tr><th>Destination</th><th>Allowed if questionnaire <strong>not</strong> done today?</th></tr></thead><tbody><tr><td>Questionnaire</td><td>Yes</td></tr><tr><td><strong>Start morning measurement</strong> (combined session)</td><td><strong>No</strong></td></tr><tr><td>Today’s metric numbers (after measure)</td><td>Only after questionnaire; metrics appear as completed</td></tr><tr><td>History / charts / baselines</td><td><strong>No</strong> until questionnaire submitted for <strong>today</strong></td></tr><tr><td>Settings</td><td>Yes (always)</td></tr><tr><td>Export</td><td>Yes (always); <strong>History blocked</strong> until questionnaire done</td></tr></tbody></table></div>
+<p><strong>Day boundary:</strong> <code>localDate</code> in device timezone (default <code>America/Los_Angeles</code>, user-overridable in Settings).</p>
+<p><strong>Resubmit questionnaire:</strong> Allowed; overwrites today’s answers; does not delete measurements already taken (flag <code>questionnaireEditedAfterMeasure</code> if edit after first measurement).</p>
+<p><strong>Remeasure (same day):</strong> At most <strong>one active measurement bundle</strong> per <code>localDate</code>. User may re-run the combined session (or HRV-only if orthostatic skipped) only after <strong>confirm overwrite</strong>. Overwrite replaces the previous bundle for that day (no multi-version history in v3).</p>
+<h3 id="6-3-questionnaire-v3-fields">6.3 Questionnaire (v3 fields)</h3>
+<h4 id="block-a-required-alan-couzens-core-scale-1-7">Block A — required (Alan Couzens core), scale <strong>1–7</strong></h4>
+<p>Higher = better (consistent polarity). Midpoint = 4.</p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>1</th><th>7</th></tr></thead><tbody><tr><td><strong>Fatigue</strong></td><td>Exhausted</td><td>Fresh</td></tr><tr><td><strong>Mood</strong></td><td>Very low</td><td>Great</td></tr><tr><td><strong>Soreness / heavy legs</strong></td><td>Very sore</td><td>None</td></tr><tr><td><strong>Life stress</strong></td><td>Very high</td><td>Very low</td></tr></tbody></table></div>
+<p><em>Rationale:</em> Couzens morning inventory / dashboard features use <strong>Fatigue, Mood, Soreness, Stress</strong> (+ measured HRV &amp; Pulse).</p>
+<h4 id="block-b-required-short-scale-1-7">Block B — required (short), scale <strong>1–7</strong></h4>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>1</th><th>7</th></tr></thead><tbody><tr><td><strong>Sleep quality (how it felt)</strong></td><td>Terrible</td><td>Excellent</td></tr></tbody></table></div>
+<p><em>Rationale:</em> Captures “slept long but feel wrecked”; complements Oura without API.</p>
+<h4 id="block-c-optional-context-skippable-fields-not-required-for-gate">Block C — optional context (skippable fields; not required for gate)</h4>
+<p>Shown on the same questionnaire screen; each can be left blank / “Skip.”</p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead><tbody><tr><td><strong>Last caffeine time (previous day → morning)</strong></td><td>Time of day (or “none”)</td><td>When caffeine was <em>last</em> consumed before this check-in</td></tr><tr><td><strong>Caffeine amount</strong></td><td>Optional amount</td><td>Free number + unit picker default <strong>mg</strong>, or coarse chips (e.g. none / small / medium / large) if exact mg unknown</td></tr><tr><td><strong>Last meal time</strong></td><td>Time of day</td><td>When the last meal/substantial snack was finished</td></tr></tbody></table></div>
+<p><em>Rationale:</em> Timing/dose of caffeine and last meal affect sleep, overnight HRV proxies, morning RHR, and how “fasted” the measurement is—useful context without forcing perfection.</p>
+<h4 id="block-d-optional-habit-chips-whoop-inspired-yes-no">Block D — optional habit chips (WHOOP-inspired), <strong>Yes / No</strong></h4>
+<p>Defaults off until user enables in Settings:</p>
+<ul>
+<li>Alcohol last night  </li>
+<li>Hard training yesterday  </li>
+<li>Travel / late night  </li>
+<li>Feeling sick / under the weather  </li>
+</ul>
+<p>(Late caffeine is largely covered by Block C time field.)</p>
+<h4 id="block-e-optional-free-text-notes">Block E — optional free-text <strong>Notes</strong></h4>
+<p><strong>Submit</strong> enabled when Block A + B complete (5 scores on <strong>1–7</strong>). Blocks C–E optional.</p>
+<h3 id="6-4-measurement-rmssd-replaces-elite-hrv">6.4 Measurement: rMSSD (replaces Elite HRV)</h3>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Spec</th></tr></thead><tbody><tr><td>Hardware</td><td>Polar H10 via Bluetooth LE</td></tr><tr><td>Posture</td><td><strong>Lying supine</strong>, still, normal breathing (aligned with orthostatic lying; one posture for whole session)</td></tr><tr><td>Duration</td><td><strong>60 seconds</strong> of accepted RR intervals after a short settle</td></tr><tr><td>Settle</td><td><strong>15 s</strong> countdown after “connected &amp; still” before RR window starts</td></tr><tr><td>Output</td><td>rMSSD (ms), mean HR (bpm), artifact %, sample count</td></tr><tr><td>Failures</td><td>Disconnect, too many artifacts → prompt retry; do not save junk without confirmation</td></tr></tbody></table></div>
+<p><strong>Caffeine / timing guidance (in-app copy, not enforced):</strong> before coffee when possible; same time of day; bathroom OK; after waking ~5–15 min.</p>
+<h3 id="6-5-measurement-orthostatic-couzens-style">6.5 Measurement: orthostatic (Couzens-style)</h3>
+<p><strong>Science reference (Couzens):</strong> classic standalone orthostatic is often described as <strong>~60 s lying + ~60 s standing</strong>, tracking avg lying, avg standing, peak standing, and especially <strong>peak − lying</strong>.</p>
+<p><strong>v3 normative product protocol (combined morning session — locked):</strong>   One lie-down; rMSSD and orthostatic share the session. Orthostatic <strong>lying sample is 30 s</strong> after rMSSD (not a second full 60 s lie), then <strong>60 s standing</strong>. This is an intentional time tradeoff; standing duration and peak−lying emphasis stay Couzens-faithful.</p>
+<div class="table-wrap"><table><thead><tr><th>Phase</th><th>Duration</th><th>User action</th><th>Record</th></tr></thead><tbody><tr><td>Prep</td><td>—</td><td>Connect H10; lie down</td><td>—</td></tr><tr><td>Settle</td><td><strong>15 s</strong></td><td>Stay lying, still</td><td>discard for rMSSD</td></tr><tr><td>rMSSD</td><td><strong>~60 s</strong> RR accumulation</td><td>Stay lying</td><td><strong>rMSSD</strong>, mean HR</td></tr><tr><td>Orthostatic lying</td><td><strong>30 s</strong></td><td>Stay lying</td><td><strong>Avg lying HR</strong> (primary <strong>RHR</strong> for the day)</td></tr><tr><td>Cue</td><td><strong>3 s</strong></td><td>“Stand up now” (haptic)</td><td>—</td></tr><tr><td>Standing</td><td><strong>60 s</strong></td><td>Stand still</td><td><strong>Avg standing HR</strong>, <strong>Peak standing HR</strong></td></tr></tbody></table></div>
+<p><strong>Derived (store all):</strong></p>
+<ul>
+<li><code>gap_avg</code> = avg_standing − avg_lying  </li>
+<li><code>gap_peak</code> = peak_standing − avg_lying  </li>
+</ul>
+<p><strong>Primary gap in UI:</strong> <code>gap_peak</code> (Couzens). Show <code>gap_avg</code> secondary.</p>
+<p><strong>Total guided time:</strong> ~15 + 60 + 30 + 3 + 60 ≈ <strong>~3 min</strong> + connection → product copy “about 3 minutes.”</p>
+<p><strong>Standalone classic 60+60</strong> is <strong>not</strong> a v3 UI mode (may be added later). Skip-orthostatic path: settle + rMSSD only (see O1).</p>
+<h3 id="6-6-results-interpretation-non-prescriptive">6.6 Results interpretation (non-prescriptive)</h3>
+<p><strong>What Couzens actually does</strong> (dashboard / Ch.13 materials)—not a branded G/Y/R product table:</p>
+<ol>
+<li><strong>Long-term norm</strong> ≈ <strong>60-day</strong> rolling mean (starting point; window can be experimented with).  </li>
+<li><strong>Acute signal</strong> ≈ <strong>7-day</strong> rolling mean (less noisy than raw daily).  </li>
+<li><strong>Normal band</strong> ≈ <strong>±1 standard deviation</strong> around the long-term mean (he plots this as a pale green “normal range”).  </li>
+<li>Flag when the athlete is <strong>outside their own range</strong>.  </li>
+<li>Combine HRV, pulse, fatigue, mood, soreness, stress; be skeptical of commercial single “readiness scores.”  </li>
+<li><strong>“Red light”</strong> language for serious overtraining-type states (e.g. orthostatic Q4)—not every slightly off morning.</li>
+</ol>
+<p><strong>RecoveryDeck mapping:</strong> full rules in <strong><code>TECH_SPEC.md</code> §5.4</strong> (Couzens-aligned):</p>
+<div class="table-wrap"><table><thead><tr><th>Light</th><th>Meaning</th></tr></thead><tbody><tr><td><strong>Green</strong></td><td>Today (acute) inside personal <strong>60-day mean ± 1 SD</strong> band, or still building history</td></tr><tr><td><strong>Yellow</strong></td><td>Mildly outside that band (~1–1.5 SD)</td></tr><tr><td><strong>Red</strong></td><td>Clearly outside (~&amp;gt;1.5 SD), especially in a concerning direction</td></tr></tbody></table></div>
+<p>UI must <strong>label direction</strong> (“RHR higher than your usual range”, “orthostatic gap smaller than usual”), not only color. Not a medical diagnosis.</p>
+<p><strong>Plain-language tips (examples, not medical advice):</strong></p>
+<ul>
+<li>Low rMSSD + high RHR + small gap → bias easy / recovery; avoid intensity.  </li>
+<li>Low rMSSD but good subjective + large gap → still prefer easy if unsure; easy AeT work may be OK.  </li>
+<li>Heavy legs (soreness <strong>1–2</strong> on 1–7 scale) → respect muscular recovery even if HRV “looks fine.”  </li>
+</ul>
+<p><strong>Never:</strong> “You have overtraining syndrome.”   <strong>Never:</strong> auto-change training calendar.</p>
+<h3 id="6-7-history">6.7 History</h3>
+<ul>
+<li>List by day: scores + rMSSD + RHR + gaps  </li>
+<li>Simple charts: 14–28 day rMSSD, RHR, gap_avg, subjective average  </li>
+<li>Filter: incomplete days visible as partial  </li>
+</ul>
+<h3 id="6-8-notifications">6.8 Notifications</h3>
+<ul>
+<li>One daily local notification (default <strong>06:30</strong> local, user-editable)  </li>
+<li>Title: “Morning check-in”  </li>
+<li>Body: “Questionnaire first — then H10.”  </li>
+<li>Tapping opens app to questionnaire if incomplete  </li>
+</ul>
+<h3 id="6-9-settings">6.9 Settings</h3>
+<ul>
+<li><strong>Display name</strong> (optional; greetings only)  </li>
+<li>Notification time on/off  </li>
+<li>Timezone / day-boundary note  </li>
+<li>Baseline window (7 vs 14 days)  </li>
+<li>Habit chips enable/disable (Block D)  </li>
+<li>H10 pairing / BLE troubleshooting help  </li>
+<li>Export JSON/CSV  </li>
+<li>Local analytics summary (adherence, etc.)  </li>
+<li>Delete all data  </li>
+<li>About / disclaimer  </li>
+<li>Orthostatic always skippable with confirm (O1)</li>
+</ul>
+<hr>
+<h2 id="7-information-architecture-screens">7. Information architecture (screens)</h2>
+<ol>
+<li><strong>Onboarding</strong> (first launch): purpose, privacy, H10 requirement, disclaimer, optional display name, notification permission  </li>
+<li><strong>Questionnaire</strong> (blocking when incomplete)  </li>
+<li><strong>Today</strong> hub (post-questionnaire): <strong>Start morning measurement</strong> + today’s results  </li>
+<li><strong>Morning measurement session</strong> (combined guided flow; skip-orthostatic variant)  </li>
+<li><strong>History</strong> (gated)  </li>
+<li><strong>Day detail</strong>  </li>
+<li><strong>Settings</strong>  </li>
+</ol>
+<hr>
+<h2 id="8-privacy-and-trust">8. Privacy and trust</h2>
+<div class="table-wrap"><table><thead><tr><th>Rule</th><th>Detail</th></tr></thead><tbody><tr><td>Local first</td><td>All data in app sandbox</td></tr><tr><td>No account</td><td>Optional display name only</td></tr><tr><td>No third-party cloud analytics SDK</td><td>None in v3</td></tr><tr><td>First-party local analytics</td><td>Yes — events/metrics on device only</td></tr><tr><td>No ads</td><td>None</td></tr><tr><td>Network</td><td>None required for core flow; BLE only</td></tr><tr><td>Export</td><td>User-initiated share sheet</td></tr><tr><td>Delete</td><td>One-tap wipe</td></tr><tr><td>Future App Store</td><td>Privacy Nutrition Labels: Data Not Collected (if still true); privacy policy URL when shipping publicly</td></tr></tbody></table></div>
+<p><strong>Disclaimer (onboarding + About):</strong>   Not a medical device. Not for diagnosis or treatment. For personal training journaling only. If you have a heart condition or dizziness on standing, consult a clinician before orthostatic testing; stop if lightheaded.</p>
+<hr>
+<h2 id="9-hardware-and-environment">9. Hardware and environment</h2>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Requirement</th></tr></thead><tbody><tr><td>Phone</td><td>iPhone, iOS version per tech spec</td></tr><tr><td>Strap</td><td>Polar H10 (BLE Heart Rate + RR if available)</td></tr><tr><td>Optional</td><td>Oura — <strong>not integrated</strong> in v3; user may type RHR in notes if desired</td></tr></tbody></table></div>
+<hr>
+<h2 id="10-rollout-plan">10. Rollout plan</h2>
+<div class="table-wrap"><table><thead><tr><th>Phase</th><th>Deliverable</th><th>Exit criteria</th></tr></thead><tbody><tr><td><strong>Docs</strong></td><td>PRD + TECH_SPEC approved</td><td>Zach sign-off</td></tr><tr><td><strong>v1 vertical</strong></td><td>Questionnaire gate + local store + Today shell</td><td>Forced gate works</td></tr><tr><td><strong>v2</strong></td><td>H10 connect + 60 s rMSSD + history</td><td>Replaces Elite for 7-day parallel check</td></tr><tr><td><strong>v3</strong></td><td>Orthostatic + baselines + notifications + export</td><td>Daily driver</td></tr><tr><td><strong>v3.1 (optional)</strong></td><td>Polish, widgets, CSV to Files</td><td>Nice-to-have</td></tr><tr><td><strong>v4+</strong></td><td>Optional TP/Intervals export, Oura import, HealthKit read (maybe), longer orthostatic mode, App Store</td><td>Separate PRD addendum</td></tr></tbody></table></div>
+<p><strong>Parallel validation (recommended):</strong> For <strong>7 mornings</strong>, run Elite HRV <em>after</em> this app’s rMSSD (or vice versa, fixed order) and note both values in Notes to sanity-check magnitude — not for pixel-perfect match.</p>
+<hr>
+<h2 id="11-future-app-store-for-friends">11. Future: App Store for friends</h2>
+<p>Does <strong>not</strong> block v3. When considered:</p>
+<div class="table-wrap"><table><thead><tr><th>Area</th><th>Implication</th></tr></thead><tbody><tr><td>Legal</td><td>Privacy policy, stronger medical disclaimer, maybe “wellness” not “diagnosis”</td></tr><tr><td>Support</td><td>Friends will break BLE; need troubleshooting screen</td></tr><tr><td>Signing</td><td>Apple Developer Program, review</td></tr><tr><td>Features to avoid until ready</td><td>HealthKit write of “clinical” types without care; unsubstantiated readiness claims</td></tr><tr><td>Features that help later</td><td>Clean architecture, settings-driven thresholds, export already built</td></tr></tbody></table></div>
+<hr>
+<h2 id="12-product-decisions-locked-for-v3">12. Product decisions (locked for v3)</h2>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Question</th><th>Options</th><th>Recommendation</th></tr></thead><tbody><tr><td><strong>O1</strong></td><td>Can user skip orthostatic after HRV?</td><td>(a) Required daily (b) Skippable with confirm (c) Required 4×/week</td><td><strong>LOCKED (b)</strong> Skippable with confirm</td></tr><tr><td><strong>O2</strong></td><td>Lying HR duration in combined flow</td><td>(a) 60 s after rMSSD (b) reuse rMSSD mean HR (c) 30 s after rMSSD</td><td><strong>LOCKED (c)</strong> 30 s dedicated lying avg</td></tr><tr><td><strong>O3</strong></td><td>Orthostatic gap primary display</td><td>gap_peak vs gap_avg</td><td><strong>LOCKED</strong> both stored; <strong>gap_peak</strong> primary in UI</td></tr><tr><td><strong>O4</strong></td><td>Strict history gate</td><td>Block history until questionnaire</td><td><strong>LOCKED Yes</strong></td></tr><tr><td><strong>O5</strong></td><td>rMSSD posture</td><td>Lie vs sit</td><td><strong>LOCKED Lie</strong></td></tr></tbody></table></div>
+<hr>
+<h2 id="13-risks-and-mitigations">13. Risks and mitigations</h2>
+<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Mitigation</th></tr></thead><tbody><tr><td>BLE flaky on iOS</td><td>Clear reconnect UX; foreground-only session; tested checklist</td></tr><tr><td>rMSSD ≠ Elite exactly</td><td>Document method; parallel week; don’t chase identity</td></tr><tr><td>User stands too slow/fast</td><td>Large cues, haptics, invalidation if peak too late</td></tr><tr><td>Dizziness</td><td>Warning in onboarding; cancel button always visible</td></tr><tr><td>Habit drop</td><td>Notification + &lt;5 min full path</td></tr><tr><td>Scope creep (Oura, TP, AI)</td><td>Non-goals list; new PRD revision required</td></tr></tbody></table></div>
+<hr>
+<h2 id="14-out-of-scope-copy-compliance">14. Out of scope copy / compliance</h2>
+<ul>
+<li>Do not claim FDA clearance or medical accuracy.  </li>
+<li>Do not use the word “diagnose.”  </li>
+<li>Prefer “training journal,” “morning check-in,” “personal baselines.”</li>
+</ul>
+<hr>
+<h2 id="15-approval">15. Approval</h2>
+<div class="table-wrap"><table><thead><tr><th>Role</th><th>Name</th><th>Status</th></tr></thead><tbody><tr><td>Product owner</td><td>Zach</td><td>Pending</td></tr><tr><td>Spec author</td><td>Grok (session 2026-08-01)</td><td>Complete for review</td></tr></tbody></table></div>
+<p><strong>Next step after approval:</strong> implement per <code>TECH_SPEC.md</code> milestones; no code until Zach says go.</p></article><article class="doc" id="doc-tech"><h1 id="technical-specification-recoverydeck-ios">Technical Specification — RecoveryDeck (iOS)</h1>
+<p><strong>Companion:</strong> <a href="./PRD.md"><code>PRD.md</code></a> · <a href="./REVIEW_NOTES_RESPONSE.md"><code>REVIEW_NOTES_RESPONSE.md</code></a>   <strong>Product name:</strong> <strong>RecoveryDeck</strong>   <strong>Version:</strong> 1.3   <strong>Date:</strong> 2026-08-02   <strong>Status:</strong> Draft for approval (no implementation until approved)   <strong>Changelog 1.2:</strong> Rename RecoveryDeck; local analytics; 1–7 questionnaire + habits; displayName; export schema.   <strong>Changelog 1.3:</strong> Baselines Couzens-style 7d vs 60d ±1 SD; caffeine time/amount + last meal fields; short orthostatic kept.</p>
+<hr>
+<h2 id="1-overview">1. Overview</h2>
+<p>Native <strong>iOS</strong> application (Swift + SwiftUI) that:</p>
+<ol>
+<li>Enforces a <strong>per-local-day questionnaire gate</strong>  </li>
+<li>Streams <strong>Polar H10</strong> BLE heart rate / RR intervals  </li>
+<li>Computes <strong>rMSSD</strong> (Elite HRV replacement)  </li>
+<li>Runs a guided <strong>orthostatic</strong> protocol  </li>
+<li>Persists all data <strong>on-device only</strong></li>
+</ol>
+<p>Target: personal sideload / TestFlight to owner. Architecture must not preclude App Store later.</p>
+<hr>
+<h2 id="2-platform-and-project-setup">2. Platform and project setup</h2>
+<div class="table-wrap"><table><thead><tr><th>Choice</th><th>Decision</th></tr></thead><tbody><tr><td>Language</td><td><strong>Swift 5.9+</strong></td></tr><tr><td>UI</td><td><strong>SwiftUI</strong></td></tr><tr><td>Min iOS</td><td><strong>iOS 17</strong> (adjust to owner’s phone if needed; document at kickoff)</td></tr><tr><td>Architecture</td><td><strong>MVVM</strong> + protocol-oriented services</td></tr><tr><td>Concurrency</td><td><strong>Swift async/await</strong> + <code>AsyncStream</code> for HR samples</td></tr><tr><td>Persistence</td><td><strong>SwiftData</strong> (preferred) or Core Data; v3 single store</td></tr><tr><td>BLE</td><td><strong>CoreBluetooth</strong></td></tr><tr><td>Package manager</td><td>Xcode SPM only if needed (prefer zero deps v3)</td></tr><tr><td>Bundle ID (suggested)</td><td><code>com.zringstrom.recoverydeck</code> (final at Xcode create)</td></tr><tr><td>Display name</td><td>RecoveryDeck</td></tr></tbody></table></div>
+<h3 id="2-1-xcode-project-layout-suggested">2.1 Xcode project layout (suggested)</h3>
+<pre class="code"><code>RecoveryDeck/
+  App/
+    RecoveryDeckApp.swift
+  Features/
+    Onboarding/
+    Questionnaire/
+    Today/
+    MorningMeasurement/   # combined rMSSD + orthostatic session
+    History/
+    Settings/
+  Services/
+    Bluetooth/
+      HeartRateClient.swift
+      PolarH10Identifiers.swift
+    Metrics/
+      RMSSDCalculator.swift
+      OrthostaticCalculator.swift
+      BaselineCalculator.swift
+    Persistence/
+      Models.swift
+      DayRepository.swift
+    Notifications/
+      NotificationScheduler.swift
+  Resources/
+    Info.plist keys (BLE usage strings)
+  Tests/
+    RMSSDCalculatorTests.swift
+    OrthostaticCalculatorTests.swift
+    BaselineCalculatorTests.swift
+    GateLogicTests.swift</code></pre>
+<hr>
+<h2 id="3-permissions-and-info-plist">3. Permissions and Info.plist</h2>
+<div class="table-wrap"><table><thead><tr><th>Key</th><th>Purpose</th><th>User-facing string (draft)</th></tr></thead><tbody><tr><td><code>NSBluetoothAlwaysUsageDescription</code></td><td>H10</td><td>“Bluetooth is used to connect to your Polar H10 for morning heart-rate measurements.”</td></tr><tr><td><code>NSBluetoothPeripheralUsageDescription</code></td><td>if required by target</td><td>same spirit</td></tr><tr><td>Notifications</td><td>morning reminder</td><td>Standard request at end of onboarding</td></tr></tbody></table></div>
+<p><strong>Not used in v3:</strong> HealthKit, Motion (unless later for stand detect — <strong>out of scope</strong>), Background Modes for BLE (sessions are <strong>foreground only</strong>).</p>
+<hr>
+<h2 id="4-bluetooth-polar-h10">4. Bluetooth / Polar H10</h2>
+<h3 id="4-1-services-and-characteristics">4.1 Services and characteristics</h3>
+<p>Use standard BLE SIG profiles (H10 supports these):</p>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>UUID (standard)</th></tr></thead><tbody><tr><td>Heart Rate Service</td><td><code>0x180D</code></td></tr><tr><td>Heart Rate Measurement</td><td><code>0x2A37</code></td></tr><tr><td>Body Sensor Location</td><td><code>0x2A38</code> (optional)</td></tr><tr><td>Battery Service</td><td><code>0x180F</code> (optional UX)</td></tr></tbody></table></div>
+<p><strong>RR intervals:</strong> Parse HR Measurement flags per Bluetooth HR Profile:</p>
+<ul>
+<li>If <strong>RR-Interval bit</strong> present, extract RR values in <strong>1/1024 s</strong> units → convert to ms:  </li>
+</ul>
+<p>  <code>rr_ms = rr_raw * 1000 / 1024</code></p>
+<p>If a firmware/connection path yields HR-only without RR:</p>
+<ul>
+<li><strong>Cannot compute true rMSSD</strong> from integer BPM alone.  </li>
+<li>UX: error “RR intervals not available — ensure H10 is snug, charged, and not connected exclusively elsewhere; prefer H10 in heart rate mode.”  </li>
+<li>Optional degraded mode: store mean HR only; mark <code>rmssd</code> null — <strong>do not fake rMSSD from BPM</strong>.</li>
+</ul>
+<h3 id="4-2-connection-ux">4.2 Connection UX</h3>
+<ol>
+<li>User taps <strong>Connect Polar H10</strong>  </li>
+<li>Scan for peripherals advertising HR service (or known Polar name prefix <code>Polar H10</code>)  </li>
+<li>Connect + subscribe to HR Measurement notifications  </li>
+<li>Show live BPM + “RR OK” indicator when RR present  </li>
+<li>On disconnect mid-test: pause, offer Resume/Restart  </li>
+<li>Only one session owns the peripheral at a time  </li>
+</ol>
+<p><strong>Note:</strong> iPhone may already be bonded; handle reconnect. Instruct user to disconnect H10 from other apps (Elite HRV, Polar Beat) during measurement.</p>
+<h3 id="4-3-sample-model">4.3 Sample model</h3>
+<pre class="code"><code>struct HRSample: Sendable {
+  let timestamp: Date
+  let bpm: Double?          // from HR field when present
+  let rrIntervalsMs: [Double] // zero or more RR since last notification
+}</code></pre>
+<p>Feed <code>AsyncStream&lt;HRSample&gt;</code> into session VMs.</p>
+<hr>
+<h2 id="5-metric-algorithms">5. Metric algorithms</h2>
+<h3 id="5-1-rmssd">5.1 rMSSD</h3>
+<p><strong>Definition:</strong> Root mean square of successive differences of valid NN (RR) intervals.</p>
+<p>For successive valid intervals \(RR_i\), \(RR_{i+1}\) (ms):</p>
+<p>\[ rMSSD = \sqrt{ \frac{1}{N-1} \sum_{i=1}^{N-1} (RR_{i+1} - RR_i)^2 } \]</p>
+<p><strong>Window (normative):</strong> accumulate accepted RR until <strong>sum(RR) ≥ 60_000 ms</strong>, with <strong>min 45</strong> accepted intervals and <strong>max wall-clock 90 s</strong> after settle; fail quality if either floor not met.   (Physiological 60 s of RR, not wall-clock-only.)</p>
+<p><strong>Settle:</strong> 15.0 s wall-clock after user confirms still; discard RR during settle for rMSSD (may still show live HR).</p>
+<p><strong>Artifact rejection (v3, simple and documented):</strong></p>
+<ol>
+<li>Drop RR &amp;lt; <strong>300 ms</strong> or &amp;gt; <strong>2000 ms</strong>  </li>
+<li>Drop RR where successive difference &amp;gt; <strong>20%</strong> of previous RR (ectopic/motion heuristic)  </li>
+<li>Track <code>artifactRatio = rejected / (accepted+rejected)</code>  </li>
+<li>If <code>artifactRatio &gt; 0.20</code> <strong>or</strong> accepted count &amp;lt; 45 → quality <strong>fail</strong>, prompt retry  </li>
+</ol>
+<p><strong>Also store:</strong> mean RR, mean HR = 60000/meanRR, SDNN optional (not primary UI).</p>
+<p><strong>Unit tests:</strong> golden vectors of RR lists → known rMSSD (hand-calculated fixtures).</p>
+<h3 id="5-2-mean-hr-over-a-phase">5.2 Mean HR over a phase</h3>
+<p>For orthostatic lying/standing phases of wall duration T:</p>
+<ul>
+<li>Prefer mean of BPM samples in window, <strong>or</strong> 60000/mean(RR) if RR dense  </li>
+<li><strong>Peak standing HR:</strong> <strong>max BPM over the full 60 s standing window</strong> (includes early rise; Couzens peak response)</li>
+</ul>
+<h3 id="5-3-orthostatic-derived">5.3 Orthostatic derived</h3>
+<pre class="code"><code>avgLyingHR
+avgStandingHR
+peakStandingHR
+gapAvg  = avgStandingHR - avgLyingHR
+gapPeak = peakStandingHR - avgLyingHR</code></pre>
+<h3 id="5-4-baselines-and-green-yellow-red-couzens-aligned">5.4 Baselines and green / yellow / red (Couzens-aligned)</h3>
+<p>Couzens dashboard approach (Ch.13 materials): <strong>7-day rolling mean</strong> (acute) vs <strong>60-day rolling mean</strong> (norm), with a <strong>normal band ≈ ±1 SD</strong> around the long-term mean. Values inside the band look “normal for this athlete”; outside is highlighted.</p>
+<p><strong>Per metric series</strong> (rMSSD, avgLyingHR, gapPeak, gapAvg, subjectiveMean):</p>
+<div class="table-wrap"><table><thead><tr><th>Quantity</th><th>Definition</th></tr></thead><tbody><tr><td><code>normMean</code></td><td>Rolling mean of last <strong>60</strong> complete days (excluding today); require ≥ <strong>14</strong> prior days else <code>baselineStatus = .building</code></td></tr><tr><td><code>normSD</code></td><td>Sample SD over same 60-day window (min floor: rMSSD 1 ms, HR 1 bpm, gap 1 bpm, subjective 0.25)</td></tr><tr><td><code>acute</code></td><td>Prefer <strong>today’s value</strong> for daily UI; optional secondary display of <strong>7-day</strong> rolling mean (Couzens acute line)</td></tr><tr><td><strong>Normal band</strong></td><td><code>[normMean − 1×normSD, normMean + 1×normSD]</code></td></tr></tbody></table></div>
+<p><strong>Traffic lights (normative):</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Light</th><th>Rule</th></tr></thead><tbody><tr><td><strong>Green</strong></td><td><code>acute</code> inside normal band <strong>or</strong> still <code>.building</code></td></tr><tr><td><strong>Yellow</strong></td><td>outside band by <strong>≤ 0.5×normSD</strong> beyond the edge (i.e. between 1.0 and 1.5 SD from mean)</td></tr><tr><td><strong>Red</strong></td><td>outside band by <strong>&gt; 0.5×normSD</strong> beyond the edge (beyond ~1.5 SD from mean)</td></tr></tbody></table></div>
+<p><strong>Concerning directions</strong> (for tips / emphasis, not for ignoring the opposite side):</p>
+<div class="table-wrap"><table><thead><tr><th>Series</th><th>Emphasize when…</th></tr></thead><tbody><tr><td>rMSSD</td><td><strong>Low</strong> vs band</td></tr><tr><td>avgLyingHR</td><td><strong>High</strong> vs band (elevated); very <strong>low</strong> + poor subjective → tip “deep fatigue pattern?”</td></tr><tr><td>gapPeak</td><td><strong>Smaller</strong> gap vs band (blunted stand response)</td></tr><tr><td>Subjective mean (5× 1–7)</td><td><strong>Low</strong> scores (worse feel)</td></tr></tbody></table></div>
+<p><strong>Absolute subjective fallback</strong> if not enough history: mean ≥ 5.0 green-ish, ≥ 3.5 yellow-ish, else red-ish (same polarity as before).</p>
+<p><strong>Composite chip (optional):</strong> majority of channel lights; ties → yellow. Label <strong>“rough signal — not medical.”</strong></p>
+<p>Not clinical cutoffs; personal statistical bands after Couzens’ visualization pattern.</p>
+<hr>
+<h2 id="6-session-state-machines">6. Session state machines</h2>
+<h3 id="6-1-combined-morning-measurement-flow-v3-primary-locked">6.1 Combined morning measurement flow (v3 primary — locked)</h3>
+<p>Single CTA: <strong>Start morning measurement</strong>. Matches PRD §6.1 / §6.5.</p>
+<pre class="code"><code>State: Idle
+  → Connecting
+  → ConnectedLive (show BPM)
+  → User taps Start (must be post-questionnaire)
+  → SettleLying (15 s)
+  → CaptureRMSSD (accumulate RR ~60 s sum)
+  → CaptureLyingHR (30 s wall, mean HR)   // orthostatic lying / daily RHR
+  → PromptStand (3 s countdown + haptic)
+  → CaptureStanding (60 s wall)
+  → Complete (persist MeasurementBundle; overwrite if same localDate confirm)
+  → Error/Cancel from any state</code></pre>
+<p><strong>Total:</strong> 15 + 60 + 30 lying + 3 cue + 60 standing ≈ <strong>~3 min</strong> + connect.</p>
+<p><strong>Remeasure:</strong> If <code>MeasurementRecord</code> exists for <code>localDate</code>, require confirm → overwrite same row (v3: no version history).</p>
+<h3 id="6-2-hrv-only-path">6.2 HRV-only path</h3>
+<p>If orthostatic skipped (PRD O1b):</p>
+<pre class="code"><code>Settle 15 s → RMSSD 60 s → persist HRV partial → Today shows orthostatic missing</code></pre>
+<p>Skip requires confirm: “Skip orthostatic today?”</p>
+<h3 id="6-3-gate-logic-pure-function-unit-test">6.3 Gate logic (pure function — unit test)</h3>
+<pre class="code"><code>func canAccessHistory(today: LocalDate, questionnaire: DayRecord?) -&gt; Bool
+func canStartMeasurement(today: LocalDate, questionnaire: DayRecord?) -&gt; Bool</code></pre>
+<p>Rules per PRD §6.2.</p>
+<hr>
+<h2 id="7-data-model">7. Data model</h2>
+<h3 id="7-1-swiftdata-entities-conceptual">7.1 SwiftData entities (conceptual)</h3>
+<p><strong>DayRecord</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead><tbody><tr><td>id</td><td>UUID</td><td></td></tr><tr><td>localDate</td><td>String <code>yyyy-MM-dd</code></td><td>unique</td></tr><tr><td>timezoneIdentifier</td><td>String</td><td></td></tr><tr><td>fatigue</td><td>Int 1…7</td><td></td></tr><tr><td>mood</td><td>Int 1…7</td><td></td></tr><tr><td>soreness</td><td>Int 1…7</td><td></td></tr><tr><td>lifeStress</td><td>Int 1…7</td><td></td></tr><tr><td>sleepQuality</td><td>Int 1…7</td><td></td></tr><tr><td>lastCaffeineAt</td><td>Date?</td><td>optional; local time of last caffeine</td></tr><tr><td>caffeineAmountMg</td><td>Double?</td><td>optional; mg if known</td></tr><tr><td>caffeineAmountBand</td><td>String?</td><td>optional: none/small/medium/large if mg unknown</td></tr><tr><td>lastMealAt</td><td>Date?</td><td>optional; time last meal finished</td></tr><tr><td>habitAlcohol</td><td>Bool?</td><td>optional chip</td></tr><tr><td>habitHardTrainingYesterday</td><td>Bool?</td><td></td></tr><tr><td>habitTravelLate</td><td>Bool?</td><td></td></tr><tr><td>habitSick</td><td>Bool?</td><td></td></tr><tr><td>notes</td><td>String?</td><td></td></tr><tr><td>questionnaireCompletedAt</td><td>Date</td><td></td></tr><tr><td>questionnaireEditedAfterMeasure</td><td>Bool</td><td>default false</td></tr></tbody></table></div>
+<p><strong>MeasurementRecord</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead><tbody><tr><td>id</td><td>UUID</td><td></td></tr><tr><td>localDate</td><td>String</td><td>FK logical to day</td></tr><tr><td>measuredAt</td><td>Date</td><td></td></tr><tr><td>protocolVersion</td><td>String</td><td>e.g. <code>&quot;v3.0&quot;</code></td></tr><tr><td>rmssdMs</td><td>Double?</td><td></td></tr><tr><td>meanHrBpm</td><td>Double?</td><td>during RMSSD</td></tr><tr><td>rrAcceptedCount</td><td>Int?</td><td></td></tr><tr><td>artifactRatio</td><td>Double?</td><td></td></tr><tr><td>hrvQuality</td><td>enum ok/fail</td><td></td></tr><tr><td>avgLyingHr</td><td>Double?</td><td></td></tr><tr><td>avgStandingHr</td><td>Double?</td><td></td></tr><tr><td>peakStandingHr</td><td>Double?</td><td></td></tr><tr><td>gapAvg</td><td>Double?</td><td></td></tr><tr><td>gapPeak</td><td>Double?</td><td></td></tr><tr><td>orthostaticSkipped</td><td>Bool</td><td></td></tr><tr><td>orthostaticQuality</td><td>enum ok/fail/skipped</td><td></td></tr><tr><td>deviceName</td><td>String?</td><td></td></tr><tr><td>rawDebugPath</td><td>String?</td><td>optional debug only, off by default</td></tr></tbody></table></div>
+<p><strong>AppSettings</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Default</th></tr></thead><tbody><tr><td>displayName</td><td>String?</td><td>optional greeting</td></tr><tr><td>notificationHour/Minute</td><td>Int</td><td>6:30</td></tr><tr><td>notificationsEnabled</td><td>Bool</td><td>true</td></tr><tr><td>normWindowDays</td><td>Int</td><td><strong>60</strong> (Couzens long-term norm)</td></tr><tr><td>acuteWindowDays</td><td>Int</td><td><strong>7</strong> (optional chart line)</td></tr><tr><td>dayStartTimezone</td><td>String</td><td>auto</td></tr><tr><td>enabledHabitChips</td><td>[String]</td><td>which Block D chips show</td></tr></tbody></table></div>
+<h3 id="7-3-local-analytics-on-device-only">7.3 Local analytics (on-device only)</h3>
+<p>Store lightweight events in the same sandbox (separate entity or append-only log), e.g.:</p>
+<ul>
+<li><code>morning_completed</code>, <code>orthostatic_skipped</code>, <code>hrv_quality_fail</code>, <code>session_duration_ms</code>, <code>ble_connect_fail</code></li>
+</ul>
+<p><strong>No</strong> network upload. Surface a simple Settings → Analytics summary. Export may include analytics if user exports “full backup.”</p>
+<h3 id="7-4-future-export-v4-not-implemented">7.4 Future export (v4+ — not implemented)</h3>
+<p>Stable JSON <code>protocolVersion</code> so a later module can map fields → TrainingPeaks metrics / Intervals wellness without schema thrash.</p>
+<h3 id="7-2-completeness">7.2 Completeness</h3>
+<p><code>day.isComplete</code> = questionnaire done &amp;&amp; rmssd present &amp;&amp; quality ok &amp;&amp; (orthostatic ok || skipped).</p>
+<hr>
+<h2 id="8-persistence-and-privacy">8. Persistence and privacy</h2>
+<div class="table-wrap"><table><thead><tr><th>Topic</th><th>Spec</th></tr></thead><tbody><tr><td>Location</td><td>App sandbox only</td></tr><tr><td>Encryption</td><td>iOS Data Protection default; no custom crypto required v3</td></tr><tr><td>iCloud</td><td><strong>Off</strong></td></tr><tr><td>Backup</td><td>Participates in iCloud device backup unless excluded — <strong>v3 accept default</strong>; document that iCloud backup may include data if user backs up phone</td></tr><tr><td>Export</td><td>JSON (full) + CSV (days flat) via <code>UIActivityViewController</code></td></tr><tr><td>Delete all</td><td>Wipe SwiftData store + reset onboarding flag optional keep</td></tr></tbody></table></div>
+<p><strong>No</strong> network client in v3 targets. CI should fail if new URLSession analytics appear.</p>
+<hr>
+<h2 id="9-ui-specifications-behavioral">9. UI specifications (behavioral)</h2>
+<h3 id="9-1-questionnaire">9.1 Questionnaire</h3>
+<ul>
+<li><strong>Five required</strong> steppers / tappable <strong>1–7</strong> chips (Block A+B)  </li>
+<li>Optional Block C: last caffeine time, caffeine amount, last meal time (skippable)  </li>
+<li>Optional Block D habit chips + Block E notes  </li>
+<li>Large touch targets; submit sticky  </li>
+<li>Cannot navigate to History via Tab until required scores submitted</li>
+</ul>
+<h3 id="9-2-session-ui">9.2 Session UI</h3>
+<ul>
+<li>Large phase title  </li>
+<li>Countdown / progress  </li>
+<li>Live BPM  </li>
+<li>Cancel always available  </li>
+<li>Success checkmark → auto-return Today  </li>
+</ul>
+<h3 id="9-3-accessibility">9.3 Accessibility</h3>
+<ul>
+<li>Dynamic Type support for questionnaire  </li>
+<li>VoiceOver labels on scores  </li>
+<li>Haptics for stand cue (respect reduce motion: visual flash)</li>
+</ul>
+<h3 id="9-4-appearance">9.4 Appearance</h3>
+<ul>
+<li>System light/dark  </li>
+<li>Calm, minimal; no gamification streaks required in v3 (optional later)</li>
+</ul>
+<hr>
+<h2 id="10-notifications">10. Notifications</h2>
+<ul>
+<li><code>UNUserNotificationCenter</code>  </li>
+<li>Daily calendar trigger  </li>
+<li>ID: <code>morning-checkin-daily</code>  </li>
+<li>Reschedule on settings change  </li>
+<li>No critical alerts  </li>
+</ul>
+<hr>
+<h2 id="11-testing-strategy">11. Testing strategy</h2>
+<h3 id="11-1-unit-tests-required-before-calling-v3-done">11.1 Unit tests (required before calling v3 done)</h3>
+<div class="table-wrap"><table><thead><tr><th>Module</th><th>Cases</th></tr></thead><tbody><tr><td>RMSSDCalculator</td><td>empty, single, monotonic, known fixture, artifact heavy</td></tr><tr><td>OrthostaticCalculator</td><td>gaps, peak</td></tr><tr><td>BaselineCalculator</td><td>building, green/yellow/red bands</td></tr><tr><td>GateLogic</td><td>before/after questionnaire, day rollover</td></tr></tbody></table></div>
+<h3 id="11-2-manual-test-checklist-h10">11.2 Manual test checklist (H10)</h3>
+<ol>
+<li>Fresh install → onboarding → notification permission  </li>
+<li>Questionnaire gate blocks History and Start  </li>
+<li>Connect H10; RR indicator green  </li>
+<li>Full combined session completes; values plausible (rMSSD typically tens of ms; not 0; not 500)  </li>
+<li>Kill app mid-session; no corrupt day  </li>
+<li>Skip orthostatic path  </li>
+<li>Second launch same day: questionnaire done; can remeasure with confirm overwrite  </li>
+<li>Next calendar day: gate resets  </li>
+<li>Export JSON non-empty  </li>
+<li>Delete all data  </li>
+</ol>
+<h3 id="11-3-parallel-elite-hrv-user">11.3 Parallel Elite HRV (user)</h3>
+<p>7 days: record both rMSSD; expect similar order of magnitude and co-movement, not equality.</p>
+<hr>
+<h2 id="12-implementation-milestones">12. Implementation milestones</h2>
+<div class="table-wrap"><table><thead><tr><th>Milestone</th><th>Scope</th><th>Done when</th></tr></thead><tbody><tr><td><strong>M0</strong></td><td>Xcode project, folder structure, SwiftData models, gate + questionnaire + Today shell</td><td>UI flow without BLE</td></tr><tr><td><strong>M1</strong></td><td>HeartRateClient + live BPM</td><td>Connect H10 reliably</td></tr><tr><td><strong>M2</strong></td><td>RMSSD session + persist + History</td><td>Elite replacement usable</td></tr><tr><td><strong>M3</strong></td><td>Combined orthostatic + baselines + notifications + export + tests</td><td><strong>v3 complete</strong></td></tr></tbody></table></div>
+<p>Estimated effort (solo, familiar with iOS): <strong>M0–M1</strong> 1–2 days, <strong>M2</strong> 1–2 days, <strong>M3</strong> 1–2 days — <strong>~1 week calendar</strong> part-time, not a commitment.</p>
+<hr>
+<h2 id="13-error-catalog-user-visible">13. Error catalog (user-visible)</h2>
+<div class="table-wrap"><table><thead><tr><th>Code</th><th>Message (draft)</th></tr></thead><tbody><tr><td>BT_POWER</td><td>Turn on Bluetooth</td></tr><tr><td>BT_DENIED</td><td>Allow Bluetooth in Settings</td></tr><tr><td>H10_NOT_FOUND</td><td>Polar H10 not found — wear it, press button, close other HR apps</td></tr><tr><td>H10_NO_RR</td><td>Connected but no RR intervals — cannot compute HRV</td></tr><tr><td>H10_DROP</td><td>Connection lost — retry</td></tr><tr><td>QUALITY_HRV</td><td>Too much noise — lie still and retry</td></tr><tr><td>QUALITY_ORTHO</td><td>Standing segment invalid — retry orthostatic</td></tr><tr><td>GATE</td><td>Complete today’s questionnaire first</td></tr></tbody></table></div>
+<hr>
+<h2 id="14-security-notes">14. Security notes</h2>
+<ul>
+<li>No API keys in repo  </li>
+<li>No logging of health samples to third parties  </li>
+<li>Debug RR dumps <strong>off by default</strong>; if enabled, local file only + setting  </li>
+</ul>
+<hr>
+<h2 id="15-app-store-readiness-non-blocking-notes">15. App Store readiness (non-blocking notes)</h2>
+<p>When/if public:</p>
+<ol>
+<li>Privacy policy URL  </li>
+<li>App Review notes: Polar H10 required for full function; demo mode with simulator RR fixture for reviewers  </li>
+<li><strong>Simulator demo mode:</strong> inject synthetic RR for UI review without hardware  </li>
+<li>Avoid HealthKit until justified  </li>
+<li>Medical disclaimer in App Description  </li>
+</ol>
+<p><strong>v3 demo mode:</strong> compile-flag <code>DEMO_RR</code> for SwiftUI previews and unit-free UI dev without strap.</p>
+<hr>
+<h2 id="16-prd-decisions-locked-for-v3">16. PRD decisions (locked for v3)</h2>
+<div class="table-wrap"><table><thead><tr><th>PRD</th><th>Implementation</th></tr></thead><tbody><tr><td>O1 skip orthostatic</td><td><strong>Allow skip</strong> with confirm → HRV-only path §6.2</td></tr><tr><td>O2 lying duration</td><td><strong>30 s</strong> lying HR after rMSSD</td></tr><tr><td>O3 gap display</td><td><strong>gapPeak</strong> primary, gapAvg secondary</td></tr><tr><td>O4 history gate</td><td>Block until questionnaire</td></tr><tr><td>O5 posture</td><td><strong>Lying</strong> for rMSSD</td></tr><tr><td>Remeasure</td><td>Overwrite after confirm</td></tr></tbody></table></div>
+<hr>
+<h2 id="17-explicit-non-implementations">17. Explicit non-implementations</h2>
+<ul>
+<li>Frequency-domain HRV (LF/HF) — Couzens notes need ~5 min for LF; v3 stays rMSSD + orthostatic  </li>
+<li>ECG authentication modes beyond standard HR BLE  </li>
+<li>Auto-stand detection via accelerometer  </li>
+<li>Cloud sync  </li>
+</ul>
+<hr>
+<h2 id="18-acceptance-criteria-v3">18. Acceptance criteria (v3)</h2>
+<ol>
+<li>Questionnaire required before measurements and history.  </li>
+<li>rMSSD computed from H10 RR with documented artifact rules; saved per day.  </li>
+<li>Orthostatic produces lying avg, standing avg, peak, gaps (or skip recorded).  </li>
+<li>Baselines: <code>.building</code> until ≥14 complete days; then G/Y/R vs 60-day ±1 SD band.  </li>
+<li>No network calls in core paths.  </li>
+<li>Export and delete work.  </li>
+<li>Unit tests for calculators and gate pass.  </li>
+<li>Manual H10 checklist completed by owner.  </li>
+</ol>
+<hr>
+<h2 id="19-references-product-science">19. References (product science)</h2>
+<ul>
+<li>Alan Couzens, readiness composite (HRV, RHR, fatigue, mood, soreness, stress) — training-plan dashboard / Ch.13 materials in local archive  </li>
+<li>Alan Couzens, orthostatic 60s+60s, peak vs lying gap — <code>taking-your-understanding-of-hrv.md</code>  </li>
+<li>Alan Couzens, HRV alone insufficient; commercial readiness skepticism — distilled monitoring notes  </li>
+<li>Bluetooth SIG Heart Rate Profile (RR intervals)</li>
+</ul>
+<hr>
+<h2 id="20-approval">20. Approval</h2>
+<div class="table-wrap"><table><thead><tr><th>Role</th><th>Status</th></tr></thead><tbody><tr><td>Engineering spec author</td><td>Complete for review</td></tr><tr><td>Owner (Zach)</td><td>Pending</td></tr></tbody></table></div>
+<p><strong>No implementation until PRD + this spec are approved and Zach requests build.</strong></p></article><article class="doc" id="doc-notes"><h1 id="response-to-product-review-notes-2026-08-02">Response to product-review notes (2026-08-02)</h1>
+<p>Companion to <code>PRD.md</code> / <code>TECH_SPEC.md</code>. Product name going forward: <strong>RecoveryDeck</strong>.</p>
+<hr>
+<h2 id="1-how-long-should-the-orthostatic-test-be-research-vs-our-protocol">1. How long should the orthostatic test be? Research vs our protocol</h2>
+<h3 id="what-research-clinical-guidelines-use">What research / clinical guidelines use</h3>
+<div class="table-wrap"><table><thead><tr><th>Context</th><th>Typical protocol</th><th>Purpose</th></tr></thead><tbody><tr><td><strong>Orthostatic hypotension (clinical)</strong></td><td>~<strong>5 min supine</strong>, then BP/HR at <strong>~3 min standing</strong> (sometimes also 1 min)</td><td>Diagnose sustained BP drop / HR response</td></tr><tr><td><strong>Active stand / POTS screening</strong></td><td>Often <strong>5–10 min supine</strong>, then <strong>up to 10 min standing</strong> with serial HR/BP</td><td>Diagnose postural tachycardia (≥30 bpm rise sustained)</td></tr><tr><td><strong>Autonomic lab studies</strong></td><td>Sometimes <strong>5+5 min</strong> or longer (10 min stand)</td><td>Research-grade comparability to tilt</td></tr><tr><td><strong>Couzens (coaching tool)</strong></td><td>~<strong>60 s lie + 60 s stand</strong>; track lying avg, standing avg, <strong>peak standing</strong>, gaps</td><td><strong>Daily readiness / ANS quadrant</strong>, not clinical diagnosis</td></tr></tbody></table></div>
+<p>Clinical orthostatic tests are <strong>longer</strong> because they are optimizing <strong>diagnostic sensitivity</strong> (POTS, OH), often with BP cuffs, not a 3-minute morning habit with a chest strap.</p>
+<h3 id="our-current-v3-protocol">Our current v3 protocol</h3>
+<p>~15 s settle + 60 s rMSSD + <strong>30 s</strong> lying HR + <strong>60 s</strong> stand ≈ <strong>3 min</strong> total.</p>
+<ul>
+<li><strong>Aligned with Couzens</strong> on the <em>idea</em> (quick daily orthostatic, peak−lying gap).  </li>
+<li><strong>Not aligned</strong> with clinical 3–10 min stand standards.  </li>
+<li><strong>Shorter lying sample (30 s)</strong> after rMSSD is a habit tradeoff, not a research gold standard.</li>
+</ul>
+<h3 id="recommendation">Recommendation</h3>
+<div class="table-wrap"><table><thead><tr><th>Goal</th><th>Protocol</th></tr></thead><tbody><tr><td><strong>Daily habit (v3 default)</strong></td><td>Keep ~<strong>60 s stand</strong> + peak/avg gaps; keep combined rMSSD session. Accept that this is a <strong>trend tool</strong>, not a POTS test.</td></tr><tr><td><strong>Better Couzens alignment</strong></td><td>Prefer <strong>60 s lying HR</strong> (not 30 s) after rMSSD if you can spare ~30 s more on the floor.</td></tr><tr><td><strong>Optional “long stand” mode (later)</strong></td><td>Settings: <strong>60 s / 3 min stand</strong> for occasional deeper check (still not a medical diagnosis).</td></tr><tr><td><strong>Do not</strong></td><td>Claim clinical OH/POTS diagnosis from this app.</td></tr></tbody></table></div>
+<p><strong>Bottom line:</strong> Research supports <strong>minutes</strong>, not seconds, for <em>clinical</em> orthostatic testing. For <em>daily coaching readiness</em>, Couzens-style <strong>~1+1 min</strong> is a deliberate lightweight proxy. We should <strong>document that honestly</strong> and optionally offer a longer stand later—not silently claim clinical equivalence.</p>
+<hr>
+<h2 id="2-evidence-behind-green-yellow-red-signals">2. Evidence behind green / yellow / red signals</h2>
+<h3 id="honest-answer-current-v1-3">Honest answer (current v1.3)</h3>
+<p>RecoveryDeck no longer uses arbitrary ±10% / ±3 bpm tables as the primary rule.</p>
+<p><strong>Couzens’s actual method</strong> (dashboard): compare <strong>acute (≈7-day)</strong> metrics to a <strong>long-term norm (≈60-day mean)</strong> and shade a <strong>normal range ≈ ±1 SD</strong>. Outside that band is “not normal for this athlete.” He does <strong>not</strong> publish a universal green/yellow/red product matrix.</p>
+<p><strong>RecoveryDeck G/Y/R</strong> (TECH §5.4) implements that idea: green inside ±1 SD, yellow ~1–1.5 SD, red beyond ~1.5 SD, with concerning-direction labels.</p>
+<h3 id="what-is-evidence-backed-directionally">What <em>is</em> evidence-backed (directionally)</h3>
+<div class="table-wrap"><table><thead><tr><th>Idea</th><th>Support</th></tr></thead><tbody><tr><td><strong>Compare to personal baseline, not population</strong></td><td>Couzens 7d vs 60d; HRV practice generally</td></tr><tr><td><strong>±1 SD as “normal range” visualization</strong></td><td>Couzens dashboard figures (explicit green band)</td></tr><tr><td><strong>HRV related to readiness for higher intensity</strong></td><td>Couzens / Vesterinen et al. type findings</td></tr><tr><td><strong>RHR + orthostatic response context</strong></td><td>Couzens quadrants; Hedelin et al. overreaching</td></tr><tr><td><strong>Subjective fatigue/mood/soreness/stress</strong></td><td>Couzens Ch.13; Morgan/Hooper swimming staleness work</td></tr><tr><td><strong>Composite &gt; single commercial score</strong></td><td>Couzens critique of unanchored readiness apps</td></tr></tbody></table></div>
+<h3 id="what-is-not-proven">What is <em>not</em> proven</h3>
+<ul>
+<li>That <strong>1.0 / 1.5 SD</strong> yellow/red edges are optimal for <em>you</em> (tunable later)  </li>
+<li>That a single traffic light predicts adaptation that day  </li>
+</ul>
+<h3 id="recommendation">Recommendation</h3>
+<p>Keep lights as <strong>personal-band cues</strong>, not medical scores; show direction in words; allow tuning after you have months of data.</p>
+<hr>
+<h2 id="3-analytics-no-sdk-vs-in-app-analytics">3. Analytics: “no SDK” vs in-app analytics</h2>
+<h3 id="clarification">Clarification</h3>
+<div class="table-wrap"><table><thead><tr><th>Kind</th><th>v3 intent</th></tr></thead><tbody><tr><td><strong>Third-party analytics SDK</strong> (Amplitude, Firebase Analytics cloud, Mixpanel, etc.)</td><td><strong>No</strong> — privacy-first, no phone-home</td></tr><tr><td><strong>On-device analytics / instrumentation</strong></td><td><strong>Yes</strong> — local event + metric store so <em>you</em> can see adherence, completion, quality fails, time-to-complete</td></tr></tbody></table></div>
+<p>Examples of <strong>local analytics</strong> (stay on phone):</p>
+<ul>
+<li>Days completed / streak  </li>
+<li>% mornings with orthostatic skipped  </li>
+<li>HRV quality fail rate  </li>
+<li>Median time for full session  </li>
+<li>Questionnaire item distributions over time  </li>
+</ul>
+<p><strong>We will update the PRD wording</strong> from “no analytics” → <strong>“no third-party cloud analytics SDK; first-party local analytics OK.”</strong></p>
+<hr>
+<h2 id="4-trainingpeaks-intervals-icu-sync-later">4. TrainingPeaks / Intervals.icu sync later</h2>
+<p><strong>Agreed:</strong> not in v3, but <strong>optional future</strong> (v4+), not a hard forever-no.</p>
+<p>Architecture implication (tech): keep <code>DayRecord</code> / <code>MeasurementRecord</code> export-friendly (stable JSON schema) so a later exporter can push:</p>
+<ul>
+<li>Morning metrics as TrainingPeaks “metrics” style fields, or  </li>
+<li>Intervals wellness / notes / custom fields  </li>
+</ul>
+<p><strong>No implementation now.</strong></p>
+<hr>
+<h2 id="5-scale-1-5-vs-1-7">5. Scale 1–5 vs 1–7</h2>
+<h3 id="research-psychometrics-brief">Research (psychometrics, brief)</h3>
+<ul>
+<li><strong>5- and 7-point Likert scales</strong> are both widely used and considered adequate.  </li>
+<li><strong>7-point</strong> often gives <strong>slightly higher reliability / more variance</strong> (more discrimination); diminishing returns above ~7–11.  </li>
+<li><strong>5-point</strong> is faster and often better for general populations / less fatigue.  </li>
+<li>“Weird numbers” (e.g. 1–10, 0–100) help mainly by <strong>more resolution</strong>, not magic—<strong>odd midpoints</strong> (5 or 7) give a true center.</li>
+</ul>
+<h3 id="recommendation-for-recoverydeck">Recommendation for RecoveryDeck</h3>
+<p><strong>Default to 1–7</strong> for core feeling items (athlete daily use, high motivation, want nuance).</p>
+<div class="table-wrap"><table><thead><tr><th>Scale</th><th>When</th></tr></thead><tbody><tr><td><strong>1–7</strong></td><td>Fatigue, mood, soreness, stress, sleep quality (core)</td></tr><tr><td><strong>Yes / No</strong></td><td>WHOOP-style habit tags (alcohol, late caffeine, etc.)</td></tr></tbody></table></div>
+<p>Update traffic-light subjective bands when switching (e.g. green mean ≥ 5.0, yellow ≥ 3.5 on 1–7).</p>
+<hr>
+<h2 id="6-questionnaire-alan-whoop-inspired">6. Questionnaire: Alan + WHOOP-inspired</h2>
+<h3 id="what-alan-actually-uses-models-archive">What Alan actually uses / models (archive)</h3>
+<p>From Couzens dashboard / readiness materials, morning metrics fed into readiness include:</p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Role</th></tr></thead><tbody><tr><td><strong>HRV</strong></td><td>Measured (not questionnaire)</td></tr><tr><td><strong>Pulse / RHR</strong></td><td>Measured</td></tr><tr><td><strong>Fatigue</strong></td><td>Subjective</td></tr><tr><td><strong>Mood</strong></td><td>Subjective</td></tr><tr><td><strong>Soreness</strong></td><td>Subjective (incl. “heavy legs”)</td></tr><tr><td><strong>Stress</strong> (life stress)</td><td>Subjective</td></tr></tbody></table></div>
+<p>He emphasizes: multi-input composite; low HRV ≠ ban all easy work; soreness = muscular readiness; life stress often early warning.</p>
+<h3 id="whoop-journal-what-you-likely-liked">WHOOP Journal (what you likely liked)</h3>
+<p>WHOOP separates:</p>
+<ol>
+<li><strong>How you feel / recovery-adjacent ratings</strong> (mood, etc., product evolves)  </li>
+<li><strong>Behavior tags (yes/no)</strong> correlated later with recovery: e.g. <strong>alcohol</strong>, <strong>caffeine</strong>, shared bed, meditation, late meals, etc.</li>
+</ol>
+<p>The power is <strong>habit ↔ recovery association</strong>, not a long feelings essay.</p>
+<h3 id="proposed-recoverydeck-questionnaire-v3">Proposed RecoveryDeck questionnaire (v3)</h3>
+<p><strong>Block A — required (Alan core), scale 1–7</strong>   Higher = better for all feeling items (consistent polarity).</p>
+<ol>
+<li><strong>Fatigue</strong> — Exhausted → Fresh  </li>
+<li><strong>Mood</strong> — Very low → Great  </li>
+<li><strong>Soreness / heavy legs</strong> — Very sore → None  </li>
+<li><strong>Life stress</strong> — Very high → Very low  </li>
+</ol>
+<p><strong>Block B — required short (WHOOP-inspired sleep feel)</strong>  </p>
+<ol>
+<li><strong>Sleep quality (subjective)</strong> — Terrible → Excellent  </li>
+</ol>
+<p>   <em>(complements Oura; captures “I slept 8h but feel wrecked”)</em></p>
+<p><strong>Block C — optional habit chips (WHOOP-style, yes/no, default off until user enables)</strong>  </p>
+<p>Suggested starter set (user can toggle in Settings later):</p>
+<ul>
+<li>Alcohol last night  </li>
+<li>Caffeine after 2pm (or “late caffeine”)  </li>
+<li>Hard training yesterday (self-tag)  </li>
+<li>Travel / late night  </li>
+<li>Illness / sick feel  </li>
+</ul>
+<p><strong>Block D — optional free text Notes</strong></p>
+<p><strong>Gate:</strong> Block A + B required before measurements. Block C can be same screen, optional.</p>
+<hr>
+<h2 id="7-name-without-account">7. Name without account</h2>
+<p><strong>Yes — optional display name</strong> in onboarding/Settings.</p>
+<ul>
+<li>Stored only on device  </li>
+<li>Used for “Good morning, Zach”  </li>
+<li>Not identity verification; no login  </li>
+<li>Default: empty → “Good morning”</li>
+</ul>
+<hr>
+<h2 id="8-friends-will-break-ble-what-that-means">8. “Friends will break BLE” — what that means</h2>
+<p><strong>Not</strong> “Bluetooth is nonstandard.” BLE HR is exactly what Elite HRV, HRV4Training, Polar Beat use.</p>
+<p>It means <strong>support reality</strong> when people other than you use the app:</p>
+<div class="table-wrap"><table><thead><tr><th>Issue</th><th>Why friends hit it</th></tr></thead><tbody><tr><td>H10 connected to <strong>two apps</strong></td><td>iOS often only streams cleanly to one</td></tr><tr><td>Wrong strap fit / dry electrodes</td><td>No RR → no rMSSD</td></tr><tr><td>Bluetooth permission denied</td><td>Silent fail</td></tr><tr><td>Backgrounded mid-test</td><td>Session dies (we’re foreground-only by design)</td></tr><tr><td>Non-H10 strap</td><td>May send HR without RR</td></tr><tr><td>“It worked yesterday”</td><td>Watch OS / phone OS updates</td></tr></tbody></table></div>
+<p>Elite HRV has years of edge-case UX and support docs. For <strong>you</strong>, fine. For <strong>App Store friends</strong>, expect support load unless troubleshooting is excellent.</p>
+<hr>
+<h2 id="9-healthkit-would-it-ever-make-sense">9. HealthKit — would it ever make sense?</h2>
+<div class="table-wrap"><table><thead><tr><th>Write to HealthKit</th><th>Sense?</th></tr></thead><tbody><tr><td><strong>Heart rate samples</strong> during test</td><td>Low value (transient; Apple already has workouts from watch)</td></tr><tr><td><strong>HRV (SDNN)</strong></td><td>Possible; Apple’s type is often SDNN-oriented, not rMSSD—mapping is messy</td></tr><tr><td><strong>Mindful / sleep</strong></td><td>Not our domain</td></tr><tr><td><strong>Read: sleep analysis, resting HR from watch</strong></td><td>Maybe later if you drop Oura manual path</td></tr><tr><td><strong>Read: workouts</strong></td><td>Could contextualize “hard day yesterday” without Intervals</td></tr></tbody></table></div>
+<p><strong>Recommendation:</strong></p>
+<ul>
+<li><strong>v3:</strong> <strong>No HealthKit</strong> (simpler privacy story, fewer review issues).  </li>
+<li><strong>Later (optional):</strong>  </li>
+</ul>
+<p>  - <strong>Read</strong> last-night sleep duration / workouts for context chips     - <strong>Write</strong> optional “mindful session” or a single daily summary only if users want Apple Health graphs  </p>
+<ul>
+<li>Avoid writing clinical-sounding “recovery diagnosis.”</li>
+</ul>
+<hr>
+<h2 id="10-app-name-recoverydeck">10. App name: <strong>RecoveryDeck</strong></h2>
+<p>Approved as product name. Bundle ID suggestion: <code>com.zringstrom.recoverydeck</code>.</p>
+<hr>
+<h2 id="product-decisions-updated-2026-08-02-follow-up">Product decisions (updated 2026-08-02 follow-up)</h2>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Decision</th></tr></thead><tbody><tr><td>Name</td><td><strong>RecoveryDeck</strong></td></tr><tr><td>Local analytics</td><td><strong>Yes</strong> (on-device only)</td></tr><tr><td>Cloud analytics SDK</td><td><strong>No</strong> (v3)</td></tr><tr><td>TP / Intervals</td><td><strong>v4+ optional</strong>, not v3</td></tr><tr><td>Likert</td><td><strong>1–7</strong> for feeling items</td></tr><tr><td>Questionnaire</td><td>Alan core + sleep quality; <strong>optional</strong> last caffeine time + amount; <strong>optional</strong> last meal time; optional habit chips</td></tr><tr><td>Display name</td><td>Optional onboarding field</td></tr><tr><td>Orthostatic duration</td><td><strong>Keep short daily proxy</strong> (v3 combined ~60 s stand)</td></tr><tr><td>HealthKit</td><td><strong>Not v3</strong> (confirmed)</td></tr><tr><td>G/Y/R</td><td><strong>Couzens-style:</strong> acute vs <strong>60-day mean ± 1 SD</strong> band (see TECH §5.4)—not arbitrary ±10%</td></tr></tbody></table></div>
+<h3 id="couzens-on-green-yellow-red-short">Couzens on green / yellow / red (short)</h3>
+<p>He does <strong>not</strong> ship a branded traffic-light product table. He:</p>
+<ul>
+<li>Compares <strong>7-day</strong> (acute) metrics to a <strong>60-day norm</strong>  </li>
+<li>Shades a <strong>normal range ≈ ±1 SD</strong> (green band in his dashboard figures)  </li>
+<li>Flags when the athlete is <strong>outside their own range</strong>  </li>
+<li>Uses <strong>“red light”</strong> for serious overtraining-type states (e.g. orthostatic Q4), not every off morning  </li>
+</ul>
+<p>RecoveryDeck’s G/Y/R is an <strong>implementation of that normal-band idea</strong>, not a quote of Couzens cutoffs.</p>
+<h3 id="ble-friends-will-break-it-plainer">BLE “friends will break it” (plainer)</h3>
+<p>Bluetooth itself is fine—Elite HRV uses it too. The hard part is <strong>everything around the radio</strong>:</p>
+<p>Imagine a friend installs RecoveryDeck, wears an H10, and taps Start:</p>
+<ol>
+<li><strong>Polar Beat is still connected</strong> in the background → phone won’t give clean RR to RecoveryDeck → “no HRV.”  </li>
+<li>They <strong>didn’t enable Bluetooth permission</strong> → blank scan.  </li>
+<li>Strap is <strong>loose / dry skin</strong> → HR jumps, RR missing → quality fail.  </li>
+<li>They switch to Messages mid-test → app backgrounds → connection drops.  </li>
+<li>They use a <strong>generic $30 strap</strong> that only sends BPM, not RR → we refuse to invent rMSSD.  </li>
+<li>They’re in a gym full of BLE devices → slow pairing, flaky connect.</li>
+</ol>
+<p><strong>You</strong> already know “close other apps, wet electrodes, stay in the app.” Friends often don’t—so they think the app is broken when it’s the setup. That’s all “friends will break BLE” meant: <strong>support/education</strong>, not “BLE is wrong.”</p>
+<p>Docs updated in PRD/TECH to reflect the above (see changelog).</p></article><article class="doc" id="doc-readme"><h1 id="recoverydeck">RecoveryDeck</h1>
+<p>Privacy-first <strong>iOS</strong> morning recovery check-in (personal): forced questionnaire → Polar H10 <strong>rMSSD</strong> (Elite HRV replacement) → <strong>orthostatic</strong> test → local history + on-device analytics.</p>
+<p>Formerly working title: “Morning Readiness.”</p>
+<h2 id="documents">Documents</h2>
+<div class="table-wrap"><table><thead><tr><th>Doc</th><th>Purpose</th></tr></thead><tbody><tr><td><strong><a href="./docs/index.html"><code>docs/index.html</code></a></strong></td><td><strong>Easy reading site</strong> (open in browser)</td></tr><tr><td><a href="./PRD.md"><code>PRD.md</code></a></td><td>Product requirements</td></tr><tr><td><a href="./TECH_SPEC.md"><code>TECH_SPEC.md</code></a></td><td>Engineering</td></tr><tr><td><a href="./REVIEW_NOTES_RESPONSE.md"><code>REVIEW_NOTES_RESPONSE.md</code></a></td><td>Answers to review notes (research + decisions)</td></tr></tbody></table></div>
+<pre class="code"><code>open docs/index.html</code></pre>
+<h2 id="status">Status</h2>
+<p><strong>Docs only</strong> — not implemented until approved and build is requested.</p>
+<h2 id="hardware">Hardware</h2>
+<ul>
+<li>iPhone  </li>
+<li>Polar H10  </li>
+</ul>
+<h2 id="privacy">Privacy</h2>
+<p>Local-first; optional display name; <strong>no</strong> third-party cloud analytics SDK; <strong>yes</strong> first-party on-device analytics.</p></article><p class="footer-note">Regenerated from PRD / TECH / REVIEW / README</p></main></div>
+<script>
+const keys=['prd', 'tech', 'notes', 'readme'];
+const buttons=document.querySelectorAll('.nav-docs button');
+const docs=Object.fromEntries(keys.map(k=>[k,document.getElementById('doc-'+k)]));
+const tocs=Object.fromEntries(keys.map(k=>[k,document.getElementById('toc-'+k)]));
+function show(name){buttons.forEach(b=>b.classList.toggle('active',b.dataset.doc===name));keys.forEach(k=>{docs[k].classList.toggle('active',k===name);tocs[k].style.display=k===name?'':'none';});window.scrollTo({top:0});}
+buttons.forEach(b=>b.addEventListener('click',()=>show(b.dataset.doc)));
+document.querySelectorAll('[data-doc-link]').forEach(a=>a.addEventListener('click',()=>{const t=a.closest('.toc');if(t)show(t.id.replace('toc-',''));}));
+const p=new URLSearchParams(location.search); if(p.get('doc')&&docs[p.get('doc')]) show(p.get('doc'));
+</script></body></html>

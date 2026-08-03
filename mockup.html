@@ -1,0 +1,885 @@
+<!doctype html>
+<title>RecoveryDeck — Flow Mock</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root{
+    --bg:#eef1f6;
+    --page-edge:#e2e6ee;
+    --surface:#ffffff;
+    --surface-sunk:#e7eaf1;
+    --ink:#171b26;
+    --ink-muted:#5b6273;
+    --ink-faint:#8a90a0;
+    --hair:rgba(23,27,38,0.10);
+    --accent:#256abf;
+    --accent-strong:#184f95;
+    --accent-tint:#dce8f7;
+    --good:#0ca30c;
+    --warn:#c9860a;
+    --crit:#d03b3b;
+    --good-tint:#e2f4e0;
+    --warn-tint:#fbedd3;
+    --crit-tint:#f8e0dd;
+    --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      --bg:#0c0e13;
+      --page-edge:#0c0e13;
+      --surface:#1a1e28;
+      --surface-sunk:#12151d;
+      --ink:#eceef3;
+      --ink-muted:#9aa1b4;
+      --ink-faint:#6c7386;
+      --hair:rgba(255,255,255,0.09);
+      --accent:#5f9bdd;
+      --accent-strong:#86b6ef;
+      --accent-tint:#1c2d40;
+      --good:#0ca30c;
+      --warn:#fab219;
+      --crit:#e2776a;
+      --good-tint:#153018;
+      --warn-tint:#332608;
+      --crit-tint:#341a17;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c0e13;
+    --page-edge:#0c0e13;
+    --surface:#1a1e28;
+    --surface-sunk:#12151d;
+    --ink:#eceef3;
+    --ink-muted:#9aa1b4;
+    --ink-faint:#6c7386;
+    --hair:rgba(255,255,255,0.09);
+    --accent:#5f9bdd;
+    --accent-strong:#86b6ef;
+    --accent-tint:#1c2d40;
+    --good:#0ca30c;
+    --warn:#fab219;
+    --crit:#e2776a;
+    --good-tint:#153018;
+    --warn-tint:#332608;
+    --crit-tint:#341a17;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f6; --page-edge:#e2e6ee; --surface:#ffffff; --surface-sunk:#e7eaf1;
+    --ink:#171b26; --ink-muted:#5b6273; --ink-faint:#8a90a0; --hair:rgba(23,27,38,0.10);
+    --accent:#256abf; --accent-strong:#184f95; --accent-tint:#dce8f7;
+    --good:#0ca30c; --warn:#c9860a; --crit:#d03b3b;
+    --good-tint:#e2f4e0; --warn-tint:#fbedd3; --crit-tint:#f8e0dd;
+    color-scheme: light;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; min-height:100vh;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, color-mix(in oklab, var(--accent) 7%, transparent), transparent),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    display:flex;
+    justify-content:center;
+    padding:32px 20px 64px;
+  }
+  .stage{
+    width:100%;
+    max-width:1180px;
+    display:grid;
+    grid-template-columns: 240px minmax(0,1fr);
+    gap:40px;
+    align-items:start;
+  }
+  @media (max-width: 860px){
+    .stage{ grid-template-columns: 1fr; }
+    .rail{ order:2; }
+    .frame-col{ order:1; }
+  }
+
+  /* ---------- Rail (real sequence — the morning ritual has a true order) ---------- */
+  .rail{
+    position:sticky; top:32px;
+    display:flex; flex-direction:column; gap:2px;
+    background:var(--surface);
+    border:1px solid var(--hair);
+    border-radius:14px;
+    padding:8px;
+  }
+  .rail-title{
+    font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--ink-faint); padding:10px 12px 8px;
+  }
+  .rail-btn{
+    display:flex; align-items:center; gap:10px;
+    text-align:left;
+    border:none; background:transparent; color:var(--ink);
+    font-family:var(--font-ui); font-size:14px; font-weight:500;
+    padding:10px 12px; border-radius:9px; cursor:pointer;
+  }
+  .rail-btn .n{
+    font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+    font-size:11px; color:var(--ink-faint); width:16px; flex:none;
+  }
+  .rail-btn:hover{ background:var(--surface-sunk); }
+  .rail-btn.active{ background:var(--accent-tint); color:var(--accent-strong); }
+  .rail-btn.active .n{ color:var(--accent-strong); }
+  .rail-btn.locked{ color:var(--ink-faint); cursor:not-allowed; }
+  .rail-btn.locked:hover{ background:transparent; }
+  .rail-btn .lock{ margin-left:auto; font-size:12px; color:var(--ink-faint); }
+  .rail-foot{
+    margin-top:8px; padding:10px 12px 6px; border-top:1px solid var(--hair);
+    font-size:11.5px; color:var(--ink-faint); line-height:1.5;
+  }
+  .theme-toggle{
+    margin:6px 4px 2px; display:flex; gap:4px; background:var(--surface-sunk);
+    border-radius:8px; padding:3px;
+  }
+  .theme-toggle button{
+    flex:1; border:none; background:transparent; color:var(--ink-muted);
+    font-family:var(--font-ui); font-size:12px; padding:6px 0; border-radius:6px; cursor:pointer;
+  }
+  .theme-toggle button.on{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px var(--hair); }
+
+  /* ---------- Phone frame ---------- */
+  .frame-col{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .toast{
+    font-size:13px; color:var(--crit); background:var(--crit-tint);
+    border-radius:8px; padding:8px 14px; opacity:0; transform:translateY(-4px);
+    transition:opacity .18s, transform .18s; pointer-events:none;
+  }
+  .toast.show{ opacity:1; transform:translateY(0); }
+
+  .phone{
+    width:380px; height:800px;
+    background:linear-gradient(180deg, #2b2f3a, #1a1c22);
+    border-radius:54px;
+    padding:14px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.45), 0 2px 0 rgba(255,255,255,0.04) inset;
+    position:relative;
+    flex:none;
+  }
+  .screen{
+    position:relative;
+    width:100%; height:100%;
+    background:var(--bg);
+    border-radius:40px;
+    overflow:hidden;
+    display:flex; flex-direction:column;
+  }
+  .island{
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:100px; height:28px; background:#000; border-radius:20px; z-index:20;
+  }
+  .statusbar{ height:46px; flex:none; }
+  .content{
+    flex:1; overflow-y:auto; padding:14px 18px 24px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .content::-webkit-scrollbar{ width:0; }
+
+  h1,h2,h3{ text-wrap:balance; margin:0; }
+  .h-page{ font-size:26px; font-weight:700; letter-spacing:-.01em; }
+  .h-section{ font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); margin:22px 0 10px; }
+  .h-section:first-child{ margin-top:2px; }
+  p.lede{ color:var(--ink-muted); font-size:14.5px; line-height:1.5; margin:6px 0 0; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--hair); border-radius:16px;
+    padding:16px; margin-bottom:12px;
+  }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:14px 18px; border-radius:14px; border:none;
+    font-family:var(--font-ui); font-size:15.5px; font-weight:600; cursor:pointer;
+    background:var(--accent); color:#fff;
+  }
+  .btn:active{ transform:scale(.985); }
+  .btn.secondary{ background:var(--surface-sunk); color:var(--ink); }
+  .btn.ghost{ background:transparent; color:var(--accent); padding:10px; width:auto; }
+  .btn.small{ padding:9px 14px; font-size:13.5px; width:auto; }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn.danger{ background:var(--crit-tint); color:var(--crit); }
+
+  .row{ display:flex; align-items:center; gap:10px; }
+  .between{ justify-content:space-between; }
+  .stack{ display:flex; flex-direction:column; gap:10px; }
+
+  /* Sliders */
+  .field{ margin-bottom:18px; }
+  .field-label{ display:flex; justify-content:space-between; font-size:14.5px; font-weight:600; margin-bottom:4px; }
+  .field-label .val{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--accent); }
+  .field-ends{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-faint); margin-top:3px; }
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:6px; border-radius:3px;
+    background:var(--surface-sunk); outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+    background:var(--accent); border:3px solid var(--surface); box-shadow:0 1px 4px var(--hair); cursor:pointer;
+    margin-top:-8px;
+  }
+  input[type=range].touched::-webkit-slider-runnable-track{ background:var(--accent-tint); }
+
+  .disclosure{ border-top:1px solid var(--hair); padding-top:12px; margin-top:6px; }
+  .disclosure summary{ cursor:pointer; font-size:13.5px; font-weight:600; color:var(--accent); list-style:none; }
+  .disclosure summary::-webkit-details-marker{ display:none; }
+  .disclosure summary::before{ content:"+ "; }
+  .disclosure[open] summary::before{ content:"– "; }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    padding:8px 13px; border-radius:20px; border:1px solid var(--hair); background:var(--surface);
+    font-size:13px; color:var(--ink-muted); cursor:pointer;
+  }
+  .chip.on{ background:var(--accent-tint); color:var(--accent-strong); border-color:transparent; }
+
+  textarea{
+    width:100%; border:1px solid var(--hair); border-radius:12px; background:var(--surface);
+    color:var(--ink); font-family:var(--font-ui); font-size:14px; padding:10px 12px; resize:none; min-height:64px;
+  }
+  select, input[type=text], input[type=number], input[type=time]{
+    border:1px solid var(--hair); border-radius:10px; background:var(--surface); color:var(--ink);
+    font-family:var(--font-ui); font-size:14px; padding:8px 10px;
+  }
+
+  .flag{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px 4px 8px; border-radius:20px; font-size:12.5px; font-weight:700; }
+  .flag .dot{ width:8px; height:8px; border-radius:50%; }
+  .flag.good{ background:var(--good-tint); color:color-mix(in oklab, var(--good) 70%, var(--ink)); }
+  .flag.good .dot{ background:var(--good); }
+  .flag.warn{ background:var(--warn-tint); color:color-mix(in oklab, var(--warn) 55%, var(--ink)); }
+  .flag.warn .dot{ background:var(--warn); }
+  .flag.crit{ background:var(--crit-tint); color:color-mix(in oklab, var(--crit) 65%, var(--ink)); }
+  .flag.crit .dot{ background:var(--crit); }
+
+  .metric{
+    display:flex; flex-direction:column; gap:2px; padding:14px; background:var(--surface-sunk);
+    border-radius:14px; flex:1;
+  }
+  .metric .k{ font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); }
+  .metric .v{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:22px; font-weight:600; }
+  .metric .u{ font-size:12px; color:var(--ink-muted); font-weight:400; margin-left:3px; }
+
+  .lockcard{
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px;
+    padding:40px 20px; color:var(--ink-muted);
+  }
+  .lockcard .glyph{ font-size:30px; }
+
+  .phase-track{ display:flex; gap:4px; margin-bottom:16px; }
+  .phase-track i{ flex:1; height:4px; border-radius:2px; background:var(--surface-sunk); }
+  .phase-track i.done{ background:var(--accent); }
+  .phase-track i.active{ background:var(--accent-tint); position:relative; overflow:hidden; }
+  .phase-track i.active::after{
+    content:""; position:absolute; inset:0; background:var(--accent);
+    animation:fill var(--dur,3s) linear forwards;
+  }
+  @keyframes fill{ from{ width:0; } to{ width:100%; } }
+  .phase-track i.active::after{ width:0; }
+
+  .day-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--hair); }
+  .day-row:last-child{ border-bottom:none; }
+  .day-row .date{ width:70px; font-size:13px; color:var(--ink-muted); flex:none; }
+  .day-row .nums{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-muted); flex:1; }
+  .day-row .nums b{ color:var(--ink); font-weight:600; }
+
+  .sparkline-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .spark-card{ background:var(--surface); border:1px solid var(--hair); border-radius:14px; padding:12px; }
+  .spark-card .k{ font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); }
+  .spark-card svg{ width:100%; height:44px; display:block; margin-top:4px; }
+  .spark-card .end{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:15px; font-weight:600; margin-top:2px; }
+
+  .disc{ font-size:11.5px; line-height:1.5; color:var(--ink-faint); margin-top:18px; }
+
+  .toggle{
+    width:44px; height:26px; border-radius:14px; background:var(--surface-sunk); position:relative; cursor:pointer; flex:none; border:none;
+  }
+  .toggle::after{ content:""; position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%; background:var(--surface); box-shadow:0 1px 3px var(--hair); transition:transform .15s; }
+  .toggle.on{ background:var(--accent); }
+  .toggle.on::after{ transform:translateX(18px); background:#fff; }
+
+  .settings-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 2px; border-bottom:1px solid var(--hair); }
+  .settings-row:last-child{ border-bottom:none; }
+  .settings-row .label{ font-size:14.5px; }
+  .settings-row .sub{ font-size:12px; color:var(--ink-faint); }
+</style>
+
+<div class="stage">
+
+  <!-- ============ RAIL ============ -->
+  <nav class="rail" id="rail">
+    <div class="rail-title">Morning ritual</div>
+    <!-- buttons injected by JS -->
+  </nav>
+
+  <!-- ============ PHONE ============ -->
+  <div class="frame-col">
+    <div class="toast" id="toast"></div>
+    <div class="phone">
+      <div class="screen">
+        <div class="island"></div>
+        <div class="statusbar"></div>
+        <div class="content" id="content"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SCREENS = [
+  { id:'onboarding', label:'Onboarding' },
+  { id:'questionnaire', label:'Questionnaire' },
+  { id:'today', label:'Today', locks:'quest' },
+  { id:'measure', label:'Measurement', locks:'quest' },
+  { id:'results', label:'Results', locks:'measure' },
+  { id:'history', label:'History', locks:'quest' },
+  { id:'settings', label:'Settings' },
+];
+
+const state = {
+  screen:'onboarding',
+  theme:'auto',
+  displayName:'',
+  questDone:false,
+  measureDone:false,
+  touched:new Set(),
+  scores:{fatigue:4,mood:4,soreness:4,stress:4,sleep:4},
+  caffeineOpen:false,
+  caffeineTime:'', caffeineAmt:'', mealTime:'',
+  habitChipsEnabled:true,
+  habits:{alcohol:false,hard:false,travel:false,sick:false},
+  notes:'',
+  measurePhase:-1, // -1 not started
+  orthoSkipped:false,
+  results:null,
+  baselineWindow:7,
+  notifTime:'06:30',
+};
+
+const PHASES = [
+  {key:'settle', label:'Settle', instr:'Lie still, breathe normally.', dur:2200, real:'15 s'},
+  {key:'rmssd', label:'rMSSD', instr:'Stay lying — recording RR intervals.', dur:3200, real:'~60 s'},
+  {key:'lying', label:'Lying HR', instr:'Still lying — recording resting HR.', dur:1800, real:'30 s'},
+  {key:'cue', label:'Stand up now', instr:'Haptic cue — rise now.', dur:900, real:'3 s'},
+  {key:'standing', label:'Standing', instr:'Stand still, let HR settle.', dur:2200, real:'60 s'},
+];
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove('show'), 1900);
+}
+
+function locked(screenDef){
+  if(screenDef.locks==='quest') return !state.questDone;
+  if(screenDef.locks==='measure') return !state.measureDone;
+  return false;
+}
+
+function go(id){
+  const def = SCREENS.find(s=>s.id===id);
+  if(def && locked(def)){
+    toast(def.locks==='quest'
+      ? 'Locked — finish today’s questionnaire first'
+      : 'Locked — take today’s measurement first');
+    return;
+  }
+  state.screen = id;
+  render();
+}
+
+function renderRail(){
+  const rail = document.getElementById('rail');
+  rail.innerHTML = '';
+  const title = document.createElement('div');
+  title.className='rail-title'; title.textContent='Morning ritual';
+  rail.appendChild(title);
+  SCREENS.forEach((s,i)=>{
+    const btn = document.createElement('button');
+    const isLocked = locked(s);
+    btn.className = 'rail-btn' + (state.screen===s.id?' active':'') + (isLocked?' locked':'');
+    btn.innerHTML = `<span class="n">${String(i+1).padStart(2,'0')}</span><span>${s.label}</span>` + (isLocked?'<span class="lock">🔒</span>':'');
+    btn.onclick = ()=>go(s.id);
+    rail.appendChild(btn);
+  });
+  const toggleWrap = document.createElement('div');
+  toggleWrap.className='theme-toggle';
+  toggleWrap.innerHTML = `
+    <button data-t="auto">Auto</button>
+    <button data-t="light">Light</button>
+    <button data-t="dark">Dark</button>`;
+  [...toggleWrap.children].forEach(b=>{
+    if(b.dataset.t===state.theme) b.classList.add('on');
+    b.onclick = ()=>{ state.theme=b.dataset.t; applyTheme(); renderRail(); };
+  });
+  rail.appendChild(toggleWrap);
+  const foot = document.createElement('div');
+  foot.className='rail-foot';
+  foot.textContent = 'Interactive mock of the PRD flow — gating rules (§6.2) are live: locked screens really are unreachable until the step before is done.';
+  rail.appendChild(foot);
+}
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', state.theme==='auto' ? '' : state.theme);
+  if(state.theme==='auto') document.documentElement.removeAttribute('data-theme');
+}
+
+function flagFor(z){
+  // z = mock standard deviations from 60-day mean
+  if(Math.abs(z) <= 1) return {cls:'good', word:'Green'};
+  if(Math.abs(z) <= 1.5) return {cls:'warn', word:'Yellow'};
+  return {cls:'crit', word:'Red'};
+}
+
+function sparkPath(vals, w, h){
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = (max-min)||1;
+  const pts = vals.map((v,i)=>{
+    const x = (i/(vals.length-1))*w;
+    const y = h - ((v-min)/range)*h;
+    return [x,y];
+  });
+  return pts.map((p,i)=> (i===0?'M':'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+}
+
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function seriesFor(key, n){
+  const rnd = mulberry32(key.length*97 + n);
+  const base = {rmssd:52, rhr:50, gap:24, subj:5}[key];
+  const spread = {rmssd:9, rhr:3, gap:5, subj:0.8}[key];
+  let v = base, out=[];
+  for(let i=0;i<n;i++){ v += (rnd()-0.5)*spread; out.push(Math.round(v*10)/10); }
+  return out;
+}
+
+/* ---------------- SCREEN RENDERERS ---------------- */
+
+function screenOnboarding(){
+  return `
+    <div class="h-page">Welcome to RecoveryDeck</div>
+    <p class="lede">A private morning ritual: questionnaire first, then a ~3 minute Polar H10 session for rMSSD and orthostatic HR. Nothing leaves your phone.</p>
+
+    <div class="h-section">What it replaces</div>
+    <div class="card stack">
+      <div class="row between"><span>Elite HRV (rMSSD)</span><span class="flag good"><span class="dot"></span>In-app</span></div>
+      <div class="row between"><span>Orthostatic test</span><span class="flag good"><span class="dot"></span>Guided</span></div>
+      <div class="row between"><span>Commercial readiness score</span><span class="flag crit"><span class="dot"></span>Not used</span></div>
+    </div>
+
+    <div class="h-section">Before you start</div>
+    <div class="card">
+      <p style="margin:0 0 10px;font-size:13.5px;color:var(--ink-muted);line-height:1.5;">Requires a Polar H10 over Bluetooth. Not a medical device — for personal training journaling only. Stop if lightheaded during standing.</p>
+      <div class="field" style="margin-bottom:0;">
+        <div class="field-label"><span>Display name <span style="font-weight:400;color:var(--ink-faint);">(optional)</span></span></div>
+        <input type="text" id="ob-name" placeholder="For morning greetings only" value="${state.displayName}" style="width:100%;margin-top:6px;">
+      </div>
+    </div>
+
+    <div class="h-section">Notifications</div>
+    <div class="card row between">
+      <div>
+        <div style="font-size:14.5px;">Daily reminder</div>
+        <div style="font-size:12px;color:var(--ink-faint);">06:30 · "Questionnaire first — then H10."</div>
+      </div>
+      <button class="toggle on" disabled></button>
+    </div>
+
+    <button class="btn" style="margin-top:8px;" onclick="onboardingContinue()">Get started</button>
+  `;
+}
+function onboardingContinue(){
+  state.displayName = document.getElementById('ob-name').value.trim();
+  go('questionnaire');
+}
+
+function slider(key, label, lo, hi){
+  const touched = state.touched.has(key);
+  return `
+    <div class="field">
+      <div class="field-label"><span>${label}</span><span class="val">${state.scores[key]}</span></div>
+      <input type="range" min="1" max="7" step="1" value="${state.scores[key]}" class="${touched?'touched':''}"
+        oninput="updateScore('${key}', this.value)">
+      <div class="field-ends"><span>${lo}</span><span>${hi}</span></div>
+    </div>`;
+}
+function updateScore(key, val){
+  state.scores[key] = Number(val);
+  state.touched.add(key);
+  renderQuestionnaireInPlace();
+}
+function renderQuestionnaireInPlace(){
+  // cheap re-render that preserves scroll position within questionnaire
+  const scroller = document.getElementById('content');
+  const y = scroller.scrollTop;
+  scroller.innerHTML = screenQuestionnaire();
+  scroller.scrollTop = y;
+}
+
+function screenQuestionnaire(){
+  const required = ['fatigue','mood','soreness','stress','sleep'];
+  const complete = required.every(k=>state.touched.has(k));
+  return `
+    <div class="h-page">Morning check-in</div>
+    <p class="lede">${state.questDone ? 'Editing today’s answers — overwrites what you already submitted.' : 'Required before measurements or history unlock.'}</p>
+
+    <div class="h-section">How are you feeling</div>
+    <div class="card">
+      ${slider('fatigue','Fatigue','Exhausted','Fresh')}
+      ${slider('mood','Mood','Very low','Great')}
+      ${slider('soreness','Soreness / heavy legs','Very sore','None')}
+      ${slider('stress','Life stress','Very high','Very low')}
+    </div>
+
+    <div class="h-section">Sleep</div>
+    <div class="card">
+      ${slider('sleep','Sleep quality (how it felt)','Terrible','Excellent')}
+    </div>
+
+    <details class="disclosure card" ${state.caffeineOpen?'open':''} ontoggle="state.caffeineOpen=this.open">
+      <summary>Caffeine &amp; last meal (optional)</summary>
+      <div class="stack" style="margin-top:12px;">
+        <div class="row between"><span style="font-size:13.5px;">Last caffeine</span><input type="time" value="${state.caffeineTime}" onchange="state.caffeineTime=this.value"></div>
+        <div class="row between"><span style="font-size:13.5px;">Amount</span><input type="text" placeholder="e.g. 120 mg" value="${state.caffeineAmt}" onchange="state.caffeineAmt=this.value" style="width:110px;"></div>
+        <div class="row between"><span style="font-size:13.5px;">Last meal</span><input type="time" value="${state.mealTime}" onchange="state.mealTime=this.value"></div>
+      </div>
+    </details>
+
+    ${state.habitChipsEnabled ? `
+    <div class="h-section">Last night</div>
+    <div class="card">
+      <div class="chip-row">
+        ${habitChip('alcohol','Alcohol')}
+        ${habitChip('hard','Hard training')}
+        ${habitChip('travel','Travel / late night')}
+        ${habitChip('sick','Feeling sick')}
+      </div>
+    </div>` : ''}
+
+    <div class="h-section">Notes</div>
+    <div class="card">
+      <textarea placeholder="Anything else worth remembering…" onchange="state.notes=this.value">${state.notes}</textarea>
+    </div>
+
+    <button class="btn" ${complete?'':'disabled'} onclick="submitQuestionnaire()">
+      ${state.questDone ? 'Save changes' : 'Submit'}
+    </button>
+    ${!complete ? '<p style="text-align:center;font-size:12px;color:var(--ink-faint);margin-top:8px;">Move all five sliders above to enable submit</p>' : ''}
+  `;
+}
+function habitChip(key,label){
+  const on = state.habits[key];
+  return `<button class="chip ${on?'on':''}" onclick="toggleHabit('${key}')">${label}</button>`;
+}
+function toggleHabit(key){ state.habits[key]=!state.habits[key]; renderQuestionnaireInPlace(); }
+function submitQuestionnaire(){
+  const wasDone = state.questDone;
+  state.questDone = true;
+  toast(wasDone ? 'Answers updated' : 'Questionnaire submitted');
+  go('today');
+}
+
+function screenToday(){
+  const greeting = state.displayName ? `Good morning, ${state.displayName}` : 'Good morning';
+  return `
+    <div class="h-page">${greeting}</div>
+    <p class="lede">${new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'})}</p>
+
+    <div class="h-section">Questionnaire</div>
+    <div class="card row between">
+      <span class="flag good"><span class="dot"></span>Submitted</span>
+      <button class="btn ghost small" onclick="go('questionnaire')">Edit</button>
+    </div>
+
+    <div class="h-section">Measurement</div>
+    ${state.measureDone ? `
+      <div class="card stack">
+        <div class="row" style="gap:8px;">
+          <div class="metric"><div class="k">rMSSD</div><div class="v">${state.results.rmssd}<span class="u">ms</span></div></div>
+          <div class="metric"><div class="k">RHR</div><div class="v">${state.results.rhr}<span class="u">bpm</span></div></div>
+        </div>
+        <button class="btn secondary" onclick="go('results')">View full results</button>
+      </div>
+    ` : `
+      <div class="card">
+        <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-muted);">Combined session: settle → rMSSD → lying HR → stand. About 3 minutes.</p>
+        <button class="btn" onclick="startMeasure()">Start morning measurement</button>
+      </div>
+    `}
+
+    <div class="h-section">History</div>
+    <div class="card row between">
+      <span style="font-size:14px;color:var(--ink-muted);">14–28 day trends, unlocked</span>
+      <button class="btn ghost small" onclick="go('history')">Open →</button>
+    </div>
+  `;
+}
+function startMeasure(){
+  state.measurePhase = -1;
+  state.orthoSkipped = false;
+  go('measure');
+  runPhase(0);
+}
+
+function screenMeasure(){
+  const p = state.measurePhase;
+  const track = PHASES.map((ph,i)=>{
+    let cls = '';
+    if(i < p) cls='done'; else if(i===p) cls='active';
+    return `<i class="${cls}" style="${i===p?`--dur:${ph.dur}ms`:''}"></i>`;
+  }).join('');
+  const cur = PHASES[p];
+  const preSettle = p < 0;
+  const showSkip = p===1; // during rMSSD, allow "skip orthostatic today" per O1
+  const finished = p >= PHASES.length;
+
+  return `
+    <div class="h-page">Morning session</div>
+    <p class="lede">${preSettle ? 'Connect your H10, then lie down.' : finished ? 'Complete.' : cur.instr}</p>
+    <div class="phase-track" style="margin-top:20px;">${track || PHASES.map(()=>`<i></i>`).join('')}</div>
+
+    ${preSettle ? `
+      <div class="card" style="text-align:center;padding:32px 20px;">
+        <div style="font-size:34px;margin-bottom:8px;">📡</div>
+        <div style="font-weight:600;margin-bottom:4px;">H10 connected</div>
+        <div style="font-size:13px;color:var(--ink-faint);">72 bpm · signal strong</div>
+      </div>
+      <button class="btn" onclick="runPhase(0)">Begin</button>
+    ` : finished ? `
+      <div class="card" style="text-align:center;padding:28px 20px;">
+        <div style="font-size:34px;margin-bottom:6px;">✅</div>
+        <div style="font-weight:600;">Session saved</div>
+      </div>
+      <button class="btn" onclick="go('results')">See results</button>
+    ` : `
+      <div class="card" style="text-align:center;padding:30px 20px;">
+        <div class="h-section" style="margin:0 0 6px;">${cur.label} · ${cur.real}</div>
+        <div style="font-size:15px;">${cur.instr}</div>
+      </div>
+      <div class="row" style="gap:8px;">
+        ${showSkip ? `<button class="btn secondary" onclick="skipOrtho()">Skip orthostatic today</button>` : ''}
+        <button class="btn ghost small" style="margin-left:auto;" onclick="advancePhase()">Skip phase (demo) →</button>
+      </div>
+    `}
+  `;
+}
+let phaseTimer=null;
+function runPhase(i){
+  state.measurePhase = i;
+  render();
+  clearTimeout(phaseTimer);
+  if(i < PHASES.length){
+    phaseTimer = setTimeout(()=>advancePhase(), PHASES[i].dur);
+  } else {
+    finishMeasure();
+  }
+}
+function advancePhase(){
+  clearTimeout(phaseTimer);
+  const next = state.measurePhase + 1;
+  if(next >= PHASES.length){ finishMeasure(); }
+  else runPhase(next);
+}
+function skipOrtho(){
+  clearTimeout(phaseTimer);
+  state.orthoSkipped = true;
+  state.measurePhase = PHASES.length;
+  finishMeasure();
+}
+function finishMeasure(){
+  state.measurePhase = PHASES.length;
+  const rnd = Math.random;
+  const rmssd = Math.round(38 + rnd()*30);
+  const rhr = Math.round(46 + rnd()*10);
+  const standing = state.orthoSkipped ? null : Math.round(rhr + 16 + rnd()*14);
+  const peak = state.orthoSkipped ? null : Math.round((standing||0) + 3 + rnd()*8);
+  state.results = {
+    rmssd, rhr, standing, peak,
+    gapAvg: standing!==null ? standing-rhr : null,
+    gapPeak: peak!==null ? peak-rhr : null,
+    rmssdZ: (rnd()-0.5)*3,
+    rhrZ: (rnd()-0.5)*3,
+    gapZ: (rnd()-0.5)*3,
+  };
+  state.measureDone = true;
+  render();
+}
+
+function screenResults(){
+  const r = state.results;
+  const fR = flagFor(r.rmssdZ), fH = flagFor(r.rhrZ), fG = r.gapPeak!==null ? flagFor(r.gapZ) : null;
+  const tip = (()=>{
+    if(fR.cls==='crit' && fH.cls!=='good') return 'Low rMSSD and elevated RHR — bias easy today; avoid intensity.';
+    if(fR.cls!=='good' && state.scores.soreness<=2) return 'Heavy legs on top of an off HRV reading — respect muscular recovery even if numbers look borderline.';
+    if(fR.cls==='good' && fH.cls==='good') return 'Signals inside your normal range — cleared to load as planned.';
+    return 'Mixed signal — use subjective feel alongside these numbers, not in place of it.';
+  })();
+  return `
+    <div class="h-page">Today’s results</div>
+    <p class="lede">vs your personal 60-day mean · ±1 SD band</p>
+
+    <div class="row" style="gap:8px;margin-top:16px;">
+      <div class="metric"><div class="k">rMSSD</div><div class="v">${r.rmssd}<span class="u">ms</span></div></div>
+      <div class="metric"><div class="k">RHR (lying)</div><div class="v">${r.rhr}<span class="u">bpm</span></div></div>
+    </div>
+
+    <div class="h-section">Baseline check</div>
+    <div class="card stack">
+      <div class="row between"><span>rMSSD</span><span class="flag ${fR.cls}"><span class="dot"></span>${fR.word}</span></div>
+      <div class="row between"><span>RHR</span><span class="flag ${fH.cls}"><span class="dot"></span>${fH.word}</span></div>
+      ${fG ? `<div class="row between"><span>Orthostatic gap</span><span class="flag ${fG.cls}"><span class="dot"></span>${fG.word}</span></div>` : `<div class="row between"><span>Orthostatic gap</span><span style="color:var(--ink-faint);font-size:13px;">Skipped today</span></div>`}
+    </div>
+
+    ${r.gapPeak!==null ? `
+    <div class="h-section">Orthostatic</div>
+    <div class="card">
+      <div class="row" style="gap:8px;">
+        <div class="metric"><div class="k">Gap (peak)</div><div class="v">${r.gapPeak}<span class="u">bpm</span></div></div>
+        <div class="metric"><div class="k">Gap (avg)</div><div class="v">${r.gapAvg}<span class="u">bpm</span></div></div>
+      </div>
+    </div>` : ''}
+
+    <div class="h-section">What this might mean</div>
+    <div class="card">
+      <p style="margin:0;font-size:14px;line-height:1.55;">${tip}</p>
+    </div>
+
+    <p class="disc">Not a medical device or diagnosis. A training journaling aid only — never a substitute for how you actually feel.</p>
+  `;
+}
+
+function screenHistory(){
+  const n = 14;
+  const days = Array.from({length:n},(_,i)=>{
+    const d = new Date(); d.setDate(d.getDate()-(n-1-i));
+    return d;
+  });
+  const rmssd = seriesFor('rmssd', n);
+  const rhr = seriesFor('rhr', n);
+  const gap = seriesFor('gap', n);
+  const subj = seriesFor('subj', n);
+
+  const rows = days.map((d,i)=>{
+    const z = (rmssd[i]-52)/9;
+    const f = flagFor(z);
+    return `<div class="day-row">
+      <div class="date">${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div>
+      <div class="nums"><b>${rmssd[i]}</b>ms · <b>${rhr[i]}</b>bpm · gap <b>${gap[i]}</b></div>
+      <span class="flag ${f.cls}" style="padding:2px 8px 2px 6px;"><span class="dot" style="width:6px;height:6px;"></span>${f.word}</span>
+    </div>`;
+  }).reverse().join('');
+
+  function spark(vals, unit){
+    const w=140,h=40;
+    const path = sparkPath(vals,w,h);
+    const min=Math.min(...vals), max=Math.max(...vals);
+    const lastY = h - ((vals[vals.length-1]-min)/((max-min)||1))*h;
+    return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="${w}" cy="${lastY}" r="3.5" fill="var(--accent)"/>
+    </svg>
+    <div class="end">${vals[vals.length-1]}<span style="font-size:11px;color:var(--ink-faint);font-weight:400;"> ${unit}</span></div>`;
+  }
+
+  return `
+    <div class="h-page">History</div>
+    <p class="lede">Last ${n} days · baseline window ${state.baselineWindow}d</p>
+
+    <div class="h-section">Trends</div>
+    <div class="sparkline-grid">
+      <div class="spark-card"><div class="k">rMSSD</div>${spark(rmssd,'ms')}</div>
+      <div class="spark-card"><div class="k">RHR</div>${spark(rhr,'bpm')}</div>
+      <div class="spark-card"><div class="k">Gap (avg)</div>${spark(gap,'bpm')}</div>
+      <div class="spark-card"><div class="k">Subjective avg</div>${spark(subj,'/7')}</div>
+    </div>
+
+    <div class="h-section">Daily log</div>
+    <div class="card" style="padding:4px 16px;">${rows}</div>
+  `;
+}
+
+function screenSettings(){
+  return `
+    <div class="h-page">Settings</div>
+
+    <div class="h-section">Profile</div>
+    <div class="card">
+      <div class="settings-row">
+        <div><div class="label">Display name</div><div class="sub">Greetings only</div></div>
+        <input type="text" value="${state.displayName}" style="width:120px;" onchange="state.displayName=this.value">
+      </div>
+    </div>
+
+    <div class="h-section">Ritual</div>
+    <div class="card">
+      <div class="settings-row">
+        <div><div class="label">Notification time</div><div class="sub">"Questionnaire first — then H10."</div></div>
+        <input type="time" value="${state.notifTime}" onchange="state.notifTime=this.value">
+      </div>
+      <div class="settings-row">
+        <div><div class="label">Baseline window</div><div class="sub">Acute average length</div></div>
+        <select onchange="state.baselineWindow=Number(this.value)">
+          <option value="7" ${state.baselineWindow===7?'selected':''}>7 days</option>
+          <option value="14" ${state.baselineWindow===14?'selected':''}>14 days</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div><div class="label">Habit chips</div><div class="sub">Alcohol / hard training / travel / sick</div></div>
+        <button class="toggle ${state.habitChipsEnabled?'on':''}" onclick="toggleHabitChips(this)"></button>
+      </div>
+      <div class="settings-row">
+        <div><div class="label">Orthostatic</div><div class="sub">Always skippable with confirm (O1)</div></div>
+        <span style="font-size:12px;color:var(--ink-faint);">Locked</span>
+      </div>
+    </div>
+
+    <div class="h-section">Data</div>
+    <div class="card stack">
+      <button class="btn secondary" onclick="toast('Exported recoverydeck.json (demo)')">Export JSON / CSV</button>
+      <button class="btn secondary" onclick="toast('Adherence 86% · 0 quality fails this week (demo)')">Local analytics summary</button>
+      <button class="btn danger" onclick="toast('Would prompt: delete all data? (demo)')">Delete all data</button>
+    </div>
+
+    <div class="h-section">About</div>
+    <div class="card">
+      <p style="margin:0;font-size:12.5px;line-height:1.6;color:var(--ink-faint);">RecoveryDeck is not a medical device and is not for diagnosis or treatment — a personal training journal only. Consult a clinician before orthostatic testing if you have a heart condition or dizziness on standing.</p>
+    </div>
+  `;
+}
+function toggleHabitChips(btn){
+  state.habitChipsEnabled = !state.habitChipsEnabled;
+  btn.classList.toggle('on');
+}
+
+const RENDERERS = {
+  onboarding: screenOnboarding,
+  questionnaire: screenQuestionnaire,
+  today: screenToday,
+  measure: screenMeasure,
+  results: screenResults,
+  history: screenHistory,
+  settings: screenSettings,
+};
+
+function render(){
+  document.getElementById('content').innerHTML = RENDERERS[state.screen]();
+  document.getElementById('content').scrollTop = 0;
+  renderRail();
+}
+
+applyTheme();
+render();
+</script>

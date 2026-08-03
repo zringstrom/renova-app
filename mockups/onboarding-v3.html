@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Arc</title>
+<style>
+  :root{
+    --bg:#07090b;
+    --surface:#0f1417;
+    --surface-2:#131a1d;
+    --line:#1d262a;
+    --line-strong:#2a363b;
+    --ink:#eef2f2;
+    --ink-dim:#859293;
+    --ink-faint:#525f61;
+    --accent:#2fe6d6;
+    --accent-glow:rgba(47,230,214,0.35);
+    --warn:#ffb020;
+    --rounded: ui-rounded, "SF Pro Rounded", "Segoe UI Rounded", system-ui, sans-serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef4f3; --surface:#ffffff; --surface-2:#f2f7f6; --line:#d7e2e0; --line-strong:#bcccc9;
+    --ink:#0b1414; --ink-dim:#546363; --ink-faint:#8a9998; --accent:#0f8c7d; --accent-glow:rgba(15,140,125,0.18); --warn:#b5720a;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#eef4f3; --surface:#ffffff; --surface-2:#f2f7f6; --line:#d7e2e0; --line-strong:#bcccc9;
+      --ink:#0b1414; --ink-dim:#546363; --ink-faint:#8a9998; --accent:#0f8c7d; --accent-glow:rgba(15,140,125,0.18); --warn:#b5720a;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    padding:40px 16px 90px; -webkit-font-smoothing:antialiased;
+  }
+  .device{
+    width:100%; max-width:412px; background:var(--surface); border:1px solid var(--line);
+    border-radius:28px; overflow:hidden; box-shadow:0 30px 70px -25px rgba(0,0,0,0.55);
+  }
+  .top{padding:22px 24px 6px; display:flex; justify-content:space-between; align-items:center;}
+  .top-title{font-family:var(--rounded); font-size:15px; font-weight:700; letter-spacing:0.01em;}
+  .top-skip{font-size:12px; color:var(--ink-faint); background:none; border:none; cursor:pointer; font-family:var(--sans);}
+
+  .stage{position:relative; min-height:480px;}
+  .step{
+    padding:16px 28px 8px; display:none; flex-direction:column; align-items:center; text-align:center;
+  }
+  .step.active{display:flex;}
+
+  /* step 1 hero */
+  .arc-wrap{position:relative; width:200px; height:200px; margin:6px auto 18px;}
+  .arc-wrap svg{width:100%; height:100%; transform:rotate(-215deg);}
+  .arc-track{fill:none; stroke:var(--line-strong); stroke-width:12; stroke-linecap:round;}
+  .arc-fill{fill:none; stroke:var(--accent); stroke-width:12; stroke-linecap:round; stroke-dasharray:0 100; filter:drop-shadow(0 0 10px var(--accent-glow)); animation:sweep 1.6s cubic-bezier(.2,.8,.3,1) forwards .2s;}
+  @keyframes sweep{to{stroke-dasharray:70 100;}}
+  @media (prefers-reduced-motion: reduce){.arc-fill{animation:none; stroke-dasharray:70 100;}}
+  .arc-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .arc-num{font-family:var(--rounded); font-size:15px; font-weight:700; color:var(--ink-faint); letter-spacing:0.06em; text-transform:uppercase;}
+  .arc-sub{font-family:var(--rounded); font-size:11px; color:var(--ink-faint); margin-top:4px;}
+
+  h2.step-title{font-family:var(--rounded); font-size:25px; font-weight:800; line-height:1.2; margin:0 0 10px; text-wrap:balance;}
+  p.step-body{font-size:14.5px; color:var(--ink-dim); line-height:1.6; margin:0; max-width:30ch;}
+
+  /* step 2 replaces list */
+  .replace-list{width:100%; display:flex; flex-direction:column; gap:10px; margin-top:8px; text-align:left;}
+  .replace-row{display:flex; align-items:center; gap:12px; padding:13px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:16px;}
+  .replace-ic{width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; font-weight:700;}
+  .replace-ic.on{background:var(--accent); color:#032420;}
+  .replace-ic.off{background:var(--surface); border:1px solid var(--line-strong); color:var(--ink-faint);}
+  .replace-text{flex:1;}
+  .replace-name{font-size:13.5px; color:var(--ink);}
+  .replace-tag{font-size:11px; color:var(--ink-faint);}
+
+  .warn-card{
+    width:100%; margin-top:14px; text-align:left; background:color-mix(in srgb, var(--warn) 10%, var(--surface-2));
+    border:1px solid color-mix(in srgb, var(--warn) 40%, var(--line)); border-radius:16px; padding:14px 16px;
+  }
+  .warn-head{display:flex; align-items:center; gap:7px; font-family:var(--rounded); font-size:12px; font-weight:700; color:var(--warn); margin-bottom:6px;}
+  .warn-card p{margin:0; font-size:12.5px; line-height:1.6; color:var(--ink-dim);}
+  .warn-card p + p{margin-top:6px;}
+
+  /* step 3 inputs */
+  .field{width:100%; text-align:left; margin-top:6px;}
+  .field label{display:block; font-size:11.5px; color:var(--ink-faint); margin-bottom:7px;}
+  .field input{
+    width:100%; background:var(--surface-2); border:1px solid var(--line-strong); border-radius:14px; color:var(--ink);
+    font-family:var(--sans); font-size:14.5px; padding:12px 14px; outline:none;
+  }
+  .field input:focus{border-color:var(--accent);}
+
+  .notify-card{width:100%; margin-top:18px; display:flex; justify-content:space-between; align-items:center; background:var(--surface-2); border:1px solid var(--line); border-radius:16px; padding:14px 16px; text-align:left;}
+  .notify-left{display:flex; flex-direction:column; gap:3px;}
+  .notify-name{font-size:13.5px; color:var(--ink); font-weight:600;}
+  .notify-meta{font-size:11.5px; color:var(--ink-faint);}
+  .icon-toggle{display:flex; gap:6px; flex-shrink:0;}
+  .icon-toggle button{
+    display:flex; align-items:center; gap:5px; padding:7px 12px; border-radius:20px; border:1px solid var(--line-strong);
+    background:var(--surface); color:var(--ink-faint); font-size:11.5px; font-weight:600; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .icon-toggle button.selected{background:var(--accent); border-color:var(--accent); color:#032420;}
+
+  .dots{display:flex; justify-content:center; gap:6px; padding:14px 0 8px;}
+  .dots span{width:6px; height:6px; border-radius:50%; background:var(--line-strong); transition:all .2s ease;}
+  .dots span.done{background:var(--accent); width:6px;}
+  .dots span.cur{background:var(--ink); width:16px; border-radius:3px;}
+
+  .nav-row{display:flex; justify-content:space-between; padding:6px 26px 24px; align-items:center;}
+  .nav-btn{background:none; border:1px solid var(--line-strong); color:var(--ink-dim); border-radius:20px; padding:11px 20px; font-size:13px; font-family:var(--sans); cursor:pointer;}
+  .nav-btn:disabled{opacity:0.3; cursor:default;}
+  .nav-btn.primary{background:var(--accent); border-color:var(--accent); color:#032420; font-weight:700; box-shadow:0 10px 26px -10px var(--accent-glow); flex:1; margin-left:14px;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="top">
+    <div class="top-title">RecoveryDeck</div>
+    <button class="top-skip" id="skip">Skip</button>
+  </div>
+
+  <div class="stage">
+    <div class="step active" data-step="0">
+      <div class="arc-wrap">
+        <svg viewBox="0 0 200 200">
+          <circle class="arc-track" cx="100" cy="100" r="86" pathLength="100" stroke-dasharray="70 100" />
+          <circle class="arc-fill" cx="100" cy="100" r="86" pathLength="100" />
+        </svg>
+        <div class="arc-center">
+          <div class="arc-num">RESTING HR</div>
+          <div class="arc-sub">read, not guessed</div>
+        </div>
+      </div>
+      <h2 class="step-title">Know your morning before you train through it.</h2>
+      <p class="step-body">One arc, every day: a quick check-in, then a guided Polar H10 read of rMSSD and orthostatic HR. About three minutes, entirely on your phone.</p>
+    </div>
+
+    <div class="step" data-step="1">
+      <h2 class="step-title" style="font-size:21px;">What this replaces</h2>
+      <div class="replace-list">
+        <div class="replace-row"><div class="replace-ic on">✓</div><div class="replace-text"><div class="replace-name">The 7-question morning check-in</div><div class="replace-tag">Built in</div></div></div>
+        <div class="replace-row"><div class="replace-ic on">✓</div><div class="replace-text"><div class="replace-name">rMSSD &amp; orthostatic HR test</div><div class="replace-tag">Guided via H10</div></div></div>
+        <div class="replace-row"><div class="replace-ic off">✕</div><div class="replace-text"><div class="replace-name">Any commercial readiness score</div><div class="replace-tag">Not used — nothing leaves your phone</div></div></div>
+      </div>
+      <div class="warn-card">
+        <div class="warn-head">⚠ Before you start</div>
+        <p>Requires a Polar H10 over Bluetooth. Not a medical device — for personal training journaling only.</p>
+        <p>Consult a clinician before orthostatic testing if you have a heart condition or dizziness on standing. Stop if you feel lightheaded.</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="2">
+      <h2 class="step-title" style="font-size:21px;">A couple of settings</h2>
+      <div class="field">
+        <label>Display name — optional, for greetings only</label>
+        <input type="text" id="ob-name" placeholder="What should we call you?" />
+      </div>
+      <div class="notify-card">
+        <div class="notify-left">
+          <div class="notify-name">Daily reminder · 06:30</div>
+          <div class="notify-meta">"Questionnaire first — then H10."</div>
+        </div>
+        <div class="icon-toggle" data-toggle>
+          <button data-val="off">Off</button>
+          <button data-val="on" class="selected">On</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="nav-row">
+    <button class="nav-btn" id="prev">Back</button>
+    <button class="nav-btn primary" id="next">Continue</button>
+  </div>
+</div>
+
+<script>
+  const steps = document.querySelectorAll('.step');
+  const total = steps.length;
+  let cur = 0;
+
+  const dotsEl = document.getElementById('dots');
+  steps.forEach(() => {
+    const d = document.createElement('span');
+    dotsEl.appendChild(d);
+  });
+
+  function render(){
+    steps.forEach((s, i) => s.classList.toggle('active', i === cur));
+    document.getElementById('prev').disabled = cur === 0;
+    const next = document.getElementById('next');
+    next.textContent = cur === total - 1 ? 'Begin morning scan' : 'Continue';
+    dotsEl.querySelectorAll('span').forEach((d, i) => {
+      d.classList.remove('done','cur');
+      if(i === cur) d.classList.add('cur');
+      else if(i < cur) d.classList.add('done');
+    });
+  }
+
+  document.getElementById('prev').addEventListener('click', () => { if(cur>0){cur--; render();} });
+  document.getElementById('next').addEventListener('click', () => {
+    if(cur < total - 1){ cur++; render(); }
+    else { alert('Mockup only — this would begin the readiness scan.'); }
+  });
+  document.getElementById('skip').addEventListener('click', () => { cur = total - 1; render(); });
+
+  document.querySelectorAll('[data-toggle]').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+  });
+
+  render();
+</script>
+</body>
+</html>

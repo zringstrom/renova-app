@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Control Grid (Today)</title>
+<style>
+  :root{
+    --bg:#e2e2de;
+    --surface:#fbfbf9;
+    --surface-2:#f0f0ec;
+    --line:#d2d2cb;
+    --line-strong:#adada2;
+    --ink:#0a0a08;
+    --ink-dim:#5f5f57;
+    --ink-faint:#8f8f84;
+    --accent:#e8331b;
+    --accent-2:#1b6e5c;
+    --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --grot: -apple-system, "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --bg:#151513; --surface:#1c1c19; --surface-2:#232320; --line:#33332e; --line-strong:#48483f;
+    --ink:#f2f2ec; --ink-dim:#adada2; --ink-faint:#75756a; --accent:#ff5a3d; --accent-2:#3ddcb8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#151513; --surface:#1c1c19; --surface-2:#232320; --line:#33332e; --line-strong:#48483f;
+      --ink:#f2f2ec; --ink-dim:#adada2; --ink-faint:#75756a; --accent:#ff5a3d; --accent-2:#3ddcb8;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--grot);
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    padding:36px 16px 90px; -webkit-font-smoothing:antialiased;
+  }
+  .device{width:100%; max-width:412px; background:var(--surface); border:1px solid var(--line); display:flex; flex-direction:column; min-height:820px;}
+
+  .band{padding:16px 20px; border-bottom:3px solid var(--ink); display:flex; justify-content:space-between; align-items:center;}
+  .band-title{font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em;}
+  .band-meta{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); text-align:right; line-height:1.4;}
+
+  .content{padding:0 0 20px; flex:1;}
+
+  .greet{padding:20px 20px 8px;}
+  .greet-eyebrow{font-family:var(--mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--accent); margin-bottom:8px;}
+  .greet h1{font-size:22px; font-weight:800; margin:0 0 4px; letter-spacing:-0.005em;}
+  .greet .date{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
+
+  .sec-label{font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-faint); padding:16px 20px 8px;}
+
+  .status-table{margin:0 20px; border:1px solid var(--line);}
+  .status-row{display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--line);}
+  .status-row:last-child{border-bottom:none;}
+  .led{width:8px; height:8px; border-radius:2px; flex-shrink:0;}
+  .led.on{background:var(--accent); box-shadow:0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);}
+  .led.off{background:var(--line-strong);}
+  .status-name{flex:1; font-size:12.5px;}
+  .status-tag{font-family:var(--mono); font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-faint);}
+  .status-tag.on{color:var(--accent); font-weight:700;}
+  .status-link{font-family:var(--mono); font-size:10px; color:var(--ink-dim); text-decoration:underline; text-underline-offset:2px;}
+
+  .cta-wrap{margin:16px 20px 0;}
+  .cta-copy{font-size:12.5px; color:var(--ink-dim); line-height:1.6; margin:0 0 12px;}
+  .cta{
+    width:100%; padding:16px; border:2px solid var(--accent); background:var(--accent); color:#fff8f6;
+    font-family:var(--grot); font-size:13.5px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;
+  }
+
+  .readout-grid{margin:0 20px; display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line);}
+  .readout{background:var(--surface); padding:14px;}
+  .readout-label{font-family:var(--mono); font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px;}
+  .readout-val{font-family:var(--mono); font-size:22px; font-weight:700; color:var(--accent);}
+  .readout-val .unit{font-size:12px; font-weight:400; color:var(--ink-faint); margin-left:2px;}
+  .readout-tip{margin:12px 20px 0; padding:12px 14px; background:var(--surface-2); border:1px solid var(--line); font-size:12px; color:var(--ink-dim); line-height:1.55;}
+
+  .tabbar{
+    display:flex; border-top:3px solid var(--ink); background:var(--surface);
+  }
+  .tab{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 0 12px;
+    font-family:var(--mono); font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint);
+    border-top:2px solid transparent; margin-top:-2px; cursor:pointer;
+  }
+  .tab.active{color:var(--ink); border-top-color:var(--accent);}
+  .tab .glyph{width:16px; height:16px; position:relative;}
+  .tab .glyph::before{content:""; position:absolute; inset:2px; border:1.4px solid currentColor;}
+  .tab.active .glyph::before{background:color-mix(in srgb, var(--accent) 18%, transparent); border-color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="band">
+    <div class="band-title">Today</div>
+    <div class="band-meta">SAT 02 AUG 2026<br/>06:41 LOCAL</div>
+  </div>
+
+  <div class="content">
+    <div class="greet">
+      <div class="greet-eyebrow">GOOD MORNING</div>
+      <h1>Zach</h1>
+      <div class="date">Day 14 · streak intact</div>
+    </div>
+
+    <div class="sec-label">STATUS</div>
+    <div class="status-table">
+      <div class="status-row">
+        <span class="led on"></span>
+        <span class="status-name">Questionnaire</span>
+        <span class="status-tag on">SUBMITTED</span>
+      </div>
+      <div class="status-row">
+        <span class="led off"></span>
+        <span class="status-name">Morning measurement</span>
+        <span class="status-link">EDIT</span>
+      </div>
+    </div>
+
+    <div class="sec-label">SESSION</div>
+    <div class="cta-wrap">
+      <p class="cta-copy">Combined session: settle → rMSSD → lying HR → stand. About 3 minutes.</p>
+      <button class="cta">Start morning measurement</button>
+    </div>
+
+    <!-- Alternate state once measured — shown for reference, not live in this mockup -->
+    <div class="sec-label" style="margin-top:22px; border-top:1px dashed var(--line); padding-top:16px;">TODAY’S READINGS (once measured)</div>
+    <div class="readout-grid">
+      <div class="readout"><div class="readout-label">rMSSD</div><div class="readout-val">52<span class="unit">ms</span></div></div>
+      <div class="readout"><div class="readout-label">Gap (peak)</div><div class="readout-val">31<span class="unit">bpm</span></div></div>
+    </div>
+    <div class="readout-tip">Building your baseline — 6 more days of history needed before this compares to your own normal range.</div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active"><span class="glyph"></span>TODAY</div>
+    <div class="tab"><span class="glyph"></span>HISTORY</div>
+    <div class="tab"><span class="glyph"></span>SETTINGS</div>
+  </div>
+</div>
+</body>
+</html>

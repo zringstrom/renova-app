@@ -1,0 +1,14 @@
+{
+  "images" : [
+    {
+      "filename" : "koru-zoom-1_75x-shifted-1024-fullbleed.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Session Progress Animation Concepts</title>
+<style>
+  :root{
+    --bg:#e2e2de;
+    --surface:#fbfbf9;
+    --surface-2:#f0f0ec;
+    --line:#d2d2cb;
+    --line-strong:#adada2;
+    --ink:#0a0a08;
+    --ink-dim:#5f5f57;
+    --ink-faint:#8f8f84;
+    --accent:#e8331b;
+    --accent-2:#1b6e5c;
+    --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --grot: -apple-system, "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --bg:#151513;
+    --surface:#1c1c19;
+    --surface-2:#232320;
+    --line:#33332e;
+    --line-strong:#48483f;
+    --ink:#f2f2ec;
+    --ink-dim:#adada2;
+    --ink-faint:#75756a;
+    --accent:#ff5a3d;
+    --accent-2:#3ddcb8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#151513; --surface:#1c1c19; --surface-2:#232320; --line:#33332e; --line-strong:#48483f;
+      --ink:#f2f2ec; --ink-dim:#adada2; --ink-faint:#75756a; --accent:#ff5a3d; --accent-2:#3ddcb8;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--grot);
+    min-height:100vh; padding:36px 16px 90px; -webkit-font-smoothing:antialiased;
+  }
+
+  .page-head{max-width:1180px; margin:0 auto 28px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;}
+  .page-title{font-size:20px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em;}
+  .page-sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:6px; max-width:480px; line-height:1.5;}
+  .theme-toggle{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+    border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-dim);
+    padding:8px 12px; cursor:pointer;
+  }
+  .theme-toggle:hover{border-color:var(--ink);}
+
+  .grid-wrap{
+    max-width:1180px; margin:0 auto;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:28px;
+  }
+
+  .variant{display:flex; flex-direction:column; gap:10px;}
+  .variant-label{
+    display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+  }
+  .variant-name{font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:0.03em;}
+  .variant-idx{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);}
+  .variant-note{font-family:var(--mono); font-size:10.5px; color:var(--ink-dim); line-height:1.5; margin-top:-4px;}
+
+  /* ---- mock phase card, reused from Control Grid metric/device style ---- */
+  .device{background:var(--surface); border:1px solid var(--line);}
+  .band{
+    padding:14px 18px; border-bottom:3px solid var(--ink); display:flex; justify-content:space-between; align-items:center;
+  }
+  .band-title{font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em;}
+  .band-meta{font-family:var(--mono); font-size:11px; color:var(--ink-faint); font-variant-numeric:tabular-nums;}
+
+  .phase-body{padding:18px; display:flex; flex-direction:column; gap:14px; position:relative;}
+  .phase-name{font-size:12px; font-family:var(--mono); letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-faint);}
+  .phase-instr{font-size:14.5px; line-height:1.4; color:var(--ink);}
+  .phase-status{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); letter-spacing:0.02em;}
+  .bpm-row{display:flex; justify-content:space-between; align-items:baseline; border-top:1px solid var(--line); padding-top:12px;}
+  .bpm-num{font-family:var(--mono); font-size:32px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; letter-spacing:-0.01em;}
+  .bpm-unit{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-left:6px;}
+
+  .anim-zone{
+    position:relative; height:56px; border:1px solid var(--line); background:var(--surface-2);
+    overflow:hidden;
+  }
+
+  /* All five are now driven by a shared JS progress value (0 -> 1 per demo
+     cycle) rather than an ambient CSS loop — each visual is a direct function
+     of "how far through the phase are we," matching the real elapsed-time
+     corner label instead of just looping regardless of it. */
+
+  /* ============ 1. SWEEP BAR ============ */
+  .sweepbar-track{position:absolute; left:0; right:0; top:50%; height:2px; background:var(--line-strong); transform:translateY(-50%);}
+  .sweepbar-fill{position:absolute; left:0; top:50%; height:2px; background:var(--accent); transform:translateY(-50%); width:0%;}
+  .sweepbar-head{position:absolute; top:50%; width:8px; height:8px; background:var(--accent); transform:translate(-50%,-50%); left:0%;}
+  .sweepbar-label{position:absolute; left:0; right:0; bottom:6px; text-align:center; font-family:var(--mono); font-size:9px; color:var(--ink-faint); letter-spacing:0.08em;}
+  .sweepbar-pct{position:absolute; right:8px; top:6px; font-family:var(--mono); font-size:10px; color:var(--accent); font-variant-numeric:tabular-nums;}
+
+  /* ============ 2. PERIMETER TRACE ============ */
+  .perimeter-zone{border:1px solid var(--line-strong); position:relative;}
+  .perimeter-zone svg{position:absolute; inset:0; width:100%; height:100%;}
+  .perimeter-rect{fill:none; stroke:var(--accent); stroke-width:2; stroke-linecap:square; stroke-dasharray:100; stroke-dashoffset:100;}
+  .perimeter-pct{position:absolute; left:8px; top:6px; font-family:var(--mono); font-size:10px; color:var(--accent); font-variant-numeric:tabular-nums;}
+
+  /* ============ 3. ECG SWEEP ============ */
+  .ecg-zone svg{position:absolute; inset:0; width:200%; height:100%; animation:ecg-scroll 6s linear infinite;}
+  @keyframes ecg-scroll{ 0%{transform:translateX(0);} 100%{transform:translateX(-50%);} }
+  .ecg-path{fill:none; stroke:var(--accent); stroke-width:1.75; stroke-linejoin:round; stroke-linecap:round;}
+  .ecg-baseline{position:absolute; left:0; right:0; top:50%; height:1px; background:var(--line);}
+  .ecg-progress-rail{position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--line);}
+  .ecg-progress-fill{position:absolute; left:0; bottom:0; height:4px; background:var(--accent); width:0%;}
+
+  /* ============ 4. TICK MARCH ============ */
+  .tickmarch-rail{position:absolute; left:12px; right:12px; top:50%; transform:translateY(-50%); display:flex; justify-content:space-between;}
+  .tickmarch-rail span{width:2px; height:14px; background:var(--line-strong); transition:background .25s ease, height .25s ease;}
+  .tickmarch-rail span.lit{background:var(--accent); height:20px;}
+
+  /* ============ 5. SCAN LINE ============ */
+  .scanline-zone{position:relative;}
+  .scanline-trail{position:absolute; top:0; bottom:0; left:0; width:0%; background:color-mix(in srgb, var(--accent) 12%, transparent);}
+  .scanline-bar{
+    position:absolute; top:0; bottom:0; width:2px; background:var(--accent); left:0%;
+    box-shadow:0 0 8px 1px color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  .scanline-grid{position:absolute; inset:0; display:flex; justify-content:space-between; padding:0 6px;}
+  .scanline-grid span{width:1px; height:100%; background:var(--line);}
+
+  footer.foot{max-width:1180px; margin:40px auto 0; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); line-height:1.6; border-top:1px solid var(--line); padding-top:16px;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div>
+    <div class="page-title">Session Progress — Animation Concepts</div>
+    <div class="page-sub">5 candidate motion treatments for the 15–75s Settle / Lying / Stand / Standing phases, shown inside the actual phase-card chrome. All loops are live CSS/SVG — no images or video.</div>
+  </div>
+  <button class="theme-toggle" id="themeToggle">Toggle theme</button>
+</div>
+
+<div class="grid-wrap">
+
+  <!-- ============ 1. SWEEP BAR ============ -->
+  <div class="variant">
+    <div class="variant-label"><span class="variant-name">1 — Sweep Bar</span><span class="variant-idx">01/05</span></div>
+    <div class="variant-note">A thin accent line fills left-to-right in direct proportion to phase progress, with a small leading head — a literal progress bar, then holds full and resets for the next phase.</div>
+    <div class="device">
+      <div class="band"><div class="band-title">Lying</div><div class="band-meta" id="sweepbar-time">0:00</div></div>
+      <div class="phase-body">
+        <div class="phase-name">Phase 2 of 4</div>
+        <div class="phase-instr">Stay lying still. Breathe normally.</div>
+        <div class="anim-zone">
+          <div class="sweepbar-track"></div>
+          <div class="sweepbar-fill" id="sweepbar-fill"></div>
+          <div class="sweepbar-head" id="sweepbar-head"></div>
+          <div class="sweepbar-pct" id="sweepbar-pct">0%</div>
+          <div class="sweepbar-label">HOLDING STEADY</div>
+        </div>
+        <div class="bpm-row"><div><span class="bpm-num">58</span><span class="bpm-unit">BPM</span></div><div class="phase-status">RECORDING</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 2. PERIMETER TRACE ============ -->
+  <div class="variant">
+    <div class="variant-label"><span class="variant-name">2 — Perimeter Trace</span><span class="variant-idx">02/05</span></div>
+    <div class="variant-note">The border itself draws in, fully tracing the card's perimeter exactly as progress reaches 100% — the whole card frame becomes the progress indicator, then resets.</div>
+    <div class="device">
+      <div class="band"><div class="band-title">Standing</div><div class="band-meta" id="perimeter-time">0:00</div></div>
+      <div class="phase-body">
+        <div class="phase-name">Phase 4 of 4</div>
+        <div class="phase-instr">Remain standing, relaxed, arms at sides.</div>
+        <div class="anim-zone perimeter-zone">
+          <svg viewBox="0 0 300 56" preserveAspectRatio="none">
+            <rect class="perimeter-rect" id="perimeter-rect" x="1" y="1" width="298" height="54" pathLength="100"/>
+          </svg>
+          <div class="perimeter-pct" id="perimeter-pct">0%</div>
+        </div>
+        <div class="bpm-row"><div><span class="bpm-num">71</span><span class="bpm-unit">BPM</span></div><div class="phase-status">STABILIZING</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 3. ECG SWEEP ============ -->
+  <div class="variant">
+    <div class="variant-label"><span class="variant-name">3 — ECG Sweep</span><span class="variant-idx">03/05</span></div>
+    <div class="variant-note">The heartbeat trace keeps scrolling continuously as an ambient "live signal, still connected" cue — but a thin rail under it fills left-to-right with actual phase progress, so the two jobs (alive vs. how much longer) aren't conflated into one ambiguous motion.</div>
+    <div class="device">
+      <div class="band"><div class="band-title">Settle</div><div class="band-meta" id="ecg-time">0:00</div></div>
+      <div class="phase-body">
+        <div class="phase-name">Phase 1 of 4</div>
+        <div class="phase-instr">Get comfortable. Strap is syncing.</div>
+        <div class="anim-zone ecg-zone">
+          <div class="ecg-baseline"></div>
+          <svg viewBox="0 0 300 56" preserveAspectRatio="none">
+            <path class="ecg-path" d="M0,28 L36,28 L44,28 L48,10 L52,44 L56,20 L64,28 L100,28 L136,28 L144,28 L148,10 L152,44 L156,20 L164,28 L200,28 L236,28 L244,28 L248,10 L252,44 L256,20 L264,28 L300,28" />
+          </svg>
+          <div class="ecg-progress-rail"></div>
+          <div class="ecg-progress-fill" id="ecg-progress-fill"></div>
+        </div>
+        <div class="bpm-row"><div><span class="bpm-num">—</span><span class="bpm-unit">BPM</span></div><div class="phase-status">ACQUIRING SIGNAL</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 4. TICK MARCH ============ -->
+  <div class="variant">
+    <div class="variant-label"><span class="variant-name">4 — Tick March</span><span class="variant-idx">04/05</span></div>
+    <div class="variant-note">A row of tick marks, borrowed directly from the slider-rail language in the questionnaire. Ticks light up accent-red cumulatively left-to-right as progress advances — like filling in a punch-card — rather than one tick roaming back and forth.</div>
+    <div class="device">
+      <div class="band"><div class="band-title">Stand</div><div class="band-meta" id="tick-time">0:00</div></div>
+      <div class="phase-body">
+        <div class="phase-name">Phase 3 of 4</div>
+        <div class="phase-instr">Stand up slowly now.</div>
+        <div class="anim-zone">
+          <div class="tickmarch-rail" id="tickmarch-rail">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="bpm-row"><div><span class="bpm-num">64</span><span class="bpm-unit">BPM</span></div><div class="phase-status">TRANSITIONING</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 5. SCAN LINE ============ -->
+  <div class="variant">
+    <div class="variant-label"><span class="variant-name">5 — Scan Line</span><span class="variant-idx">05/05</span></div>
+    <div class="variant-note">A soft-glow line sweeps once, left-to-right, leaving a faint accent-tinted trail behind it that grows with progress — an oscilloscope look, but the one-directional sweep + trail (instead of an endless back-and-forth) is what makes it read as "time elapsed" rather than ambient scanning.</div>
+    <div class="device">
+      <div class="band"><div class="band-title">Lying</div><div class="band-meta" id="scanline-time">0:00</div></div>
+      <div class="phase-body">
+        <div class="phase-name">Phase 2 of 4</div>
+        <div class="phase-instr">Stay lying still. Breathe normally.</div>
+        <div class="anim-zone scanline-zone">
+          <div class="scanline-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="scanline-trail" id="scanline-trail"></div>
+          <div class="scanline-bar" id="scanline-bar"></div>
+        </div>
+        <div class="bpm-row"><div><span class="bpm-num">55</span><span class="bpm-unit">BPM</span></div><div class="phase-status">RECORDING</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="foot">
+  MOCKUP ONLY — for side-by-side comparison. All 5 use only var(--accent) on the existing Control Grid palette; no new colors introduced.<br/>
+  All five are now driven by one shared progress value (0→100% per demo cycle, holds briefly at 100%, then resets — standing in for a real phase finishing and the next one starting) instead of looping independent of elapsed time.<br/>
+  Portability: Sweep Bar / Tick March / Scan Line = width/position tied to a `progress` value (trivial in SwiftUI via .frame/.offset driven by `phaseElapsedSeconds / targetSeconds`, already tracked in `MeasurementSessionViewModel`). Perimeter Trace = SVG stroke-dashoffset tied to progress (maps to SwiftUI `Shape.trim(from:to:)`). ECG Sweep's waveform scroll stays ambient/continuous by design — only its progress rail is progress-driven.
+</footer>
+
+<script>
+  const btn = document.getElementById('themeToggle');
+  const root = document.documentElement;
+  btn.addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme');
+    if(cur === 'dark'){ root.setAttribute('data-theme','light'); }
+    else if(cur === 'light'){ root.setAttribute('data-theme','dark'); }
+    else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', prefersDark ? 'light' : 'dark');
+    }
+  });
+
+  // ---- shared progress driver: 0 -> 1 over DEMO_MS, holds at 1 for HOLD_MS, then resets ----
+  const DEMO_MS = 7000;
+  const HOLD_MS = 900;
+  const CYCLE_MS = DEMO_MS + HOLD_MS;
+  const startedAt = performance.now();
+
+  const sweepbarFill = document.getElementById('sweepbar-fill');
+  const sweepbarHead = document.getElementById('sweepbar-head');
+  const sweepbarPct = document.getElementById('sweepbar-pct');
+  const sweepbarTime = document.getElementById('sweepbar-time');
+
+  const perimeterRect = document.getElementById('perimeter-rect');
+  const perimeterPct = document.getElementById('perimeter-pct');
+  const perimeterTime = document.getElementById('perimeter-time');
+
+  const ecgFill = document.getElementById('ecg-progress-fill');
+  const ecgTime = document.getElementById('ecg-time');
+
+  const tickRail = document.getElementById('tickmarch-rail');
+  const tickSpans = tickRail.querySelectorAll('span');
+  const tickTime = document.getElementById('tick-time');
+
+  const scanBar = document.getElementById('scanline-bar');
+  const scanTrail = document.getElementById('scanline-trail');
+  const scanTime = document.getElementById('scanline-time');
+
+  function fmtTime(ms, totalMs){
+    // Map the demo's compressed cycle onto a plausible real phase length (60s) just for the corner label.
+    const realSeconds = Math.round((ms / totalMs) * 60);
+    const m = Math.floor(realSeconds / 60);
+    const s = realSeconds % 60;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  function tick(now){
+    const elapsed = (now - startedAt) % CYCLE_MS;
+    const progress = Math.min(elapsed / DEMO_MS, 1);
+    const pct = Math.round(progress * 100);
+    const timeLabel = fmtTime(Math.min(elapsed, DEMO_MS), DEMO_MS);
+
+    sweepbarFill.style.width = pct + '%';
+    sweepbarHead.style.left = pct + '%';
+    sweepbarPct.textContent = pct + '%';
+    sweepbarTime.textContent = timeLabel;
+
+    perimeterRect.setAttribute('stroke-dashoffset', String(100 * (1 - progress)));
+    perimeterPct.textContent = pct + '%';
+    perimeterTime.textContent = timeLabel;
+
+    ecgFill.style.width = pct + '%';
+    ecgTime.textContent = timeLabel;
+
+    const litCount = Math.floor(progress * tickSpans.length);
+    tickSpans.forEach((span, i) => span.classList.toggle('lit', i < litCount));
+    tickTime.textContent = timeLabel;
+
+    scanBar.style.left = pct + '%';
+    scanTrail.style.width = pct + '%';
+    scanTime.textContent = timeLabel;
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+</script>
+</body>
+</html>

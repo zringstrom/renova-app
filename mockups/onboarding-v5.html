@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Control Grid</title>
+<style>
+  :root{
+    --bg:#e2e2de;
+    --surface:#fbfbf9;
+    --surface-2:#f0f0ec;
+    --line:#d2d2cb;
+    --line-strong:#adada2;
+    --ink:#0a0a08;
+    --ink-dim:#5f5f57;
+    --ink-faint:#8f8f84;
+    --accent:#e8331b;
+    --accent-2:#1b6e5c;
+    --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --grot: -apple-system, "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --bg:#151513; --surface:#1c1c19; --surface-2:#232320; --line:#33332e; --line-strong:#48483f;
+    --ink:#f2f2ec; --ink-dim:#adada2; --ink-faint:#75756a; --accent:#ff5a3d; --accent-2:#3ddcb8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#151513; --surface:#1c1c19; --surface-2:#232320; --line:#33332e; --line-strong:#48483f;
+      --ink:#f2f2ec; --ink-dim:#adada2; --ink-faint:#75756a; --accent:#ff5a3d; --accent-2:#3ddcb8;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--grot);
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    padding:36px 16px 90px; -webkit-font-smoothing:antialiased;
+  }
+  .device{width:100%; max-width:412px; background:var(--surface); border:1px solid var(--line);}
+
+  .band{padding:16px 20px; border-bottom:3px solid var(--ink); display:flex; justify-content:space-between; align-items:center;}
+  .band-title{font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em;}
+  .band-meta{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); text-align:right; line-height:1.4;}
+
+  .stage-labels{
+    display:grid; grid-template-columns:repeat(3, 1fr); font-family:var(--mono); font-size:9.5px; color:var(--ink-faint);
+    padding:10px 20px; border-bottom:1px solid var(--line); letter-spacing:0.06em; text-transform:uppercase;
+  }
+  .stage-labels span{text-align:center; position:relative; padding-bottom:8px;}
+  .stage-labels span::after{content:""; position:absolute; bottom:0; left:15%; right:15%; height:2px; background:var(--line-strong);}
+  .stage-labels span.active::after{background:var(--accent);}
+  .stage-labels span.active{color:var(--ink);}
+
+  .content{padding:0 0 20px;}
+
+  .hero{padding:22px 20px 8px; border-bottom:1px solid var(--line);}
+  .hero-eyebrow{font-family:var(--mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--accent); margin-bottom:10px;}
+  .hero h1{font-size:25px; font-weight:800; line-height:1.18; margin:0 0 12px; letter-spacing:-0.005em; text-wrap:balance;}
+  .hero p{font-size:13.5px; line-height:1.6; color:var(--ink-dim); margin:0 0 20px; max-width:36ch;}
+
+  .sec-label{font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-faint); padding:16px 20px 8px;}
+
+  .status-table{margin:0 20px; border:1px solid var(--line);}
+  .status-row{display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--line);}
+  .status-row:last-child{border-bottom:none;}
+  .led{width:8px; height:8px; border-radius:2px; flex-shrink:0;}
+  .led.on{background:var(--accent); box-shadow:0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);}
+  .led.alt{background:var(--accent-2); box-shadow:0 0 6px color-mix(in srgb, var(--accent-2) 60%, transparent);}
+  .led.off{background:var(--line-strong);}
+  .status-name{flex:1; font-size:12.5px;}
+  .status-tag{font-family:var(--mono); font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-faint);}
+  .status-tag.on{color:var(--accent); font-weight:700;}
+  .status-tag.alt{color:var(--accent-2); font-weight:700;}
+
+  .callout{margin:16px 20px 0; border:1px solid var(--accent); background:color-mix(in srgb, var(--accent) 6%, var(--surface-2)); padding:14px 16px 15px;}
+  .callout-head{font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; font-weight:700;}
+  .callout p{margin:0; font-size:12.5px; line-height:1.65; color:var(--ink-dim);}
+  .callout p + p{margin-top:8px;}
+
+  .field-block{margin:0 20px;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:10.5px; color:var(--ink-faint); font-family:var(--mono); letter-spacing:0.02em;}
+  .field input{background:var(--surface-2); border:1px solid var(--line-strong); color:var(--ink); font-family:var(--grot); font-size:14px; padding:11px 12px; outline:none;}
+  .field input:focus{border-color:var(--accent);}
+
+  .habit-table{margin:0 20px;}
+  .habit-row{display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--line); border-top:1px solid var(--line);}
+  .habit-left{display:flex; flex-direction:column; gap:3px;}
+  .habit-label{font-size:13px;}
+  .habit-meta{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);}
+  .habit-meta b{color:var(--accent); font-weight:700;}
+  .habit-right{display:flex; align-items:center; gap:8px;}
+  .switch{
+    width:46px; height:24px; border:1px solid var(--line-strong); border-radius:12px; position:relative; cursor:pointer; background:var(--surface-2);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .switch .knob{position:absolute; top:1px; left:1px; width:20px; height:20px; border-radius:50%; background:var(--ink-faint); transition:transform .16s ease, background .16s ease;}
+  .switch[data-state="yes"]{background:color-mix(in srgb, var(--accent) 18%, var(--surface-2)); border-color:var(--accent);}
+  .switch[data-state="yes"] .knob{transform:translateX(21px); background:var(--accent);}
+  .switch[data-state="no"]{background:color-mix(in srgb, var(--accent-2) 14%, var(--surface-2)); border-color:var(--accent-2);}
+  .switch[data-state="no"] .knob{background:var(--accent-2);}
+  .switch-label{font-family:var(--mono); font-size:9px; width:34px; text-align:right; color:var(--ink-faint); letter-spacing:0.04em;}
+
+  .submit-wrap{margin:26px 20px 0;}
+  .status-line{display:flex; justify-content:space-between; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin-bottom:8px;}
+  .status-line .n{font-weight:700; color:var(--accent);}
+  .submit{
+    width:100%; padding:16px; border:2px solid var(--accent); background:var(--accent); color:#fff8f6;
+    font-family:var(--grot); font-size:13.5px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;
+  }
+  .submit:active{transform:translateY(1px);}
+  .footer-note{text-align:center; font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); margin-top:12px; padding-bottom:20px; letter-spacing:0.06em;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="band">
+    <div class="band-title">System Onboarding</div>
+    <div class="band-meta">SAT 02 AUG 2026<br/>FIRST RUN</div>
+  </div>
+
+  <div class="stage-labels">
+    <span class="active">01 QUESTIONNAIRE</span>
+    <span class="active">02 H10 SESSION</span>
+    <span>03 LOCAL ONLY</span>
+  </div>
+
+  <div class="content">
+    <div class="hero">
+      <div class="hero-eyebrow">RECOVERYDECK</div>
+      <h1>A daily reading of what your body already knows.</h1>
+      <p>Two inputs, every morning: a short questionnaire, then a guided Polar H10 session measuring rMSSD and orthostatic HR. Every value stays on this device.</p>
+    </div>
+
+    <div class="sec-label">PIPELINE</div>
+    <div class="status-table">
+      <div class="status-row"><span class="led on"></span><span class="status-name">Morning questionnaire</span><span class="status-tag on">ACTIVE</span></div>
+      <div class="status-row"><span class="led alt"></span><span class="status-name">rMSSD + orthostatic HR, via H10</span><span class="status-tag alt">GUIDED</span></div>
+      <div class="status-row"><span class="led off"></span><span class="status-name">Cloud sync / commercial score</span><span class="status-tag">DISABLED</span></div>
+    </div>
+
+    <div class="sec-label">REQUIREMENTS</div>
+    <div class="callout">
+      <div class="callout-head">Read before first session</div>
+      <p>Requires a Polar H10 chest strap paired over Bluetooth. Not a medical device — for personal training journaling only.</p>
+      <p>If you have a heart condition or feel dizzy on standing, consult a clinician before orthostatic testing. Stop immediately if lightheaded.</p>
+    </div>
+
+    <div class="sec-label">OPERATOR</div>
+    <div class="field-block">
+      <div class="field">
+        <label>DISPLAY NAME — OPTIONAL, GREETING ONLY</label>
+        <input type="text" id="ob-name" placeholder="For morning greetings, not an account" />
+      </div>
+    </div>
+
+    <div class="sec-label">SCHEDULE</div>
+    <div class="habit-table">
+      <div class="habit-row">
+        <div class="habit-left">
+          <span class="habit-label">Daily reminder</span>
+          <span class="habit-meta"><b>06:30</b> · "Questionnaire first — then H10."</span>
+        </div>
+        <div class="habit-right">
+          <span class="switch-label" data-role="lbl">ON</span>
+          <div class="switch" data-toggle data-state="yes"><div class="knob"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-wrap">
+      <div class="status-line"><span>READY TO INITIALIZE</span><span class="n">ALL SYSTEMS SET</span></div>
+      <button class="submit" id="start">Begin readiness scan</button>
+      <div class="footer-note">RECOVERYDECK · CONTROL GRID · NO CLOUD, EVER</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-toggle]').forEach(sw => {
+    sw.addEventListener('click', () => {
+      const next = sw.dataset.state === 'yes' ? 'no' : 'yes';
+      sw.dataset.state = next;
+      const lbl = sw.parentElement.querySelector('[data-role="lbl"]');
+      lbl.textContent = next.toUpperCase();
+    });
+  });
+  document.getElementById('start').addEventListener('click', () => {
+    alert('Mockup only — this would begin the readiness scan.');
+  });
+</script>
+</body>
+</html>

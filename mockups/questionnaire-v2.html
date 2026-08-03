@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Fjord Journal</title>
+<style>
+  :root{
+    --bg:#eef1ee;
+    --surface:#ffffff;
+    --surface-2:#f4f6f3;
+    --line:#d8ddd6;
+    --line-strong:#b7c0b8;
+    --ink:#141a17;
+    --ink-dim:#556058;
+    --ink-faint:#8b968c;
+    --accent:#12503f;
+    --accent-soft:#dbe8e2;
+    --warn:#a5442f;
+    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --bg:#12160f0d;
+    --bg:#151a16;
+    --surface:#1b211c;
+    --surface-2:#212822;
+    --line:#2c342d;
+    --line-strong:#3c463d;
+    --ink:#eef1ec;
+    --ink-dim:#a3ada2;
+    --ink-faint:#6d766c;
+    --accent:#5fbf9e;
+    --accent-soft:#243a32;
+    --warn:#d97a5f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#151a16;
+      --surface:#1b211c;
+      --surface-2:#212822;
+      --line:#2c342d;
+      --line-strong:#3c463d;
+      --ink:#eef1ec;
+      --ink-dim:#a3ada2;
+      --ink-faint:#6d766c;
+      --accent:#5fbf9e;
+      --accent-soft:#243a32;
+      --warn:#d97a5f;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    min-height:100vh;
+    display:flex; justify-content:center; align-items:flex-start;
+    padding:44px 16px 90px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .device{
+    width:100%; max-width:410px;
+    background:var(--surface);
+    border:1px solid var(--line);
+  }
+  .masthead{
+    padding:26px 26px 18px;
+    border-bottom:2px solid var(--ink);
+  }
+  .masthead-top{display:flex; justify-content:space-between; align-items:baseline; font-family:var(--sans); font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:14px;}
+  .masthead h1{
+    font-family:var(--serif); font-weight:400; font-size:34px; line-height:1.05; margin:0 0 6px; letter-spacing:-0.01em; text-wrap:balance;
+  }
+  .masthead .kicker{font-family:var(--sans); font-size:12.5px; color:var(--ink-dim); font-style:normal;}
+
+  .content{padding:8px 26px 26px;}
+
+  .section-label{
+    font-family:var(--sans); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-faint);
+    margin:30px 0 4px; display:flex; align-items:baseline; gap:10px;
+  }
+  .section-label small{font-family:var(--serif); font-style:italic; font-size:13px; letter-spacing:0; color:var(--ink-faint); text-transform:none;}
+  .section-label:first-of-type{margin-top:20px;}
+
+  .metric{padding:18px 0; border-bottom:1px solid var(--line);}
+  .metric-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;}
+  .metric-name{font-family:var(--serif); font-size:19px; font-weight:400;}
+  .anchors-row{display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-faint); margin-bottom:14px; font-style:italic;}
+
+  /* editorial numeral row selector */
+  .numrow{display:flex; gap:0;}
+  .num-btn{
+    flex:1; text-align:center; padding:10px 0 8px; background:none; border:none; border-bottom:2px solid var(--line-strong);
+    cursor:pointer; -webkit-tap-highlight-color:transparent; position:relative;
+  }
+  .num-btn + .num-btn{margin-left:6px;}
+  .num-btn .n{
+    font-family:var(--serif); font-size:22px; color:var(--ink-faint); font-weight:400; display:block;
+    transition:color .15s ease, font-weight .15s ease, transform .15s ease;
+  }
+  .num-btn:hover .n{color:var(--ink-dim);}
+  .num-btn.active{border-bottom-color:var(--accent);}
+  .num-btn.active .n{color:var(--accent); font-weight:600; transform:translateY(-1px);}
+  .num-btn.active::after{
+    content:""; position:absolute; bottom:-2px; left:50%; transform:translateX(-50%);
+    width:5px; height:5px; border-radius:50%; background:var(--accent);
+  }
+
+  details.ctx{border:1px solid var(--line); margin-top:24px;}
+  details.ctx summary{
+    list-style:none; cursor:pointer; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--sans); font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim);
+  }
+  details.ctx summary::-webkit-details-marker{display:none;}
+  details.ctx summary::after{content:"Show"; font-size:10px; letter-spacing:0.1em; color:var(--ink-faint);}
+  details.ctx[open] summary::after{content:"Hide";}
+  .ctx-body{padding:2px 16px 18px; display:flex; flex-direction:column; gap:14px;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:11px; color:var(--ink-faint); letter-spacing:0.03em;}
+  .field input, .field textarea{
+    background:var(--surface-2); border:none; border-bottom:1px solid var(--line-strong); color:var(--ink);
+    font-family:var(--sans); font-size:14px; padding:8px 4px; outline:none;
+  }
+  .field input:focus, .field textarea:focus{border-bottom-color:var(--accent);}
+  .field-row{display:flex; gap:16px;}
+  .field-row .field{flex:1;}
+
+  /* Yes/No editorial word toggle */
+  .habits{display:flex; flex-direction:column;}
+  .habit{
+    display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--line);
+  }
+  .habit-label{font-size:14.5px; color:var(--ink);}
+  .word-toggle{display:flex; gap:18px; font-family:var(--serif); font-size:14.5px;}
+  .word-toggle button{
+    background:none; border:none; padding:2px 0; cursor:pointer; color:var(--ink-faint); position:relative;
+    font-family:var(--serif); font-style:italic;
+  }
+  .word-toggle button.selected{color:var(--accent); font-weight:600; font-style:normal;}
+  .word-toggle button.selected::after{
+    content:""; position:absolute; left:0; right:0; bottom:-4px; height:1px; background:var(--accent);
+  }
+
+  textarea.notes{width:100%; resize:vertical; min-height:70px; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); font-family:var(--sans); font-size:14px; padding:12px; outline:none; margin-top:6px;}
+  textarea.notes:focus{border-color:var(--accent);}
+
+  .submit-wrap{margin-top:30px; text-align:center;}
+  .submit-status{font-family:var(--serif); font-style:italic; font-size:13px; color:var(--ink-faint); margin-bottom:12px;}
+  .submit{
+    width:100%; padding:16px; border:1px solid var(--ink); background:transparent; color:var(--ink-faint);
+    font-family:var(--sans); font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase; cursor:not-allowed;
+    border-color:var(--line-strong); transition:all .2s ease;
+  }
+  .submit.ready{
+    background:var(--accent); border-color:var(--accent); color:#eef7f2; cursor:pointer;
+  }
+  .submit.ready:hover{background:#0d3f32;}
+  .footer-mark{text-align:center; font-family:var(--serif); font-style:italic; font-size:11px; color:var(--ink-faint); margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="masthead">
+    <div class="masthead-top"><span>No. 214</span><span>Sat 02 Aug</span></div>
+    <h1>Morning Reading</h1>
+    <div class="kicker">A short record, before the day begins.</div>
+  </div>
+
+  <div class="content">
+    <div class="section-label"><span>Body</span><small>how it feels today</small></div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Fatigue</div></div>
+      <div class="anchors-row"><span>Feeling fresh</span><span>Exhausted</span></div>
+      <div class="numrow">
+        <button class="num-btn" data-v="1"><span class="n">1</span></button>
+        <button class="num-btn" data-v="2"><span class="n">2</span></button>
+        <button class="num-btn" data-v="3"><span class="n">3</span></button>
+        <button class="num-btn" data-v="4"><span class="n">4</span></button>
+        <button class="num-btn" data-v="5"><span class="n">5</span></button>
+        <button class="num-btn" data-v="6"><span class="n">6</span></button>
+        <button class="num-btn" data-v="7"><span class="n">7</span></button>
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Mood</div></div>
+      <div class="anchors-row"><span>Very low</span><span>Great</span></div>
+      <div class="numrow">
+        <button class="num-btn" data-v="1"><span class="n">1</span></button>
+        <button class="num-btn" data-v="2"><span class="n">2</span></button>
+        <button class="num-btn" data-v="3"><span class="n">3</span></button>
+        <button class="num-btn" data-v="4"><span class="n">4</span></button>
+        <button class="num-btn" data-v="5"><span class="n">5</span></button>
+        <button class="num-btn" data-v="6"><span class="n">6</span></button>
+        <button class="num-btn" data-v="7"><span class="n">7</span></button>
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Soreness / heavy legs</div></div>
+      <div class="anchors-row"><span>Very sore</span><span>None</span></div>
+      <div class="numrow">
+        <button class="num-btn" data-v="1"><span class="n">1</span></button>
+        <button class="num-btn" data-v="2"><span class="n">2</span></button>
+        <button class="num-btn" data-v="3"><span class="n">3</span></button>
+        <button class="num-btn" data-v="4"><span class="n">4</span></button>
+        <button class="num-btn" data-v="5"><span class="n">5</span></button>
+        <button class="num-btn" data-v="6"><span class="n">6</span></button>
+        <button class="num-btn" data-v="7"><span class="n">7</span></button>
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Sleep quality</div></div>
+      <div class="anchors-row"><span>Terrible</span><span>Excellent</span></div>
+      <div class="numrow">
+        <button class="num-btn" data-v="1"><span class="n">1</span></button>
+        <button class="num-btn" data-v="2"><span class="n">2</span></button>
+        <button class="num-btn" data-v="3"><span class="n">3</span></button>
+        <button class="num-btn" data-v="4"><span class="n">4</span></button>
+        <button class="num-btn" data-v="5"><span class="n">5</span></button>
+        <button class="num-btn" data-v="6"><span class="n">6</span></button>
+        <button class="num-btn" data-v="7"><span class="n">7</span></button>
+      </div>
+    </div>
+
+    <div class="section-label"><span>Mind</span><small>what's weighing on you</small></div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Work stress</div></div>
+      <div class="anchors-row"><span>Low</span><span>Very high</span></div>
+      <div class="numrow">
+        <button class="num-btn" data-v="1"><span class="n">1</span></button>
+        <button class="num-btn" data-v="2"><span class="n">2</span></button>
+        <button class="num-btn" data-v="3"><span class="n">3</span></button>
+        <button class="num-btn" data-v="4"><span class="n">4</span></button>
+        <button class="num-btn" data-v="5"><span class="n">5</span></button>
+        <button class="num-btn" data-v="6"><span class="n">6</span></button>
+        <button class="num-btn" data-v="7"><span class="n">7</span></button>
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Relationship stress</div></div>
+      <div class="anchors-row"><span>Low</span><span>Very high</span></div>
+      <div class="numrow">
+        <button class="num-btn" data-v="1"><span class="n">1</span></button>
+        <button class="num-btn" data-v="2"><span class="n">2</span></button>
+        <button class="num-btn" data-v="3"><span class="n">3</span></button>
+        <button class="num-btn" data-v="4"><span class="n">4</span></button>
+        <button class="num-btn" data-v="5"><span class="n">5</span></button>
+        <button class="num-btn" data-v="6"><span class="n">6</span></button>
+        <button class="num-btn" data-v="7"><span class="n">7</span></button>
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Overall life stress</div></div>
+      <div class="anchors-row"><span>Low</span><span>Very high</span></div>
+      <div class="numrow">
+        <button class="num-btn" data-v="1"><span class="n">1</span></button>
+        <button class="num-btn" data-v="2"><span class="n">2</span></button>
+        <button class="num-btn" data-v="3"><span class="n">3</span></button>
+        <button class="num-btn" data-v="4"><span class="n">4</span></button>
+        <button class="num-btn" data-v="5"><span class="n">5</span></button>
+        <button class="num-btn" data-v="6"><span class="n">6</span></button>
+        <button class="num-btn" data-v="7"><span class="n">7</span></button>
+      </div>
+    </div>
+
+    <details class="ctx">
+      <summary>Context — caffeine &amp; meals</summary>
+      <div class="ctx-body">
+        <div class="field-row">
+          <div class="field"><label>Last caffeine, time</label><input type="time" value="07:15" /></div>
+          <div class="field"><label>Amount</label><input type="text" placeholder="e.g. one flat white" /></div>
+        </div>
+        <div class="field"><label>Last meal, time</label><input type="time" value="20:30" /></div>
+      </div>
+    </details>
+
+    <div class="section-label" style="margin-top:30px;"><span>Yesterday</span><small>notable circumstances</small></div>
+    <div class="habits">
+      <div class="habit"><span class="habit-label">Alcohol last night</span><div class="word-toggle" data-toggle><button data-val="no">No</button><button data-val="yes">Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Intense training yesterday</span><div class="word-toggle" data-toggle><button data-val="no">No</button><button data-val="yes">Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Long training yesterday</span><div class="word-toggle" data-toggle><button data-val="no">No</button><button data-val="yes">Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Travel</span><div class="word-toggle" data-toggle><button data-val="no">No</button><button data-val="yes">Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Late night</span><div class="word-toggle" data-toggle><button data-val="no">No</button><button data-val="yes">Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Feeling sick / under the weather</span><div class="word-toggle" data-toggle><button data-val="no">No</button><button data-val="yes">Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Meditated / breathwork yesterday</span><div class="word-toggle" data-toggle><button data-val="no">No</button><button data-val="yes">Yes</button></div></div>
+    </div>
+
+    <div class="section-label"><span>Notes</span><small>anything else</small></div>
+    <textarea class="notes" placeholder="A line or two, if useful..."></textarea>
+
+    <div class="submit-wrap">
+      <div class="submit-status" id="status">4 of 7 readings still needed</div>
+      <button class="submit" id="submit">Record this morning</button>
+      <div class="footer-mark">RecoveryDeck · Fjord Journal</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const metrics = document.querySelectorAll('[data-metric]');
+  const total = metrics.length;
+  const state = new Map();
+
+  metrics.forEach((m, idx) => {
+    const btns = m.querySelectorAll('.num-btn');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.set(idx, parseInt(btn.dataset.v,10));
+        btns.forEach(b => b.classList.toggle('active', b === btn));
+        updateStatus();
+      });
+    });
+  });
+
+  function updateStatus(){
+    const remaining = total - state.size;
+    const status = document.getElementById('status');
+    const submit = document.getElementById('submit');
+    if(remaining === 0){
+      status.textContent = 'All seven readings recorded';
+      submit.classList.add('ready');
+      submit.disabled = false;
+    } else {
+      status.textContent = remaining + ' of 7 readings still needed';
+      submit.classList.remove('ready');
+      submit.disabled = true;
+    }
+  }
+
+  document.querySelectorAll('[data-toggle]').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+  });
+
+  document.getElementById('submit').addEventListener('click', () => {
+    if(state.size === total) alert('Mockup only — this would record the morning entry.');
+  });
+</script>
+</body>
+</html>

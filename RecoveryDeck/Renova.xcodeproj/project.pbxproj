@@ -1,0 +1,693 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01B071E3896CE142D06FE995 /* ResultsAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A418FC21CDE33ADCD13D0C0 /* ResultsAnalyzer.swift */; };
+		06B1EAD0A47E99ECE6EFDD25 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9D044FDF395C008D0D4DE73D /* LaunchScreen.storyboard */; };
+		1C711819C6C1369E5E385BA5 /* ControlGridSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69A0C3307CB0083611F5F52 /* ControlGridSlider.swift */; };
+		1D3A9F6C49A2A2E2138B8BEB /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6848CA1E0FC38E22E54D54 /* AppViewModel.swift */; };
+		1D463A5800A0F38FDA6F14D3 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA42BBA16BE5BF6722BEB3A /* OnboardingView.swift */; };
+		1E7ACA0D1F9349684905EF5E /* ControlGridTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D478E96543498D13AE3EDDA /* ControlGridTabBar.swift */; };
+		28CCA201337510DDEF255CA6 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407BA9AA4BC8A6CF4104FE68 /* DayDetailView.swift */; };
+		2CB6B90066F57DB7BC8F0C05 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499B3C5777479D689D35D807 /* RootView.swift */; };
+		37B7F795634C1DC59F5AD990 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58BD6CD05109A6D160F161D /* TodayView.swift */; };
+		490CEB3941769B1A9CBA4D74 /* ExportModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D630D8E11BC804EC040A2EB /* ExportModels.swift */; };
+		4FC8FC10457250D3829EC8B4 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADEF3E4A6E38A60178F0ACE1 /* AppContainer.swift */; };
+		5022DBB538DB867ED14716E2 /* RecoveryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84DB7888635B9BE68E537DED /* RecoveryKit */; };
+		530BAFCBB042130E6D52B4E0 /* RenovaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9749570BE58C8B6BD257FED3 /* RenovaTests.swift */; };
+		597D27C3B489B039E0C092EC /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F914A1925EA3BCC87CEFD7BF /* MainTabView.swift */; };
+		6454E0FEB425782033F159D1 /* HeartRateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B347E312D54A76D7151A7F7A /* HeartRateClient.swift */; };
+		66C1309A9DBC8B5A3351168B /* MeasurementSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A2B82682D31D9C3E11A63A /* MeasurementSessionView.swift */; };
+		6EBE4217837E0029E83EB4DB /* RenovaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58FE73E4E12A33A66BE7541B /* RenovaApp.swift */; };
+		740C324B7AA033F555DE9BCB /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CF0EA50C3C75CFF43E2294 /* HistoryView.swift */; };
+		7AED08520DBC918BB1E66450 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E731F0B67012AE50EDCD62 /* Models.swift */; };
+		82A06D15347A32E3C485605E /* HeartRateSensorIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E47C78BF2E5C99B40E0BC4E /* HeartRateSensorIdentifiers.swift */; };
+		9E169AD79E89BCFD0E716E6E /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */; };
+		AF34F02390D3D43C7F5B00CC /* MeasurementSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 205040B9FDA737AF103EEA30 /* MeasurementSessionViewModel.swift */; };
+		B37B254D7466B4D9A83D4503 /* HeartRateClientProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B381017F774112CF46080A3 /* HeartRateClientProtocol.swift */; };
+		C890D93ECE2D5019F2AD5F2D /* ControlGridTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDF1322421C604CE851ED8E /* ControlGridTheme.swift */; };
+		CC818CDEF16D9BD356F8C61F /* RecoveryExplainerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F22836ECEE9AB8394AC3DEA /* RecoveryExplainerCard.swift */; };
+		CE65EB5ADC339ADF5FB84127 /* ControlGridToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2D00AAB7EE52A7A2EDF473 /* ControlGridToggle.swift */; };
+		DDD6B42F16A771D057FA3B20 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4317BF006E901FE9B7AE0A53 /* Assets.xcassets */; };
+		E13388CAE4743DB0D7253288 /* ScanLineProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F481B6DA03B3540201A210 /* ScanLineProgress.swift */; };
+		EA9EE65D539109E0C10828A0 /* QuestionnaireView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E9F8BC5AA3FCBD4784FD0F4 /* QuestionnaireView.swift */; };
+		EC6A64AA66D25AB7A4D29B9D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB31AC8A8E4BAEE928AD657 /* SettingsView.swift */; };
+		EFAD93CC9B92A77247D3C062 /* RecoveryExplainers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */; };
+		F987F54A4B26D042A161BB8B /* DailyQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F958DC54F33670D9261A37 /* DailyQuote.swift */; };
+		FA92BB719A264A0896CBD997 /* DayRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D065FCAC93EA68E8353970EC /* DayRepository.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		96A59C9DB7A8DA65073917C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9A98F651A13D3C2FDF081986 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1CBF2BBAD9A8DBC18D73C01B;
+			remoteInfo = Renova;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0A418FC21CDE33ADCD13D0C0 /* ResultsAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsAnalyzer.swift; sourceTree = "<group>"; };
+		0B381017F774112CF46080A3 /* HeartRateClientProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateClientProtocol.swift; sourceTree = "<group>"; };
+		0E47C78BF2E5C99B40E0BC4E /* HeartRateSensorIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateSensorIdentifiers.swift; sourceTree = "<group>"; };
+		12F958DC54F33670D9261A37 /* DailyQuote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuote.swift; sourceTree = "<group>"; };
+		15CF0EA50C3C75CFF43E2294 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		1F22836ECEE9AB8394AC3DEA /* RecoveryExplainerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryExplainerCard.swift; sourceTree = "<group>"; };
+		205040B9FDA737AF103EEA30 /* MeasurementSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementSessionViewModel.swift; sourceTree = "<group>"; };
+		2D478E96543498D13AE3EDDA /* ControlGridTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridTabBar.swift; sourceTree = "<group>"; };
+		2D630D8E11BC804EC040A2EB /* ExportModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportModels.swift; sourceTree = "<group>"; };
+		3F2D00AAB7EE52A7A2EDF473 /* ControlGridToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridToggle.swift; sourceTree = "<group>"; };
+		407BA9AA4BC8A6CF4104FE68 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
+		4317BF006E901FE9B7AE0A53 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		499B3C5777479D689D35D807 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		4BB31AC8A8E4BAEE928AD657 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		4F6848CA1E0FC38E22E54D54 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		52DA87001F51480AD60D1D56 /* RenovaTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RenovaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		58FE73E4E12A33A66BE7541B /* RenovaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenovaApp.swift; sourceTree = "<group>"; };
+		74E731F0B67012AE50EDCD62 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		9749570BE58C8B6BD257FED3 /* RenovaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenovaTests.swift; sourceTree = "<group>"; };
+		9D044FDF395C008D0D4DE73D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		9E9F8BC5AA3FCBD4784FD0F4 /* QuestionnaireView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionnaireView.swift; sourceTree = "<group>"; };
+		AAA42BBA16BE5BF6722BEB3A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		ADEF3E4A6E38A60178F0ACE1 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
+		B347E312D54A76D7151A7F7A /* HeartRateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateClient.swift; sourceTree = "<group>"; };
+		B58BD6CD05109A6D160F161D /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		C69A0C3307CB0083611F5F52 /* ControlGridSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridSlider.swift; sourceTree = "<group>"; };
+		C7F481B6DA03B3540201A210 /* ScanLineProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanLineProgress.swift; sourceTree = "<group>"; };
+		D065FCAC93EA68E8353970EC /* DayRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayRepository.swift; sourceTree = "<group>"; };
+		D7A32FC9778B48BC7A276399 /* RecoveryKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RecoveryKit; path = Packages/RecoveryKit; sourceTree = SOURCE_ROOT; };
+		E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryExplainers.swift; sourceTree = "<group>"; };
+		EFDF1322421C604CE851ED8E /* ControlGridTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridTheme.swift; sourceTree = "<group>"; };
+		F2F06FFD8D512DC5984C8C21 /* Renova.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Renova.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4A2B82682D31D9C3E11A63A /* MeasurementSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementSessionView.swift; sourceTree = "<group>"; };
+		F914A1925EA3BCC87CEFD7BF /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		436E69FE514E1FF455DD70BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5022DBB538DB867ED14716E2 /* RecoveryKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0FE0754738AA91B1EA07F3A9 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				1F22836ECEE9AB8394AC3DEA /* RecoveryExplainerCard.swift */,
+				E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		111660E5ABDF2BFA9F237EAF /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				ADEF3E4A6E38A60178F0ACE1 /* AppContainer.swift */,
+				D065FCAC93EA68E8353970EC /* DayRepository.swift */,
+				74E731F0B67012AE50EDCD62 /* Models.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		144C128680CED844BCF63564 /* Questionnaire */ = {
+			isa = PBXGroup;
+			children = (
+				C69A0C3307CB0083611F5F52 /* ControlGridSlider.swift */,
+				EFDF1322421C604CE851ED8E /* ControlGridTheme.swift */,
+				3F2D00AAB7EE52A7A2EDF473 /* ControlGridToggle.swift */,
+				9E9F8BC5AA3FCBD4784FD0F4 /* QuestionnaireView.swift */,
+			);
+			path = Questionnaire;
+			sourceTree = "<group>";
+		};
+		1757E0A07CDE0761E045E317 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F2F06FFD8D512DC5984C8C21 /* Renova.app */,
+				52DA87001F51480AD60D1D56 /* RenovaTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		49B3BB85BC5DC458995B30D6 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				407BA9AA4BC8A6CF4104FE68 /* DayDetailView.swift */,
+				15CF0EA50C3C75CFF43E2294 /* HistoryView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		4B5847F8F273E174B13803A8 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				AAA42BBA16BE5BF6722BEB3A /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		5E930D5293B267242C19E080 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				4BB31AC8A8E4BAEE928AD657 /* SettingsView.swift */,
+				4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		61782EB5D3C55A7F2D9A22C8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				860EB8005EE295C221490ED1 /* Bluetooth */,
+				94EA7EE91AABE5F4DFED7520 /* Export */,
+				111660E5ABDF2BFA9F237EAF /* Persistence */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		6C9344396CFDF0B941C1FBF4 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				D7A32FC9778B48BC7A276399 /* RecoveryKit */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		860EB8005EE295C221490ED1 /* Bluetooth */ = {
+			isa = PBXGroup;
+			children = (
+				B347E312D54A76D7151A7F7A /* HeartRateClient.swift */,
+				0B381017F774112CF46080A3 /* HeartRateClientProtocol.swift */,
+				0E47C78BF2E5C99B40E0BC4E /* HeartRateSensorIdentifiers.swift */,
+			);
+			path = Bluetooth;
+			sourceTree = "<group>";
+		};
+		873A5AD9F4C812C955AFF872 /* MorningMeasurement */ = {
+			isa = PBXGroup;
+			children = (
+				F4A2B82682D31D9C3E11A63A /* MeasurementSessionView.swift */,
+				205040B9FDA737AF103EEA30 /* MeasurementSessionViewModel.swift */,
+				0A418FC21CDE33ADCD13D0C0 /* ResultsAnalyzer.swift */,
+				C7F481B6DA03B3540201A210 /* ScanLineProgress.swift */,
+			);
+			path = MorningMeasurement;
+			sourceTree = "<group>";
+		};
+		8B38E1548D44B19D76B95E08 /* Renova */ = {
+			isa = PBXGroup;
+			children = (
+				4317BF006E901FE9B7AE0A53 /* Assets.xcassets */,
+				9D044FDF395C008D0D4DE73D /* LaunchScreen.storyboard */,
+				DE627FD12F8DBDB54F793267 /* App */,
+				D89AC3E7BC479EE04AD5E36B /* Features */,
+				61782EB5D3C55A7F2D9A22C8 /* Services */,
+			);
+			path = Renova;
+			sourceTree = "<group>";
+		};
+		94EA7EE91AABE5F4DFED7520 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				2D630D8E11BC804EC040A2EB /* ExportModels.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		9C48BA2A3491B180EC8926D1 = {
+			isa = PBXGroup;
+			children = (
+				6C9344396CFDF0B941C1FBF4 /* Packages */,
+				8B38E1548D44B19D76B95E08 /* Renova */,
+				B302BA1CEA97201E8E73E6B3 /* RenovaTests */,
+				1757E0A07CDE0761E045E317 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B20A4508FF7A612676579F0A /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				12F958DC54F33670D9261A37 /* DailyQuote.swift */,
+				B58BD6CD05109A6D160F161D /* TodayView.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		B302BA1CEA97201E8E73E6B3 /* RenovaTests */ = {
+			isa = PBXGroup;
+			children = (
+				9749570BE58C8B6BD257FED3 /* RenovaTests.swift */,
+			);
+			path = RenovaTests;
+			sourceTree = "<group>";
+		};
+		D89AC3E7BC479EE04AD5E36B /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				49B3BB85BC5DC458995B30D6 /* History */,
+				873A5AD9F4C812C955AFF872 /* MorningMeasurement */,
+				4B5847F8F273E174B13803A8 /* Onboarding */,
+				144C128680CED844BCF63564 /* Questionnaire */,
+				5E930D5293B267242C19E080 /* Settings */,
+				0FE0754738AA91B1EA07F3A9 /* Shared */,
+				B20A4508FF7A612676579F0A /* Today */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		DE627FD12F8DBDB54F793267 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				4F6848CA1E0FC38E22E54D54 /* AppViewModel.swift */,
+				2D478E96543498D13AE3EDDA /* ControlGridTabBar.swift */,
+				F914A1925EA3BCC87CEFD7BF /* MainTabView.swift */,
+				58FE73E4E12A33A66BE7541B /* RenovaApp.swift */,
+				499B3C5777479D689D35D807 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		14C006F6C44794C0614DA2A1 /* RenovaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1D72E06602C50F844A0C7EE /* Build configuration list for PBXNativeTarget "RenovaTests" */;
+			buildPhases = (
+				CCF8AB7F93BCDB53A5CDBABC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EF75EB766838B5CFF69BBDAF /* PBXTargetDependency */,
+			);
+			name = RenovaTests;
+			packageProductDependencies = (
+			);
+			productName = RenovaTests;
+			productReference = 52DA87001F51480AD60D1D56 /* RenovaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		1CBF2BBAD9A8DBC18D73C01B /* Renova */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B7895163C5C1EC23B1CAD34 /* Build configuration list for PBXNativeTarget "Renova" */;
+			buildPhases = (
+				7F3728B11479A05D623AF16A /* Sources */,
+				0E5D27AC8E78FC75DDA841B3 /* Resources */,
+				436E69FE514E1FF455DD70BB /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Renova;
+			packageProductDependencies = (
+				84DB7888635B9BE68E537DED /* RecoveryKit */,
+			);
+			productName = Renova;
+			productReference = F2F06FFD8D512DC5984C8C21 /* Renova.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9A98F651A13D3C2FDF081986 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1CBF2BBAD9A8DBC18D73C01B = {
+						DevelopmentTeam = Q68R2888XW;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = B962C4014349BC49FEA84126 /* Build configuration list for PBXProject "Renova" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 9C48BA2A3491B180EC8926D1;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DFD18214F74EA80F427F8C02 /* XCLocalSwiftPackageReference "Packages/RecoveryKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 1757E0A07CDE0761E045E317 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1CBF2BBAD9A8DBC18D73C01B /* Renova */,
+				14C006F6C44794C0614DA2A1 /* RenovaTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0E5D27AC8E78FC75DDA841B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DDD6B42F16A771D057FA3B20 /* Assets.xcassets in Resources */,
+				06B1EAD0A47E99ECE6EFDD25 /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7F3728B11479A05D623AF16A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4FC8FC10457250D3829EC8B4 /* AppContainer.swift in Sources */,
+				1D3A9F6C49A2A2E2138B8BEB /* AppViewModel.swift in Sources */,
+				1C711819C6C1369E5E385BA5 /* ControlGridSlider.swift in Sources */,
+				1E7ACA0D1F9349684905EF5E /* ControlGridTabBar.swift in Sources */,
+				C890D93ECE2D5019F2AD5F2D /* ControlGridTheme.swift in Sources */,
+				CE65EB5ADC339ADF5FB84127 /* ControlGridToggle.swift in Sources */,
+				F987F54A4B26D042A161BB8B /* DailyQuote.swift in Sources */,
+				28CCA201337510DDEF255CA6 /* DayDetailView.swift in Sources */,
+				FA92BB719A264A0896CBD997 /* DayRepository.swift in Sources */,
+				490CEB3941769B1A9CBA4D74 /* ExportModels.swift in Sources */,
+				6454E0FEB425782033F159D1 /* HeartRateClient.swift in Sources */,
+				B37B254D7466B4D9A83D4503 /* HeartRateClientProtocol.swift in Sources */,
+				82A06D15347A32E3C485605E /* HeartRateSensorIdentifiers.swift in Sources */,
+				740C324B7AA033F555DE9BCB /* HistoryView.swift in Sources */,
+				597D27C3B489B039E0C092EC /* MainTabView.swift in Sources */,
+				66C1309A9DBC8B5A3351168B /* MeasurementSessionView.swift in Sources */,
+				AF34F02390D3D43C7F5B00CC /* MeasurementSessionViewModel.swift in Sources */,
+				7AED08520DBC918BB1E66450 /* Models.swift in Sources */,
+				1D463A5800A0F38FDA6F14D3 /* OnboardingView.swift in Sources */,
+				EA9EE65D539109E0C10828A0 /* QuestionnaireView.swift in Sources */,
+				CC818CDEF16D9BD356F8C61F /* RecoveryExplainerCard.swift in Sources */,
+				EFAD93CC9B92A77247D3C062 /* RecoveryExplainers.swift in Sources */,
+				6EBE4217837E0029E83EB4DB /* RenovaApp.swift in Sources */,
+				01B071E3896CE142D06FE995 /* ResultsAnalyzer.swift in Sources */,
+				2CB6B90066F57DB7BC8F0C05 /* RootView.swift in Sources */,
+				E13388CAE4743DB0D7253288 /* ScanLineProgress.swift in Sources */,
+				EC6A64AA66D25AB7A4D29B9D /* SettingsView.swift in Sources */,
+				9E169AD79E89BCFD0E716E6E /* ShareSheet.swift in Sources */,
+				37B7F795634C1DC59F5AD990 /* TodayView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCF8AB7F93BCDB53A5CDBABC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				530BAFCBB042130E6D52B4E0 /* RenovaTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EF75EB766838B5CFF69BBDAF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1CBF2BBAD9A8DBC18D73C01B /* Renova */;
+			targetProxy = 96A59C9DB7A8DA65073917C4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5085B162A1396083C70F619E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		83483D9B84F2035FDD1854F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q68R2888XW;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Renova;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is used to connect to your heart-rate chest strap for morning heart-rate measurements.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zringstrom.recoverydeck;
+				PRODUCT_NAME = Renova;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		92443B0CEB82AA7842443919 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zringstrom.RenovaTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Renova.app/Renova";
+			};
+			name = Release;
+		};
+		9BBCA682961FE314257C3967 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zringstrom.RenovaTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Renova.app/Renova";
+			};
+			name = Debug;
+		};
+		DB6F711E1B2994ECAACB5B2C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DC4FE43BCD38909FB82D8300 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q68R2888XW;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Renova;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is used to connect to your heart-rate chest strap for morning heart-rate measurements.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zringstrom.recoverydeck;
+				PRODUCT_NAME = Renova;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1B7895163C5C1EC23B1CAD34 /* Build configuration list for PBXNativeTarget "Renova" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DC4FE43BCD38909FB82D8300 /* Debug */,
+				83483D9B84F2035FDD1854F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B1D72E06602C50F844A0C7EE /* Build configuration list for PBXNativeTarget "RenovaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9BBCA682961FE314257C3967 /* Debug */,
+				92443B0CEB82AA7842443919 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B962C4014349BC49FEA84126 /* Build configuration list for PBXProject "Renova" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB6F711E1B2994ECAACB5B2C /* Debug */,
+				5085B162A1396083C70F619E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		DFD18214F74EA80F427F8C02 /* XCLocalSwiftPackageReference "Packages/RecoveryKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/RecoveryKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		84DB7888635B9BE68E537DED /* RecoveryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RecoveryKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 9A98F651A13D3C2FDF081986 /* Project object */;
+}

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Field Log</title>
+<style>
+  :root{
+    --bg:#181a16;
+    --surface:#20241d;
+    --surface-2:#262b20;
+    --line:#363c2e;
+    --line-strong:#4a5240;
+    --ink:#eef0e6;
+    --ink-dim:#a3aa96;
+    --ink-faint:#6d7462;
+    --accent:#c8a13a;
+    --accent-ink:#20240c;
+    --good:#5c7a52;
+    --rust:#b5482f;
+    --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="light"]{
+    --bg:#e9e6da; --surface:#f6f4ea; --surface-2:#efece0; --line:#cdc8b3; --line-strong:#a9a382;
+    --ink:#211f14; --ink-dim:#5b573f; --ink-faint:#8b8467; --accent:#8a6a1e; --accent-ink:#fbf6e6; --good:#3f5c37; --rust:#93381f;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#e9e6da; --surface:#f6f4ea; --surface-2:#efece0; --line:#cdc8b3; --line-strong:#a9a382;
+      --ink:#211f14; --ink-dim:#5b573f; --ink-faint:#8b8467; --accent:#8a6a1e; --accent-ink:#fbf6e6; --good:#3f5c37; --rust:#93381f;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    padding:40px 16px 90px; -webkit-font-smoothing:antialiased;
+  }
+  .device{width:100%; max-width:412px; background:var(--surface); border:1px solid var(--line-strong); box-shadow:0 30px 60px -25px rgba(0,0,0,0.5);}
+
+  .header{padding:22px 22px 18px; border-bottom:2px dashed var(--line-strong); position:relative;}
+  .header-top{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:12px;}
+  .header h1{font-family:var(--sans); font-size:25px; font-weight:800; text-transform:uppercase; letter-spacing:0.02em; margin:0 0 6px; text-wrap:balance;}
+  .header-sub{font-family:var(--mono); font-size:11.5px; color:var(--ink-dim); line-height:1.5; max-width:33ch;}
+  .stamp-corner{
+    position:absolute; top:18px; right:20px; width:56px; height:56px; border:2px solid var(--accent); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; transform:rotate(-8deg); opacity:0.85;
+  }
+  .stamp-corner span{font-family:var(--mono); font-size:8px; font-weight:700; letter-spacing:0.06em; color:var(--accent); text-align:center; line-height:1.2;}
+
+  .content{padding:6px 22px 22px;}
+
+  .sec-label{font-family:var(--mono); font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-faint); margin:22px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line);}
+  .sec-label:first-of-type{margin-top:16px;}
+
+  .brief-card{border:1px solid var(--line); background:var(--surface-2); padding:16px 16px 17px; position:relative;}
+  .brief-card::before, .brief-card::after{content:""; position:absolute; width:8px; height:8px; border-color:var(--line-strong); border-style:solid;}
+  .brief-card::before{top:-1px; left:-1px; border-width:2px 0 0 2px;}
+  .brief-card::after{bottom:-1px; right:-1px; border-width:0 2px 2px 0;}
+  .brief-card p{margin:0; font-size:13.5px; line-height:1.65; color:var(--ink-dim);}
+
+  .manifest{display:flex; flex-direction:column; gap:1px; border:1px solid var(--line);}
+  .manifest-row{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:var(--surface-2); border-bottom:1px solid var(--line);}
+  .manifest-row:last-child{border-bottom:none;}
+  .manifest-name{font-size:13px;}
+  .manifest-tag{font-family:var(--mono); font-size:10px; letter-spacing:0.04em; padding:3px 8px; border:1px solid var(--line-strong); text-transform:uppercase;}
+  .manifest-tag.issued{color:var(--good); border-color:var(--good);}
+  .manifest-tag.na{color:var(--ink-faint);}
+
+  .warn-stamp{border:2px solid var(--rust); background:color-mix(in srgb, var(--rust) 8%, var(--surface-2)); padding:15px 16px 16px; position:relative; margin-top:4px;}
+  .warn-stamp-head{font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--rust); margin-bottom:8px; display:flex; align-items:center; gap:7px;}
+  .warn-stamp-head::before{content:"▲";}
+  .warn-stamp p{margin:0; font-family:var(--sans); font-size:12.5px; line-height:1.6; color:var(--ink-dim);}
+  .warn-stamp p + p{margin-top:8px;}
+
+  .field{display:flex; flex-direction:column; gap:6px; margin-top:4px;}
+  .field label{font-size:10.5px; color:var(--ink-faint); font-family:var(--mono); letter-spacing:0.03em;}
+  .field input{background:var(--surface-2); border:1px solid var(--line-strong); color:var(--ink); font-family:var(--mono); font-size:13.5px; padding:11px 12px; outline:none;}
+  .field input:focus{border-color:var(--accent);}
+
+  .order-row{display:flex; justify-content:space-between; align-items:center; padding:13px 14px; border:1px solid var(--line); background:var(--surface-2);}
+  .order-left{display:flex; flex-direction:column; gap:3px;}
+  .order-name{font-size:13.5px; text-transform:uppercase; font-weight:700; letter-spacing:0.02em;}
+  .order-meta{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
+  .order-meta b{color:var(--accent);}
+  .stampbox{width:70px; height:34px; border:2px solid var(--line-strong); position:relative; cursor:pointer; background:var(--surface); display:flex; -webkit-tap-highlight-color:transparent; flex-shrink:0;}
+  .stampbox .half{flex:1; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--ink-faint); letter-spacing:0.02em;}
+  .stampbox .half.n{border-right:1px solid var(--line-strong);}
+  .stampbox[data-state="no"] .half.n{background:var(--surface-2); color:var(--good); transform:rotate(-3deg);}
+  .stampbox[data-state="yes"] .half.y{background:var(--accent); color:var(--accent-ink); transform:rotate(-3deg);}
+
+  .submit-wrap{margin-top:24px;}
+  .submit{
+    width:100%; padding:16px; border:2px solid var(--accent); background:var(--accent); color:var(--accent-ink);
+    font-family:var(--sans); font-size:13.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;
+  }
+  .submit:active{transform:translateY(1px);}
+  .footer-note{text-align:center; font-family:var(--mono); font-size:10px; color:var(--ink-faint); margin-top:12px; letter-spacing:0.06em;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="header">
+    <div class="stamp-corner"><span>ENTRY<br/>001</span></div>
+    <div class="header-top"><span>MISSION BRIEF</span><span>SAT 02 AUG</span></div>
+    <h1>Before First Light</h1>
+    <div class="header-sub">Standing orders for the daily readiness log — read once, follow every morning.</div>
+  </div>
+
+  <div class="content">
+    <div class="sec-label">00 — ORDERS</div>
+    <div class="brief-card">
+      <p>Every morning, log condition before you move: a short field questionnaire, then a guided Polar H10 reading of rMSSD and orthostatic HR. Roughly three minutes. Nothing is transmitted off the device.</p>
+    </div>
+
+    <div class="sec-label">01 — MANIFEST</div>
+    <div class="manifest">
+      <div class="manifest-row"><span class="manifest-name">Morning questionnaire</span><span class="manifest-tag issued">ISSUED</span></div>
+      <div class="manifest-row"><span class="manifest-name">H10 rMSSD / orthostatic test</span><span class="manifest-tag issued">GUIDED</span></div>
+      <div class="manifest-row"><span class="manifest-name">Commercial readiness score</span><span class="manifest-tag na">N/A</span></div>
+    </div>
+
+    <div class="sec-label">02 — EQUIPMENT &amp; CAUTIONS</div>
+    <div class="warn-stamp">
+      <div class="warn-stamp-head">Read before deployment</div>
+      <p>Requires a Polar H10 chest strap over Bluetooth. Not a medical device — for personal training journaling only.</p>
+      <p>If you carry a heart condition or feel dizzy on standing, clear orthostatic testing with a clinician first. Halt at once if lightheaded.</p>
+    </div>
+
+    <div class="sec-label">03 — OPERATOR ID</div>
+    <div class="field">
+      <label>NAME FOR GREETING — OPTIONAL, NOT AN ACCOUNT</label>
+      <input type="text" id="ob-name" placeholder="e.g. ZACH" />
+    </div>
+
+    <div class="sec-label">04 — STANDING ORDERS</div>
+    <div class="order-row">
+      <div class="order-left">
+        <div class="order-name">Daily reminder</div>
+        <div class="order-meta"><b>0630H</b> · "Questionnaire first — then H10."</div>
+      </div>
+      <div class="stampbox" data-toggle data-state="yes"><div class="half n" data-val="no">NO</div><div class="half y" data-val="yes">YES</div></div>
+    </div>
+
+    <div class="submit-wrap">
+      <button class="submit" id="start">Begin field entry</button>
+      <div class="footer-note">RECOVERYDECK · FIELD LOG · LOCAL RECORD ONLY</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-toggle]').forEach(box => {
+    box.querySelectorAll('.half').forEach(half => {
+      half.addEventListener('click', () => { box.dataset.state = half.dataset.val; });
+    });
+  });
+  document.getElementById('start').addEventListener('click', () => {
+    alert('Mockup only — this would begin the field entry.');
+  });
+</script>
+</body>
+</html>

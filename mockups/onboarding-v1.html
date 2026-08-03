@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Telemetry</title>
+<style>
+  :root{
+    --bg:#0a0d0f;
+    --surface:#12171a;
+    --surface-2:#171d20;
+    --line:#232b2f;
+    --line-strong:#31393d;
+    --ink:#e8edee;
+    --ink-dim:#8a9599;
+    --ink-faint:#5b6568;
+    --accent:#ff5a1f;
+    --accent-dim:#7a3018;
+    --good:#3ddc97;
+    --warn:#ffcc4d;
+    --mono: ui-monospace, "SF Mono", "Roboto Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f0;
+    --surface:#ffffff;
+    --surface-2:#f5f7f6;
+    --line:#d7dedb;
+    --line-strong:#c2cbc7;
+    --ink:#0e1414;
+    --ink-dim:#54615f;
+    --ink-faint:#8b9895;
+    --accent:#d94a15;
+    --accent-dim:#f3c3ab;
+    --good:#0f8f5c;
+    --warn:#a8760a;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#eef1f0; --surface:#ffffff; --surface-2:#f5f7f6; --line:#d7dedb; --line-strong:#c2cbc7;
+      --ink:#0e1414; --ink-dim:#54615f; --ink-faint:#8b9895; --accent:#d94a15; --accent-dim:#f3c3ab; --good:#0f8f5c; --warn:#a8760a;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 800px at 20% -10%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
+      var(--bg);
+    color:var(--ink); font-family:var(--sans);
+    min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
+    padding:40px 16px 80px; -webkit-font-smoothing:antialiased;
+  }
+  .device{
+    width:100%; max-width:412px; background:var(--surface); border:1px solid var(--line);
+    border-radius:6px; overflow:hidden; box-shadow:0 30px 60px -20px rgba(0,0,0,0.5);
+  }
+  .hud{
+    padding:16px 18px 14px; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, transparent), transparent);
+    position:relative;
+  }
+  .hud::after{content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:linear-gradient(90deg, var(--accent), transparent 70%);}
+  .hud-row{display:flex; justify-content:space-between; align-items:baseline;}
+  .hud-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-faint);}
+  .hud-live{display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10px; color:var(--warn); letter-spacing:0.1em;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--warn); box-shadow:0 0 8px var(--warn); animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+  @media (prefers-reduced-motion: reduce){.dot{animation:none;}}
+
+  .body{padding:6px 18px 20px;}
+
+  .boot-block{padding:22px 0 6px;}
+  .boot-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:10px;}
+  .boot-title{font-family:var(--mono); font-size:26px; font-weight:700; letter-spacing:0.01em; line-height:1.15; margin:0 0 10px;}
+  .boot-title span{color:var(--accent);}
+  .boot-sub{font-size:14px; color:var(--ink-dim); line-height:1.55; max-width:36ch;}
+
+  .sec{
+    display:flex; align-items:center; gap:8px; margin:26px 0 12px;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:var(--ink-faint);
+  }
+  .sec::after{content:""; flex:1; height:1px; background:var(--line);}
+
+  .checklist{border:1px solid var(--line); border-radius:4px; background:var(--surface-2); overflow:hidden;}
+  .check-row{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; border-bottom:1px solid var(--line);
+    font-family:var(--mono); font-size:12px;
+  }
+  .check-row:last-child{border-bottom:none;}
+  .check-led{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .check-led.online{background:var(--good); box-shadow:0 0 8px color-mix(in srgb, var(--good) 70%, transparent);}
+  .check-led.off{background:var(--ink-faint);}
+  .check-name{flex:1; color:var(--ink); letter-spacing:0.02em;}
+  .check-status{color:var(--ink-faint); letter-spacing:0.06em; font-size:10.5px; text-transform:uppercase;}
+  .check-status.online{color:var(--good);}
+
+  .callout{
+    border:1px solid var(--warn); border-radius:4px; background:color-mix(in srgb, var(--warn) 8%, var(--surface-2));
+    padding:14px 14px 15px;
+  }
+  .callout-head{display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--warn); margin-bottom:8px;}
+  .callout-head::before{content:"⚠"; font-size:12px;}
+  .callout p{margin:0; font-size:12.5px; line-height:1.6; color:var(--ink-dim);}
+  .callout p + p{margin-top:8px;}
+
+  .field{display:flex; flex-direction:column; gap:6px; margin-top:4px;}
+  .field label{font-size:11px; color:var(--ink-faint); font-family:var(--mono); letter-spacing:0.04em;}
+  .field input{
+    background:var(--surface-2); border:1px solid var(--line-strong); border-radius:3px; color:var(--ink);
+    font-family:var(--mono); font-size:13.5px; padding:11px 12px; outline:none;
+  }
+  .field input:focus{border-color:var(--accent);}
+  .field input::placeholder{color:var(--ink-faint);}
+
+  .notify-row{
+    display:flex; align-items:center; justify-content:space-between; padding:14px; border:1px solid var(--line);
+    border-radius:4px; background:var(--surface-2);
+  }
+  .notify-left{display:flex; flex-direction:column; gap:3px;}
+  .notify-name{font-size:13.5px; color:var(--ink);}
+  .notify-meta{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
+  .notify-meta b{color:var(--accent); font-weight:600;}
+  .rocker{display:flex; border:1px solid var(--line-strong); border-radius:3px; overflow:hidden; font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; flex-shrink:0;}
+  .rocker button{border:none; background:var(--surface); color:var(--ink-faint); padding:6px 12px; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+  .rocker button + button{border-left:1px solid var(--line-strong);}
+  .rocker button.off-active{background:var(--surface-2); color:var(--good);}
+  .rocker button.on-active{background:var(--accent); color:#160a04;}
+
+  .submit-wrap{margin-top:26px;}
+  .submit{
+    width:100%; padding:16px; border-radius:4px; border:1px solid var(--accent); background:var(--accent); color:#160a04;
+    font-family:var(--mono); font-size:13px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer;
+    box-shadow:0 8px 24px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .submit:active{transform:scale(0.98);}
+  .footer-note{text-align:center; font-family:var(--mono); font-size:10px; color:var(--ink-faint); margin-top:12px; letter-spacing:0.06em;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="hud">
+    <div class="hud-row">
+      <div class="hud-tag">RECOVERYDECK / FIRST BOOT</div>
+      <div class="hud-live"><span class="dot"></span>SETUP</div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="boot-block">
+      <div class="boot-tag">SYSTEM READOUT</div>
+      <div class="boot-title">Every morning, <span>read the engine</span> before you run it.</div>
+      <div class="boot-sub">Fatigue, HRV, and orthostatic HR captured in one 3-minute channel — no cloud, no dashboard elsewhere. Just you and the readout.</div>
+    </div>
+
+    <div class="sec">REPLACES</div>
+    <div class="checklist">
+      <div class="check-row"><span class="check-led online"></span><span class="check-name">7-question morning scan</span><span class="check-status online">IN-APP</span></div>
+      <div class="check-row"><span class="check-led online"></span><span class="check-name">rMSSD + orthostatic HR, guided</span><span class="check-status online">H10 LINK</span></div>
+      <div class="check-row"><span class="check-led off"></span><span class="check-name">Cloud sync / commercial score</span><span class="check-status">NOT USED</span></div>
+    </div>
+
+    <div class="sec">REQUIREMENTS</div>
+    <div class="callout">
+      <div class="callout-head">Read before first scan</div>
+      <p>Requires a Polar H10 over Bluetooth. Not a medical device — for personal training journaling only.</p>
+      <p>Consult a clinician before orthostatic testing if you have a heart condition or dizziness on standing. Stop immediately if lightheaded.</p>
+    </div>
+
+    <div class="sec">OPERATOR</div>
+    <div class="field">
+      <label>DISPLAY NAME — OPTIONAL, FOR GREETING ONLY</label>
+      <input type="text" id="ob-name" placeholder="e.g. ZACH" />
+    </div>
+
+    <div class="sec">DAILY CHANNEL</div>
+    <div class="notify-row">
+      <div class="notify-left">
+        <div class="notify-name">Morning reminder</div>
+        <div class="notify-meta"><b>06:30</b> · "Questionnaire first — then H10."</div>
+      </div>
+      <div class="rocker" data-toggle>
+        <button class="off" data-val="off">OFF</button>
+        <button class="on on-active" data-val="on">ON</button>
+      </div>
+    </div>
+
+    <div class="submit-wrap">
+      <button class="submit" id="start">Initialize morning scan</button>
+      <div class="footer-note">RECOVERYDECK · LOCAL ONLY · NO CLOUD</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-toggle]').forEach(group => {
+    const offBtn = group.querySelector('.off');
+    const onBtn = group.querySelector('.on');
+    offBtn.addEventListener('click', () => { offBtn.classList.add('off-active'); onBtn.classList.remove('on-active'); });
+    onBtn.addEventListener('click', () => { onBtn.classList.add('on-active'); offBtn.classList.remove('off-active'); });
+  });
+  document.getElementById('start').addEventListener('click', () => {
+    alert('Mockup only — this would begin the readiness scan.');
+  });
+</script>
+</body>
+</html>

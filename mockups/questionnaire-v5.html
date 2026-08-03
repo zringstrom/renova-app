@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Control Grid</title>
+<style>
+  :root{
+    --bg:#e2e2de;
+    --surface:#fbfbf9;
+    --surface-2:#f0f0ec;
+    --line:#d2d2cb;
+    --line-strong:#adada2;
+    --ink:#0a0a08;
+    --ink-dim:#5f5f57;
+    --ink-faint:#8f8f84;
+    --accent:#e8331b;
+    --accent-2:#1b6e5c;
+    --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --grot: -apple-system, "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --bg:#151513;
+    --surface:#1c1c19;
+    --surface-2:#232320;
+    --line:#33332e;
+    --line-strong:#48483f;
+    --ink:#f2f2ec;
+    --ink-dim:#adada2;
+    --ink-faint:#75756a;
+    --accent:#ff5a3d;
+    --accent-2:#3ddcb8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#151513; --surface:#1c1c19; --surface-2:#232320; --line:#33332e; --line-strong:#48483f;
+      --ink:#f2f2ec; --ink-dim:#adada2; --ink-faint:#75756a; --accent:#ff5a3d; --accent-2:#3ddcb8;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--grot);
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    padding:36px 16px 90px; -webkit-font-smoothing:antialiased;
+  }
+  .device{
+    width:100%; max-width:412px; background:var(--surface); border:1px solid var(--line);
+  }
+  .band{
+    padding:16px 20px; border-bottom:3px solid var(--ink); display:flex; justify-content:space-between; align-items:center;
+  }
+  .band-title{font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em;}
+  .band-meta{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); text-align:right; line-height:1.4;}
+
+  .grid-row-labels{
+    display:grid; grid-template-columns:1fr repeat(7, 1fr); font-family:var(--mono); font-size:9.5px; color:var(--ink-faint);
+    padding:10px 20px 4px; border-bottom:1px solid var(--line);
+  }
+  .grid-row-labels span{text-align:center;}
+  .grid-row-labels span:first-child{text-align:left;}
+
+  .content{padding:0 0 20px;}
+
+  .sec-label{
+    font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-faint);
+    padding:16px 20px 8px;
+  }
+
+  .metric{padding:12px 20px 16px; border-bottom:1px solid var(--line);}
+  .metric-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;}
+  .metric-name{font-size:13.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.01em;}
+  .metric-val{font-family:var(--mono); font-size:13px; color:var(--ink-faint); font-variant-numeric:tabular-nums;}
+  .metric-val.set{color:var(--accent); font-weight:700;}
+  .anchors{display:flex; justify-content:space-between; font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); margin-bottom:10px;}
+
+  /* real range slider, thumb hidden until touched */
+  .slider-track{position:relative; height:28px; display:flex; align-items:center;}
+  .rail{position:absolute; left:0; right:0; height:2px; background:var(--line-strong);}
+  .rail-fill{position:absolute; left:0; height:2px; background:var(--accent); width:0%;}
+  .ticks{position:absolute; left:0; right:0; display:flex; justify-content:space-between; top:50%; transform:translateY(-50%); pointer-events:none;}
+  .ticks span{width:1px; height:6px; background:var(--line-strong);}
+  input[type="range"]{
+    -webkit-appearance:none; appearance:none; width:100%; height:28px; background:transparent; position:relative; margin:0; cursor:pointer;
+  }
+  input[type="range"]::-webkit-slider-runnable-track{height:2px; background:transparent;}
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:0; height:0; border-radius:50%; background:var(--accent); margin-top:0;
+    box-shadow:0 0 0 0 rgba(0,0,0,0); transition:width .1s ease, height .1s ease; cursor:pointer;
+  }
+  input[type="range"].touched::-webkit-slider-thumb{
+    width:20px; height:20px; box-shadow:0 2px 6px rgba(0,0,0,0.25); border:3px solid var(--surface);
+  }
+  input[type="range"]::-moz-range-track{height:2px; background:transparent;}
+  input[type="range"]::-moz-range-thumb{
+    width:0; height:0; border-radius:50%; background:var(--accent); border:none; transition:width .1s ease, height .1s ease;
+  }
+  input[type="range"].touched::-moz-range-thumb{ width:20px; height:20px; border:3px solid var(--surface); }
+
+  details.ctx{border:1px solid var(--line); margin:16px 20px 0;}
+  details.ctx summary{list-style:none; cursor:pointer; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-dim);}
+  details.ctx summary::-webkit-details-marker{display:none;}
+  details.ctx summary::after{content:"▸"; color:var(--ink-faint);}
+  details.ctx[open] summary::after{content:"▾";}
+  .ctx-body{padding:2px 14px 14px; display:flex; flex-direction:column; gap:10px;}
+  .field{display:flex; flex-direction:column; gap:5px;}
+  .field label{font-size:10.5px; color:var(--ink-faint); font-family:var(--mono);}
+  .field input, .field textarea{background:var(--surface-2); border:1px solid var(--line-strong); color:var(--ink); font-family:var(--grot); font-size:13.5px; padding:8px 10px; outline:none;}
+  .field input:focus, .field textarea:focus{border-color:var(--accent);}
+  .field-row{display:flex; gap:8px;}
+  .field-row .field{flex:1;}
+
+  /* dense table rows with rocker switch */
+  .habit-table{margin:0 20px;}
+  .habit-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line);}
+  .habit-row:first-child{border-top:1px solid var(--line);}
+  .habit-label{font-size:12.5px;}
+  .switch{
+    width:46px; height:24px; border:1px solid var(--line-strong); border-radius:12px; position:relative; cursor:pointer; background:var(--surface-2);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .switch .knob{
+    position:absolute; top:1px; left:1px; width:20px; height:20px; border-radius:50%; background:var(--ink-faint);
+    transition:transform .16s ease, background .16s ease;
+  }
+  .switch[data-state="yes"]{background:color-mix(in srgb, var(--accent) 18%, var(--surface-2)); border-color:var(--accent);}
+  .switch[data-state="yes"] .knob{transform:translateX(21px); background:var(--accent);}
+  .switch[data-state="no"]{background:color-mix(in srgb, var(--accent-2) 14%, var(--surface-2)); border-color:var(--accent-2);}
+  .switch[data-state="no"] .knob{background:var(--accent-2);}
+  .switch-label{font-family:var(--mono); font-size:9px; width:34px; text-align:right; color:var(--ink-faint); letter-spacing:0.04em;}
+  .habit-right{display:flex; align-items:center; gap:8px;}
+
+  textarea.notes{width:100%; resize:vertical; min-height:64px; background:var(--surface-2); border:1px solid var(--line-strong); color:var(--ink); font-family:var(--grot); font-size:13.5px; padding:10px 12px; outline:none;}
+  textarea.notes:focus{border-color:var(--accent);}
+  .notes-wrap{margin:0 20px;}
+
+  .submit-wrap{margin:24px 20px 0;}
+  .status-row{display:flex; justify-content:space-between; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin-bottom:8px;}
+  .status-row .n{font-weight:700; color:var(--ink);}
+  .submit{
+    width:100%; padding:15px; border:2px solid var(--ink); background:var(--ink); color:var(--surface);
+    font-family:var(--grot); font-size:13px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; cursor:not-allowed;
+    opacity:0.35; transition:all .2s ease;
+  }
+  .submit.ready{background:var(--accent); border-color:var(--accent); color:#fff8f6; opacity:1; cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="band">
+    <div class="band-title">Readiness Input</div>
+    <div class="band-meta">SAT 02 AUG 2026<br/>06:41 LOCAL</div>
+  </div>
+
+  <div class="grid-row-labels">
+    <span>METRIC</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+  </div>
+
+  <div class="content">
+    <div class="sec-label">BODY</div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Fatigue</div><div class="metric-val">—</div></div>
+      <div class="anchors"><span>Feeling fresh</span><span>Exhausted</span></div>
+      <div class="slider-track">
+        <div class="rail"></div><div class="rail-fill"></div>
+        <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input type="range" min="1" max="7" step="1" value="1" data-untouched="true" />
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Mood</div><div class="metric-val">—</div></div>
+      <div class="anchors"><span>Very low</span><span>Great</span></div>
+      <div class="slider-track">
+        <div class="rail"></div><div class="rail-fill"></div>
+        <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input type="range" min="1" max="7" step="1" value="1" data-untouched="true" />
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Soreness / heavy legs</div><div class="metric-val">—</div></div>
+      <div class="anchors"><span>Very sore</span><span>None</span></div>
+      <div class="slider-track">
+        <div class="rail"></div><div class="rail-fill"></div>
+        <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input type="range" min="1" max="7" step="1" value="1" data-untouched="true" />
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Sleep quality</div><div class="metric-val">—</div></div>
+      <div class="anchors"><span>Terrible</span><span>Excellent</span></div>
+      <div class="slider-track">
+        <div class="rail"></div><div class="rail-fill"></div>
+        <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input type="range" min="1" max="7" step="1" value="1" data-untouched="true" />
+      </div>
+    </div>
+
+    <div class="sec-label">STRESS</div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Work stress</div><div class="metric-val">—</div></div>
+      <div class="anchors"><span>Low</span><span>Very high</span></div>
+      <div class="slider-track">
+        <div class="rail"></div><div class="rail-fill"></div>
+        <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input type="range" min="1" max="7" step="1" value="1" data-untouched="true" />
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Relationship stress</div><div class="metric-val">—</div></div>
+      <div class="anchors"><span>Low</span><span>Very high</span></div>
+      <div class="slider-track">
+        <div class="rail"></div><div class="rail-fill"></div>
+        <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input type="range" min="1" max="7" step="1" value="1" data-untouched="true" />
+      </div>
+    </div>
+
+    <div class="metric" data-metric>
+      <div class="metric-head"><div class="metric-name">Overall life stress</div><div class="metric-val">—</div></div>
+      <div class="anchors"><span>Low</span><span>Very high</span></div>
+      <div class="slider-track">
+        <div class="rail"></div><div class="rail-fill"></div>
+        <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <input type="range" min="1" max="7" step="1" value="1" data-untouched="true" />
+      </div>
+    </div>
+
+    <div class="sec-label">CONTEXT</div>
+    <details class="ctx">
+      <summary>Caffeine &amp; last meal</summary>
+      <div class="ctx-body">
+        <div class="field-row">
+          <div class="field"><label>Last caffeine — time</label><input type="time" value="07:15" /></div>
+          <div class="field"><label>Amount (mg)</label><input type="number" placeholder="95" /></div>
+        </div>
+        <div class="field"><label>Last meal — time</label><input type="time" value="20:30" /></div>
+      </div>
+    </details>
+
+    <div class="sec-label">YESTERDAY</div>
+    <div class="habit-table">
+      <div class="habit-row"><span class="habit-label">Alcohol last night</span><div class="habit-right"><span class="switch-label" data-role="lbl">NO</span><div class="switch" data-toggle data-state="no"><div class="knob"></div></div></div></div>
+      <div class="habit-row"><span class="habit-label">Intense training yesterday</span><div class="habit-right"><span class="switch-label" data-role="lbl">NO</span><div class="switch" data-toggle data-state="no"><div class="knob"></div></div></div></div>
+      <div class="habit-row"><span class="habit-label">Long training yesterday</span><div class="habit-right"><span class="switch-label" data-role="lbl">NO</span><div class="switch" data-toggle data-state="no"><div class="knob"></div></div></div></div>
+      <div class="habit-row"><span class="habit-label">Travel</span><div class="habit-right"><span class="switch-label" data-role="lbl">NO</span><div class="switch" data-toggle data-state="no"><div class="knob"></div></div></div></div>
+      <div class="habit-row"><span class="habit-label">Late night</span><div class="habit-right"><span class="switch-label" data-role="lbl">NO</span><div class="switch" data-toggle data-state="no"><div class="knob"></div></div></div></div>
+      <div class="habit-row"><span class="habit-label">Feeling sick / under the weather</span><div class="habit-right"><span class="switch-label" data-role="lbl">NO</span><div class="switch" data-toggle data-state="no"><div class="knob"></div></div></div></div>
+      <div class="habit-row"><span class="habit-label">Meditated / breathwork yesterday</span><div class="habit-right"><span class="switch-label" data-role="lbl">NO</span><div class="switch" data-toggle data-state="no"><div class="knob"></div></div></div></div>
+    </div>
+
+    <div class="sec-label">NOTES</div>
+    <div class="notes-wrap"><textarea class="notes" placeholder="Anything else worth logging..."></textarea></div>
+
+    <div class="submit-wrap">
+      <div class="status-row"><span>FIELDS SET</span><span class="n" id="count">0 / 7</span></div>
+      <button class="submit" id="submit">Set all 7 metrics to submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const metrics = document.querySelectorAll('[data-metric]');
+  const total = metrics.length;
+  const touched = new Set();
+
+  metrics.forEach((m, idx) => {
+    const input = m.querySelector('input[type="range"]');
+    const fill = m.querySelector('.rail-fill');
+    const valEl = m.querySelector('.metric-val');
+
+    input.addEventListener('input', () => {
+      if(input.dataset.untouched === 'true'){
+        input.dataset.untouched = 'false';
+        input.classList.add('touched');
+        touched.add(idx);
+      }
+      const v = parseInt(input.value, 10);
+      fill.style.width = ((v-1)/6*100) + '%';
+      valEl.textContent = v;
+      valEl.classList.add('set');
+      updateSubmit();
+    });
+  });
+
+  function updateSubmit(){
+    document.getElementById('count').textContent = touched.size + ' / ' + total;
+    const submit = document.getElementById('submit');
+    if(touched.size === total){
+      submit.classList.add('ready');
+      submit.textContent = 'Submit readiness';
+    } else {
+      submit.classList.remove('ready');
+      submit.textContent = 'Set all 7 metrics to submit';
+    }
+  }
+
+  document.querySelectorAll('[data-toggle]').forEach(sw => {
+    sw.addEventListener('click', () => {
+      const next = sw.dataset.state === 'yes' ? 'no' : 'yes';
+      sw.dataset.state = next;
+      const lbl = sw.parentElement.querySelector('[data-role="lbl"]');
+      lbl.textContent = next.toUpperCase();
+    });
+  });
+
+  document.getElementById('submit').addEventListener('click', () => {
+    if(touched.size === total) alert('Mockup only — this would submit the entry.');
+  });
+</script>
+</body>
+</html>

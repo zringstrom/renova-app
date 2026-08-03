@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Fjord Journal</title>
+<style>
+  :root{
+    --bg:#eef1ee;
+    --surface:#ffffff;
+    --surface-2:#f4f6f3;
+    --line:#d8ddd6;
+    --line-strong:#b7c0b8;
+    --ink:#141a17;
+    --ink-dim:#556058;
+    --ink-faint:#8b968c;
+    --accent:#12503f;
+    --accent-soft:#dbe8e2;
+    --warn:#a5442f;
+    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  :root[data-theme="dark"]{
+    --bg:#151a16; --surface:#1b211c; --surface-2:#212822; --line:#2c342d; --line-strong:#3c463d;
+    --ink:#eef1ec; --ink-dim:#a3ada2; --ink-faint:#6d766c; --accent:#5fbf9e; --accent-soft:#243a32; --warn:#d97a5f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#151a16; --surface:#1b211c; --surface-2:#212822; --line:#2c342d; --line-strong:#3c463d;
+      --ink:#eef1ec; --ink-dim:#a3ada2; --ink-faint:#6d766c; --accent:#5fbf9e; --accent-soft:#243a32; --warn:#d97a5f;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    padding:44px 16px 90px; -webkit-font-smoothing:antialiased;
+  }
+  .device{width:100%; max-width:410px; background:var(--surface); border:1px solid var(--line);}
+
+  .masthead{padding:30px 26px 20px; border-bottom:2px solid var(--ink); text-align:center;}
+  .masthead-top{display:flex; justify-content:space-between; align-items:baseline; font-family:var(--sans); font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:16px;}
+  .masthead h1{font-family:var(--serif); font-weight:400; font-size:15px; letter-spacing:0.3em; text-transform:uppercase; margin:0 0 4px;}
+  .masthead .rule{width:36px; height:1px; background:var(--line-strong); margin:0 auto;}
+
+  .content{padding:28px 26px 26px;}
+
+  .opener{margin-bottom:8px;}
+  .opener-kicker{font-family:var(--sans); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--accent); margin-bottom:10px;}
+  .opener h2{
+    font-family:var(--serif); font-weight:400; font-size:32px; line-height:1.12; margin:0 0 14px; letter-spacing:-0.01em; text-wrap:balance;
+  }
+  .opener p{font-family:var(--serif); font-size:16.5px; line-height:1.6; color:var(--ink-dim); margin:0; max-width:34ch;}
+  .opener p.first-line::first-letter{
+    font-size:2.4em; float:left; line-height:0.85; padding:0.04em 0.08em 0 0; font-weight:400; color:var(--accent);
+  }
+
+  .section-label{
+    font-family:var(--sans); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-faint);
+    margin:32px 0 14px; display:flex; align-items:baseline; gap:10px;
+  }
+  .section-label small{font-family:var(--serif); font-style:italic; font-size:13px; letter-spacing:0; color:var(--ink-faint); text-transform:none;}
+
+  .contents{border-top:1px solid var(--line);}
+  .contents-row{display:flex; justify-content:space-between; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--line); gap:14px;}
+  .contents-name{font-family:var(--serif); font-size:16px; color:var(--ink);}
+  .contents-tag{font-family:var(--sans); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); white-space:nowrap; flex-shrink:0; align-self:center;}
+  .contents-tag.on{color:var(--accent);}
+
+  .callout{border:1px solid var(--line-strong); background:var(--surface-2); padding:18px 18px 19px;}
+  .callout-head{font-family:var(--serif); font-style:italic; font-size:15px; color:var(--warn); margin-bottom:8px;}
+  .callout p{margin:0; font-family:var(--sans); font-size:13px; line-height:1.65; color:var(--ink-dim);}
+  .callout p + p{margin-top:9px;}
+
+  .field{display:flex; flex-direction:column; gap:6px; margin-top:6px;}
+  .field label{font-size:11px; color:var(--ink-faint); letter-spacing:0.03em; font-family:var(--sans);}
+  .field input{
+    background:var(--surface-2); border:none; border-bottom:1px solid var(--line-strong); color:var(--ink);
+    font-family:var(--serif); font-size:17px; padding:10px 4px; outline:none;
+  }
+  .field input:focus{border-bottom-color:var(--accent);}
+  .field input::placeholder{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint);}
+
+  .notify{display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .notify-left{display:flex; flex-direction:column; gap:4px;}
+  .notify-name{font-family:var(--serif); font-size:17px;}
+  .notify-meta{font-family:var(--sans); font-size:12px; color:var(--ink-faint); font-style:italic;}
+  .word-toggle{display:flex; gap:18px; font-family:var(--serif); font-size:14.5px; flex-shrink:0;}
+  .word-toggle button{background:none; border:none; padding:2px 0; cursor:pointer; color:var(--ink-faint); position:relative; font-family:var(--serif); font-style:italic;}
+  .word-toggle button.selected{color:var(--accent); font-weight:600; font-style:normal;}
+  .word-toggle button.selected::after{content:""; position:absolute; left:0; right:0; bottom:-4px; height:1px; background:var(--accent);}
+
+  .submit-wrap{margin-top:30px; text-align:center;}
+  .submit{
+    width:100%; padding:16px; border:1px solid var(--ink); background:var(--accent); color:#eef7f2;
+    font-family:var(--sans); font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; border-color:var(--accent);
+  }
+  .submit:hover{background:#0d3f32;}
+  .footer-mark{text-align:center; font-family:var(--serif); font-style:italic; font-size:11px; color:var(--ink-faint); margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="masthead">
+    <div class="masthead-top"><span>Est. this morning</span><span>Sat 02 Aug</span></div>
+    <h1>RecoveryDeck</h1>
+    <div class="rule"></div>
+  </div>
+
+  <div class="content">
+    <div class="opener">
+      <div class="opener-kicker">Foreword</div>
+      <h2>The body keeps its own ledger. This reads it before the day does.</h2>
+      <p class="first-line">A short questionnaire, then a guided Polar H10 session for rMSSD and orthostatic heart rate — three minutes, most mornings, entirely on your phone.</p>
+    </div>
+
+    <div class="section-label"><span>Contents</span><small>what this replaces</small></div>
+    <div class="contents">
+      <div class="contents-row"><span class="contents-name">The morning questionnaire</span><span class="contents-tag on">In-app</span></div>
+      <div class="contents-row"><span class="contents-name">rMSSD &amp; orthostatic reading</span><span class="contents-tag on">Guided, via H10</span></div>
+      <div class="contents-row"><span class="contents-name">Any commercial readiness score</span><span class="contents-tag">Not used</span></div>
+    </div>
+
+    <div class="section-label"><span>A note</span><small>before your first entry</small></div>
+    <div class="callout">
+      <div class="callout-head">Before you begin</div>
+      <p>This requires a Polar H10 chest strap, worn and connected over Bluetooth. It is not a medical device — treat it as a personal training journal, nothing more.</p>
+      <p>If you carry a heart condition or feel dizzy on standing, speak with a clinician before the orthostatic test, and stop at once if you feel lightheaded.</p>
+    </div>
+
+    <div class="section-label" style="margin-top:32px;"><span>By-line</span><small>optional</small></div>
+    <div class="field">
+      <label>What should the morning greeting call you?</label>
+      <input type="text" id="ob-name" placeholder="For greetings only — not an account" />
+    </div>
+
+    <div class="notify">
+      <div class="notify-left">
+        <div class="notify-name">A daily nudge, at 06:30</div>
+        <div class="notify-meta">"Questionnaire first — then H10."</div>
+      </div>
+      <div class="word-toggle" data-toggle>
+        <button data-val="off">No</button>
+        <button data-val="on" class="selected">Yes</button>
+      </div>
+    </div>
+
+    <div class="submit-wrap">
+      <button class="submit" id="start">Begin the practice</button>
+      <div class="footer-mark">RecoveryDeck · Fjord Journal · kept privately, on your device</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-toggle]').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+  });
+  document.getElementById('start').addEventListener('click', () => {
+    alert('Mockup only — this would begin the morning practice.');
+  });
+</script>
+</body>
+</html>

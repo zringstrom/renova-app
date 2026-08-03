@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoveryDeck — Arc</title>
+<style>
+  :root{
+    --bg:#07090b;
+    --surface:#0f1417;
+    --surface-2:#131a1d;
+    --line:#1d262a;
+    --line-strong:#2a363b;
+    --ink:#eef2f2;
+    --ink-dim:#859293;
+    --ink-faint:#525f61;
+    --accent:#2fe6d6;
+    --accent-glow:rgba(47,230,214,0.35);
+    --warn:#ffb020;
+    --rounded: ui-rounded, "SF Pro Rounded", "Segoe UI Rounded", system-ui, sans-serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef4f3;
+    --surface:#ffffff;
+    --surface-2:#f2f7f6;
+    --line:#d7e2e0;
+    --line-strong:#bcccc9;
+    --ink:#0b1414;
+    --ink-dim:#546363;
+    --ink-faint:#8a9998;
+    --accent:#0f8c7d;
+    --accent-glow:rgba(15,140,125,0.18);
+    --warn:#b5720a;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#eef4f3; --surface:#ffffff; --surface-2:#f2f7f6; --line:#d7e2e0; --line-strong:#bcccc9;
+      --ink:#0b1414; --ink-dim:#546363; --ink-faint:#8a9998; --accent:#0f8c7d; --accent-glow:rgba(15,140,125,0.18); --warn:#b5720a;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    padding:40px 16px 90px; -webkit-font-smoothing:antialiased;
+  }
+  .device{
+    width:100%; max-width:412px; background:var(--surface); border:1px solid var(--line);
+    border-radius:28px; overflow:hidden; box-shadow:0 30px 70px -25px rgba(0,0,0,0.55);
+  }
+  .top{
+    padding:22px 24px 10px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .top-title{font-family:var(--rounded); font-size:15px; font-weight:700; letter-spacing:0.01em;}
+  .top-date{font-size:11.5px; color:var(--ink-faint);}
+
+  .carousel{padding:6px 0 8px;}
+  .card{padding:20px 28px 8px; text-align:center;}
+  .card-label{font-family:var(--rounded); font-size:19px; font-weight:700; margin-bottom:2px;}
+  .card-anchors{display:flex; justify-content:space-between; font-size:12px; color:var(--ink-faint); padding:0 6px; margin-bottom:18px;}
+
+  /* arc gauge */
+  .gauge-wrap{position:relative; width:220px; height:220px; margin:0 auto 6px;}
+  .gauge-wrap svg{width:100%; height:100%; transform:rotate(-215deg);}
+  .gauge-track{fill:none; stroke:var(--line-strong); stroke-width:14; stroke-linecap:round;}
+  .gauge-fill{fill:none; stroke:var(--accent); stroke-width:14; stroke-linecap:round; stroke-dasharray:0 999; transition:stroke-dasharray .35s cubic-bezier(.2,.8,.3,1); filter:drop-shadow(0 0 10px var(--accent-glow));}
+  .gauge-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .gauge-num{font-family:var(--rounded); font-size:52px; font-weight:800; color:var(--ink-faint); font-variant-numeric:tabular-nums; transition:color .2s ease;}
+  .gauge-num.set{color:var(--accent);}
+  .gauge-hint{font-size:11px; color:var(--ink-faint); letter-spacing:0.06em; text-transform:uppercase; margin-top:2px;}
+
+  .dial-picks{display:flex; justify-content:center; gap:8px; margin:14px 0 4px;}
+  .dial-pick{
+    width:34px; height:34px; border-radius:50%; border:1.5px solid var(--line-strong); background:var(--surface-2);
+    color:var(--ink-dim); font-family:var(--rounded); font-size:14px; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:all .15s ease; -webkit-tap-highlight-color:transparent;
+  }
+  .dial-pick:hover{border-color:var(--ink-faint);}
+  .dial-pick.active{background:var(--accent); border-color:var(--accent); color:#032420; transform:scale(1.12); box-shadow:0 0 14px var(--accent-glow);}
+
+  .dots{display:flex; justify-content:center; gap:6px; margin:14px 0 4px;}
+  .dots span{width:6px; height:6px; border-radius:50%; background:var(--line-strong); transition:all .2s ease;}
+  .dots span.done{background:var(--accent); width:6px;}
+  .dots span.cur{background:var(--ink); width:16px; border-radius:3px;}
+
+  .nav-row{display:flex; justify-content:space-between; padding:10px 26px 22px; align-items:center;}
+  .nav-btn{background:none; border:1px solid var(--line-strong); color:var(--ink-dim); border-radius:20px; padding:9px 16px; font-size:12.5px; font-family:var(--sans); cursor:pointer;}
+  .nav-btn:disabled{opacity:0.35; cursor:default;}
+  .nav-count{font-size:12px; color:var(--ink-faint); font-variant-numeric:tabular-nums;}
+
+  .rest{padding:6px 24px 24px;}
+  .section-label{font-family:var(--rounded); font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); margin:22px 0 12px;}
+
+  details.ctx{border:1px solid var(--line); border-radius:16px; background:var(--surface-2);}
+  details.ctx summary{list-style:none; cursor:pointer; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--ink-dim);}
+  details.ctx summary::-webkit-details-marker{display:none;}
+  details.ctx summary::after{content:"▾"; color:var(--ink-faint);}
+  details.ctx[open] summary::after{content:"▴";}
+  .ctx-body{padding:2px 16px 16px; display:flex; flex-direction:column; gap:12px;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:11px; color:var(--ink-faint);}
+  .field input, .field textarea{background:var(--surface); border:1px solid var(--line-strong); border-radius:12px; color:var(--ink); font-family:var(--sans); font-size:13.5px; padding:10px 12px; outline:none;}
+  .field input:focus, .field textarea:focus{border-color:var(--accent);}
+  .field-row{display:flex; gap:10px;}
+  .field-row .field{flex:1;}
+
+  /* icon-chip yes/no */
+  .habits{display:flex; flex-direction:column; gap:10px;}
+  .habit{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:16px;}
+  .habit-label{font-size:13.5px;}
+  .icon-toggle{display:flex; gap:6px;}
+  .icon-toggle button{
+    display:flex; align-items:center; gap:5px; padding:6px 11px; border-radius:20px; border:1px solid var(--line-strong);
+    background:var(--surface); color:var(--ink-faint); font-size:11.5px; font-weight:600; cursor:pointer; -webkit-tap-highlight-color:transparent;
+    transition:all .15s ease;
+  }
+  .icon-toggle button .ic{font-size:12px;}
+  .icon-toggle button.selected.yes{background:var(--warn); border-color:var(--warn); color:#241400;}
+  .icon-toggle button.selected.no{background:var(--accent); border-color:var(--accent); color:#032420;}
+
+  textarea.notes{width:100%; resize:vertical; min-height:66px; background:var(--surface-2); border:1px solid var(--line); border-radius:16px; color:var(--ink); font-family:var(--sans); font-size:13.5px; padding:12px; outline:none;}
+  textarea.notes:focus{border-color:var(--accent);}
+
+  .submit-wrap{margin-top:24px;}
+  .submit{
+    width:100%; padding:16px; border-radius:20px; border:none; background:var(--surface-2); color:var(--ink-faint);
+    font-family:var(--rounded); font-size:14.5px; font-weight:700; cursor:not-allowed; transition:all .2s ease;
+  }
+  .submit.ready{background:var(--accent); color:#032420; cursor:pointer; box-shadow:0 10px 26px -10px var(--accent-glow);}
+  .submit.ready:active{transform:scale(0.98);}
+  .submit-sub{text-align:center; font-size:11.5px; color:var(--ink-faint); margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="top">
+    <div class="top-title">Morning Readiness</div>
+    <div class="top-date">Sat, Aug 2</div>
+  </div>
+
+  <div class="carousel">
+    <div class="dots" id="dots"></div>
+    <div class="card" id="card">
+      <div class="card-label" id="card-label">Fatigue</div>
+      <div class="card-anchors"><span id="card-lo">Feeling fresh</span><span id="card-hi">Exhausted</span></div>
+      <div class="gauge-wrap">
+        <svg viewBox="0 0 200 200">
+          <circle class="gauge-track" cx="100" cy="100" r="86" pathLength="100" stroke-dasharray="70 100" />
+          <circle class="gauge-fill" id="gauge-fill" cx="100" cy="100" r="86" pathLength="100" />
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-num" id="gauge-num">–</div>
+          <div class="gauge-hint" id="gauge-hint">tap a number</div>
+        </div>
+      </div>
+      <div class="dial-picks" id="dial-picks"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="prev">Back</button>
+      <div class="nav-count" id="nav-count">1 / 7</div>
+      <button class="nav-btn" id="next">Next</button>
+    </div>
+  </div>
+
+  <div class="rest">
+    <div class="section-label">Context</div>
+    <details class="ctx">
+      <summary>Caffeine &amp; last meal</summary>
+      <div class="ctx-body">
+        <div class="field-row">
+          <div class="field"><label>Last caffeine — time</label><input type="time" value="07:15" /></div>
+          <div class="field"><label>Amount (mg)</label><input type="number" placeholder="e.g. 95" /></div>
+        </div>
+        <div class="field"><label>Last meal — time</label><input type="time" value="20:30" /></div>
+      </div>
+    </details>
+
+    <div class="section-label">Yesterday</div>
+    <div class="habits">
+      <div class="habit"><span class="habit-label">Alcohol last night</span><div class="icon-toggle" data-toggle><button data-val="no" class="no"><span class="ic">✕</span>No</button><button data-val="yes" class="yes"><span class="ic">●</span>Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Intense training yesterday</span><div class="icon-toggle" data-toggle><button data-val="no" class="no"><span class="ic">✕</span>No</button><button data-val="yes" class="yes"><span class="ic">●</span>Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Long training yesterday</span><div class="icon-toggle" data-toggle><button data-val="no" class="no"><span class="ic">✕</span>No</button><button data-val="yes" class="yes"><span class="ic">●</span>Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Travel</span><div class="icon-toggle" data-toggle><button data-val="no" class="no"><span class="ic">✕</span>No</button><button data-val="yes" class="yes"><span class="ic">●</span>Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Late night</span><div class="icon-toggle" data-toggle><button data-val="no" class="no"><span class="ic">✕</span>No</button><button data-val="yes" class="yes"><span class="ic">●</span>Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Feeling sick / under the weather</span><div class="icon-toggle" data-toggle><button data-val="no" class="no"><span class="ic">✕</span>No</button><button data-val="yes" class="yes"><span class="ic">●</span>Yes</button></div></div>
+      <div class="habit"><span class="habit-label">Meditated / breathwork yesterday</span><div class="icon-toggle" data-toggle><button data-val="no" class="no"><span class="ic">✕</span>No</button><button data-val="yes" class="yes"><span class="ic">●</span>Yes</button></div></div>
+    </div>
+
+    <div class="section-label">Notes</div>
+    <textarea class="notes" placeholder="Anything else worth logging..."></textarea>
+
+    <div class="submit-wrap">
+      <button class="submit" id="submit">Complete all 7 to submit</button>
+      <div class="submit-sub" id="submit-sub">0 of 7 recorded</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const metrics = [
+    {name:'Fatigue', lo:'Feeling fresh', hi:'Exhausted'},
+    {name:'Mood', lo:'Very low', hi:'Great'},
+    {name:'Soreness / heavy legs', lo:'Very sore', hi:'None'},
+    {name:'Sleep quality', lo:'Terrible', hi:'Excellent'},
+    {name:'Work stress', lo:'Low', hi:'Very high'},
+    {name:'Relationship stress', lo:'Low', hi:'Very high'},
+    {name:'Overall life stress', lo:'Low', hi:'Very high'},
+  ];
+  let cur = 0;
+  const values = new Array(metrics.length).fill(null);
+
+  const dotsEl = document.getElementById('dots');
+  metrics.forEach((_, i) => {
+    const d = document.createElement('span');
+    dotsEl.appendChild(d);
+  });
+
+  const dialPicksEl = document.getElementById('dial-picks');
+  for(let v=1; v<=7; v++){
+    const b = document.createElement('button');
+    b.className = 'dial-pick';
+    b.textContent = v;
+    b.dataset.v = v;
+    b.addEventListener('click', () => setValue(v));
+    dialPicksEl.appendChild(b);
+  }
+
+  function render(){
+    const m = metrics[cur];
+    document.getElementById('card-label').textContent = m.name;
+    document.getElementById('card-lo').textContent = m.lo;
+    document.getElementById('card-hi').textContent = m.hi;
+    document.getElementById('nav-count').textContent = (cur+1) + ' / ' + metrics.length;
+    document.getElementById('prev').disabled = cur === 0;
+
+    const v = values[cur];
+    const gaugeNum = document.getElementById('gauge-num');
+    const gaugeHint = document.getElementById('gauge-hint');
+    const gaugeFill = document.getElementById('gauge-fill');
+    if(v){
+      gaugeNum.textContent = v; gaugeNum.classList.add('set');
+      gaugeHint.textContent = 'tap to change';
+      gaugeFill.style.strokeDasharray = (v/7*70) + ' 100';
+    } else {
+      gaugeNum.textContent = '–'; gaugeNum.classList.remove('set');
+      gaugeHint.textContent = 'tap a number';
+      gaugeFill.style.strokeDasharray = '0 100';
+    }
+
+    dialPicksEl.querySelectorAll('.dial-pick').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.v,10) === v);
+    });
+
+    dotsEl.querySelectorAll('span').forEach((d, i) => {
+      d.classList.remove('done','cur');
+      if(i === cur) d.classList.add('cur');
+      else if(values[i]) d.classList.add('done');
+    });
+
+    updateSubmit();
+  }
+
+  function setValue(v){
+    values[cur] = v;
+    render();
+    if(cur < metrics.length - 1){
+      setTimeout(() => { cur++; render(); }, 220);
+    }
+  }
+
+  document.getElementById('prev').addEventListener('click', () => { if(cur>0){cur--; render();} });
+  document.getElementById('next').addEventListener('click', () => { if(cur<metrics.length-1){cur++; render();} });
+
+  function updateSubmit(){
+    const doneCount = values.filter(v => v !== null).length;
+    const submit = document.getElementById('submit');
+    const sub = document.getElementById('submit-sub');
+    if(doneCount === metrics.length){
+      submit.classList.add('ready');
+      submit.textContent = 'Submit readiness';
+      sub.textContent = 'All 7 recorded';
+    } else {
+      submit.classList.remove('ready');
+      submit.textContent = 'Complete all 7 to submit';
+      sub.textContent = doneCount + ' of 7 recorded';
+    }
+  }
+
+  render();
+
+  document.querySelectorAll('[data-toggle]').forEach(group => {
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+  });
+
+  document.getElementById('submit').addEventListener('click', () => {
+    if(values.every(v => v !== null)) alert('Mockup only — this would submit the scan.');
+  });
+</script>
+</body>
+</html>
