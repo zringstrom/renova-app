@@ -44,9 +44,14 @@ struct BandChart: View {
             return size.height - (CGFloat(fraction) * size.height)
         }
 
+        // Inset the x-domain so the newest-point marker (4pt dot + 2pt ring)
+        // and the first point's marker render whole instead of being sliced
+        // off at the plot's left/right edges.
+        let xInset: CGFloat = 6
         func x(for index: Int) -> CGFloat {
             guard points.count > 1 else { return size.width / 2 }
-            return CGFloat(index) / CGFloat(points.count - 1) * size.width
+            let usableWidth = size.width - (xInset * 2)
+            return xInset + CGFloat(index) / CGFloat(points.count - 1) * usableWidth
         }
 
         // 1. Band rect: mean ± 1 SD.

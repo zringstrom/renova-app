@@ -409,7 +409,7 @@ struct TodayView: View {
                 + Text(summary.tip).font(.system(size: 12.5)))
                 .foregroundStyle(CGTheme.inkDim)
 
-            ForEach(summary.lines.compactMap(\.maturityNote), id: \.self) { note in
+            if let note = maturityLine(for: summary.lines) {
                 Text(note)
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(CGTheme.inkFaint)
@@ -421,5 +421,21 @@ struct TodayView: View {
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 24)
+    }
+
+    /// Collapses the per-metric maturity notes (one per rMSSD/RHR/gap) into a
+    /// single honest line for the whole card, using the smallest day count
+    /// among the metrics still building. Returns nil once every metric is
+    /// fully mature, so no maturity line is shown at all.
+    private func maturityLine(for lines: [ResultsAnalyzer.Line]) -> String? {
+        let dayCounts: [(used: Int, needed: Int)] = lines.compactMap { line in
+            guard let note = line.maturityNote,
+                  let range = note.range(of: #"\d+/\d+"#, options: .regularExpression) else { return nil }
+            let parts = note[range].split(separator: "/")
+            guard parts.count == 2, let used = Int(parts[0]), let needed = Int(parts[1]) else { return nil }
+            return (used, needed)
+        }
+        guard let leastMature = dayCounts.min(by: { $0.used < $1.used }) else { return nil }
+        return "Baseline still building — \(leastMature.used)/\(leastMature.needed) days"
     }
 }
