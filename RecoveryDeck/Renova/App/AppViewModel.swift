@@ -94,4 +94,12 @@ final class AppViewModel {
         }
         refresh()
     }
+
+    #if DEBUG
+    /// Dev/screenshot helper only — see `DayRepository.seedDemoData`.
+    func seedDemoData(days: Int = 45) {
+        repository.seedDemoData(days: days)
+        refresh()
+    }
+    #endif
 }

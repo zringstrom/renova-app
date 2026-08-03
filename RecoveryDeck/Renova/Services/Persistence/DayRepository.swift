@@ -152,4 +152,138 @@ final class DayRepository {
         try? context.delete(model: AnalyticsEvent.self)
         try? context.save()
     }
+
+    #if DEBUG
+    /// Dev/screenshot helper only — generates `days` trailing days of plausible
+    /// history ending today: full questionnaires with varied scores, rMSSD
+    /// ~N(58, 9) clamped 30–90, RHR ~N(47, 3), gap (peak) ~N(25, 6), ~20%
+    /// alcohol nights (rMSSD 15% lower, RHR +3bpm — so Phase 8's correlation
+    /// engine has real signal to find later), ~10% partial days (questionnaire
+    /// only, no measurement), and exactly 2 orthostatic-skipped days. Uses a
+    /// fixed seed so repeated runs (and screenshots) are reproducible.
+    /// Idempotent: re-running overwrites the same `days`-sized window rather
+    /// than piling up duplicate rows (localDate is `.unique`).
+    func seedDemoData(days: Int = 45) {
+        var rng = SeededGenerator(seed: 20_260_803)
+        let anchor = today()
+
+        var skipIndices = Set<Int>()
+        while skipIndices.count < min(2, days) {
+            skipIndices.insert(Int.random(in: 0..<max(days, 1), using: &rng))
+        }
+
+        for offset in stride(from: days - 1, through: 0, by: -1) {
+            let index = days - 1 - offset
+            let localDate = anchor.adding(days: -offset, timeZone: timeZone)
+
+            let isPartialDay = Double.random(in: 0...1, using: &rng) < 0.10
+            let isAlcoholNight = Double.random(in: 0...1, using: &rng) < 0.20
+            let skipOrthostatic = skipIndices.contains(index)
+
+            let answers = QuestionnaireAnswers(
+                fatigue: Int.random(in: 1...7, using: &rng),
+                mood: Int.random(in: 1...7, using: &rng),
+                soreness: Int.random(in: 1...7, using: &rng),
+                sleepQuality: Int.random(in: 1...7, using: &rng),
+                workStress: Int.random(in: 1...7, using: &rng),
+                relationshipStress: Int.random(in: 1...7, using: &rng),
+                overallLifeStress: Int.random(in: 1...7, using: &rng),
+                lastCaffeineAt: nil,
+                caffeineAmountMg: nil,
+                caffeineAmountBand: nil,
+                lastMealAt: nil,
+                habitAlcohol: isAlcoholNight,
+                habitIntenseTrainingYesterday: Double.random(in: 0...1, using: &rng) < 0.15,
+                habitLongTrainingYesterday: Double.random(in: 0...1, using: &rng) < 0.10,
+                habitTravel: Double.random(in: 0...1, using: &rng) < 0.08,
+                habitLateNight: Double.random(in: 0...1, using: &rng) < 0.15,
+                habitSick: Double.random(in: 0...1, using: &rng) < 0.05,
+                habitMeditationYesterday: Double.random(in: 0...1, using: &rng) < 0.25,
+                notes: nil
+            )
+            upsertQuestionnaire(for: localDate, answers: answers)
+
+            guard !isPartialDay else { continue }
+            guard let day = dayRecord(for: localDate) else { continue }
+
+            var rmssd = gaussian(mean: 58, sd: 9, using: &rng).clamped(to: 30...90)
+            var rhr = gaussian(mean: 47, sd: 3, using: &rng)
+            let gapPeak = max(gaussian(mean: 25, sd: 6, using: &rng), 5)
+
+            if isAlcoholNight {
+                rmssd *= 0.85
+                rhr += 3
+            }
+
+            let measuredAt = localDate.startOfDay(timeZone: timeZone).addingTimeInterval(6.5 * 3600)
+            let record = day.measurement ?? MeasurementRecord(localDate: localDate.string, measuredAt: measuredAt)
+            record.measuredAt = measuredAt
+            record.protocolVersion = "v3.0"
+            record.rmssdMs = rmssd
+            record.meanHrBpm = rhr
+            record.rrAcceptedCount = 60
+            record.artifactRatio = 0.05
+            record.hrvQuality = "ok"
+
+            if skipOrthostatic {
+                record.avgLyingHr = nil
+                record.avgStandingHr = nil
+                record.peakStandingHr = nil
+                record.gapAvg = nil
+                record.gapPeak = nil
+                record.orthostaticSkipped = true
+                record.orthostaticQuality = "skipped"
+            } else {
+                let avgStanding = rhr + gapPeak * 0.75
+                record.avgLyingHr = rhr
+                record.peakStandingHr = rhr + gapPeak
+                record.avgStandingHr = avgStanding
+                record.gapAvg = avgStanding - rhr
+                record.gapPeak = gapPeak
+                record.orthostaticSkipped = false
+                record.orthostaticQuality = "ok"
+            }
+
+            if day.measurement == nil {
+                context.insert(record)
+                day.measurement = record
+            }
+        }
+
+        try? context.save()
+    }
+
+    private func gaussian(mean: Double, sd: Double, using rng: inout SeededGenerator) -> Double {
+        let u1 = Double.random(in: 0.0001...0.9999, using: &rng)
+        let u2 = Double.random(in: 0...1, using: &rng)
+        let z0 = (-2 * Foundation.log(u1)).squareRoot() * Foundation.cos(2 * Double.pi * u2)
+        return mean + z0 * sd
+    }
+    #endif
 }
+
+#if DEBUG
+private extension Double {
+    func clamped(to range: ClosedRange<Double>) -> Double {
+        Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
+    }
+}
+
+/// SplitMix64 — small, fast, deterministic given a fixed seed. Used only by
+/// `DayRepository.seedDemoData` so dev/screenshot data is reproducible run to run.
+struct SeededGenerator: RandomNumberGenerator {
+    private var state: UInt64
+
+    init(seed: UInt64) {
+        self.state = seed
+    }
+
+    mutating func next() -> UInt64 {
+        state = state &+ 0x9E37_79B9_7F4A_7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
+        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
+        return z ^ (z >> 31)
+    }
+}
+#endif

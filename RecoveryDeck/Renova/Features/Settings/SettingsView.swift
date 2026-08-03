@@ -114,8 +114,28 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
+                        #if DEBUG
+                        .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+                        #endif
                     }
                     .buttonStyle(.plain)
+
+                    #if DEBUG
+                    Button {
+                        viewModel.seedDemoData()
+                    } label: {
+                        HStack {
+                            Text("SEED DEMO DATA")
+                                .font(.system(size: 12.5, weight: .bold, design: .monospaced))
+                                .foregroundStyle(CGTheme.ink)
+                            Spacer()
+                            Text("DEBUG").font(.system(size: 10, weight: .bold, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 13)
+                    }
+                    .buttonStyle(.plain)
+                    #endif
                 }
 
                 sectionLabel("ABOUT YOUR METRICS")

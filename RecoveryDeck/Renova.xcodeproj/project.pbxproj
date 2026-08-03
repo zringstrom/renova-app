@@ -28,6 +28,8 @@
 		7AED08520DBC918BB1E66450 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E731F0B67012AE50EDCD62 /* Models.swift */; };
 		82A06D15347A32E3C485605E /* HeartRateSensorIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E47C78BF2E5C99B40E0BC4E /* HeartRateSensorIdentifiers.swift */; };
 		9E169AD79E89BCFD0E716E6E /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */; };
+		A7902E02ED7334B9F76E6FC3 /* BaselineLight+Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F1C129E9FD558DC7B39BC /* BaselineLight+Color.swift */; };
+		A898DAEEC7F03003ED07B795 /* BandChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE89128263DBA15BC670E98 /* BandChart.swift */; };
 		AF34F02390D3D43C7F5B00CC /* MeasurementSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 205040B9FDA737AF103EEA30 /* MeasurementSessionViewModel.swift */; };
 		B37B254D7466B4D9A83D4503 /* HeartRateClientProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B381017F774112CF46080A3 /* HeartRateClientProtocol.swift */; };
 		C890D93ECE2D5019F2AD5F2D /* ControlGridTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDF1322421C604CE851ED8E /* ControlGridTheme.swift */; };
@@ -75,6 +77,7 @@
 		9749570BE58C8B6BD257FED3 /* RenovaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenovaTests.swift; sourceTree = "<group>"; };
 		9D044FDF395C008D0D4DE73D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9E9F8BC5AA3FCBD4784FD0F4 /* QuestionnaireView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionnaireView.swift; sourceTree = "<group>"; };
+		A06F1C129E9FD558DC7B39BC /* BaselineLight+Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BaselineLight+Color.swift"; sourceTree = "<group>"; };
 		AAA42BBA16BE5BF6722BEB3A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		ADEF3E4A6E38A60178F0ACE1 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		B347E312D54A76D7151A7F7A /* HeartRateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateClient.swift; sourceTree = "<group>"; };
@@ -83,6 +86,7 @@
 		C7F481B6DA03B3540201A210 /* ScanLineProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanLineProgress.swift; sourceTree = "<group>"; };
 		D065FCAC93EA68E8353970EC /* DayRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayRepository.swift; sourceTree = "<group>"; };
 		D7A32FC9778B48BC7A276399 /* RecoveryKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RecoveryKit; path = Packages/RecoveryKit; sourceTree = SOURCE_ROOT; };
+		DBE89128263DBA15BC670E98 /* BandChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandChart.swift; sourceTree = "<group>"; };
 		E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryExplainers.swift; sourceTree = "<group>"; };
 		EFDF1322421C604CE851ED8E /* ControlGridTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlGridTheme.swift; sourceTree = "<group>"; };
 		F2F06FFD8D512DC5984C8C21 /* Renova.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Renova.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,6 +109,8 @@
 		0FE0754738AA91B1EA07F3A9 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				DBE89128263DBA15BC670E98 /* BandChart.swift */,
+				A06F1C129E9FD558DC7B39BC /* BaselineLight+Color.swift */,
 				1F22836ECEE9AB8394AC3DEA /* RecoveryExplainerCard.swift */,
 				E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */,
 			);
@@ -377,6 +383,8 @@
 			files = (
 				4FC8FC10457250D3829EC8B4 /* AppContainer.swift in Sources */,
 				1D3A9F6C49A2A2E2138B8BEB /* AppViewModel.swift in Sources */,
+				A898DAEEC7F03003ED07B795 /* BandChart.swift in Sources */,
+				A7902E02ED7334B9F76E6FC3 /* BaselineLight+Color.swift in Sources */,
 				1C711819C6C1369E5E385BA5 /* ControlGridSlider.swift in Sources */,
 				1E7ACA0D1F9349684905EF5E /* ControlGridTabBar.swift in Sources */,
 				C890D93ECE2D5019F2AD5F2D /* ControlGridTheme.swift in Sources */,

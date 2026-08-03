@@ -231,7 +231,7 @@ struct TodayView: View {
             if let value {
                 (Text("\(value, specifier: "%.0f")").font(.system(size: 22, weight: .bold, design: .monospaced))
                     + Text(" \(unit)").font(.system(size: 12, design: .monospaced)))
-                    .foregroundStyle(CGTheme.accent)
+                    .foregroundStyle(CGTheme.ink)
             } else {
                 Text("—").font(.system(size: 22, weight: .bold, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
             }
@@ -272,7 +272,7 @@ struct TodayView: View {
                         Spacer()
                         HStack(spacing: 6) {
                             if let light = line.light {
-                                Circle().fill(color(for: light)).frame(width: 7, height: 7)
+                                Circle().fill(light.color).frame(width: 7, height: 7)
                             }
                             Text(line.text).font(.system(size: 11.5)).foregroundStyle(CGTheme.inkDim)
                         }
@@ -297,11 +297,4 @@ struct TodayView: View {
         .padding(.bottom, 24)
     }
 
-    private func color(for light: BaselineLight) -> Color {
-        switch light {
-        case .green: .green
-        case .yellow: .yellow
-        case .red: .red
-        }
-    }
 }

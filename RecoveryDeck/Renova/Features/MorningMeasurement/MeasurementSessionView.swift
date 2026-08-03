@@ -362,7 +362,7 @@ struct MeasurementSessionView: View {
                             Spacer()
                             HStack(spacing: 6) {
                                 if let light = line.light {
-                                    Circle().fill(color(for: light)).frame(width: 7, height: 7)
+                                    Circle().fill(light.color).frame(width: 7, height: 7)
                                 }
                                 Text(line.text).font(.system(size: 11.5)).foregroundStyle(CGTheme.inkDim)
                             }
@@ -396,19 +396,11 @@ struct MeasurementSessionView: View {
             Text(label.uppercased()).font(.system(size: 9.5, design: .monospaced)).tracking(0.5).foregroundStyle(CGTheme.inkFaint)
             Text("\(value, specifier: "%.0f")\(unit)")
                 .font(.system(size: 19, weight: .bold, design: .monospaced))
-                .foregroundStyle(CGTheme.accent)
+                .foregroundStyle(CGTheme.ink)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
         .background(CGTheme.surface)
-    }
-
-    private func color(for light: BaselineLight) -> Color {
-        switch light {
-        case .green: .green
-        case .yellow: .yellow
-        case .red: .red
-        }
     }
 
     // MARK: - Buttons

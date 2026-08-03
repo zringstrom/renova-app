@@ -62,7 +62,7 @@ struct DayDetailView: View {
                             metricRow("Gap (avg)", measurement.gapAvg, "bpm", last: true)
                         }
                         if let quality = measurement.hrvQuality, quality != "ok" {
-                            Text("Quality: \(quality)").font(.system(size: 10.5, design: .monospaced)).foregroundStyle(.orange)
+                            Text("Quality: \(quality)").font(.system(size: 10.5, design: .monospaced)).foregroundStyle(CGTheme.statusWatch)
                                 .padding(.horizontal, 14).padding(.bottom, 8)
                         }
                     }
@@ -116,7 +116,7 @@ struct DayDetailView: View {
             if let value {
                 Text(value ? "YES" : "NO")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .foregroundStyle(value ? CGTheme.accent : CGTheme.accent2)
+                    .foregroundStyle(CGTheme.ink)
             }
         }
         .padding(.horizontal, 14)
@@ -130,7 +130,7 @@ struct DayDetailView: View {
             Spacer()
             Text(value.map(String.init) ?? "—")
                 .font(.system(size: 12, design: .monospaced))
-                .foregroundStyle(value == nil ? CGTheme.inkFaint : CGTheme.accent)
+                .foregroundStyle(value == nil ? CGTheme.inkFaint : CGTheme.ink)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
@@ -144,7 +144,7 @@ struct DayDetailView: View {
             if let value {
                 Text("\(value, specifier: "%.0f") \(unit)")
                     .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(CGTheme.accent)
+                    .foregroundStyle(CGTheme.ink)
             } else {
                 Text("—").font(.system(size: 12, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
             }

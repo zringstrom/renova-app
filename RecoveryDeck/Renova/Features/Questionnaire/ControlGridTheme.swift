@@ -14,6 +14,12 @@ enum CGTheme {
     static let accent = Color.dynamic(light: 0xE8331B, dark: 0xFF5A3D)
     static let accent2 = Color.dynamic(light: 0x1B6E5C, dark: 0x3DDCB8)
 
+    // Status trio — CVD-validated. NEVER shown without an accompanying direction
+    // label (PRD §6.6 requires labeled direction anyway).
+    static let statusOk = Color.dynamic(light: 0x0F7A5C, dark: 0x3DDCB8)     // inside ±1 SD band
+    static let statusWatch = Color.dynamic(light: 0xD4A017, dark: 0xE3B341) // 1–1.5 SD out
+    static let statusAlert = Color.dynamic(light: 0xE8331B, dark: 0xFF5A3D) // >1.5 SD out (== accent)
+
     static let mono: Font = .system(.footnote, design: .monospaced)
     static let monoSmall: Font = .system(size: 10, weight: .regular, design: .monospaced)
     static let sectionLabel: Font = .system(size: 11, weight: .semibold, design: .monospaced)
