@@ -6,7 +6,7 @@ enum AppTab: CaseIterable {
     var label: String {
         switch self {
         case .today: "TODAY"
-        case .history: "HISTORY"
+        case .history: "TRENDS"
         case .settings: "SETTINGS"
         }
     }

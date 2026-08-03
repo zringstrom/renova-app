@@ -66,6 +66,102 @@ final class AppViewModel {
         let gapPeak: BaselineStatus?
     }
 
+    /// Which chart metric a trend/delta call is about — shared by the Today
+    /// hero (Phase 3) and the Trends charts (Phase 4).
+    enum TrendMetric {
+        case rmssd, rhr, gapPeak
+    }
+
+    struct TrendData {
+        let rmssd: TrendSeries
+        let rhr: TrendSeries
+        let gapPeak: TrendSeries
+    }
+
+    struct BaselineProgress {
+        let collected: Int
+        let needed: Int
+    }
+
+    /// `TrendSeries` for the three chart metrics, built from measured days
+    /// only (gap excludes orthostatic-skipped days). Powers the Today hero
+    /// sparkline (Phase 3) and the Trends charts (Phase 4).
+    func trendData(windowDays: Int) -> TrendData {
+        let measuredDays = historyDays(limit: 90).filter { $0.measurement != nil }
+        let rmssdValues = measuredDays.compactMap { day -> (String, Double)? in
+            guard let value = day.measurement?.rmssdMs else { return nil }
+            return (day.localDate, value)
+        }
+        let rhrValues = measuredDays.compactMap { day -> (String, Double)? in
+            guard let value = day.measurement?.avgLyingHr else { return nil }
+            return (day.localDate, value)
+        }
+        let gapValues = measuredDays.compactMap { day -> (String, Double)? in
+            guard let measurement = day.measurement, measurement.orthostaticSkipped == false,
+                  let value = measurement.gapPeak else { return nil }
+            return (day.localDate, value)
+        }
+        return TrendData(
+            rmssd: TrendBuilder.series(values: rmssdValues, windowDays: windowDays, sdFloor: 1),
+            rhr: TrendBuilder.series(values: rhrValues, windowDays: windowDays, sdFloor: 1),
+            gapPeak: TrendBuilder.series(values: gapValues, windowDays: windowDays, sdFloor: 1)
+        )
+    }
+
+    /// Today vs the mean of the last (up to) 7 prior measured days for the
+    /// given metric, today excluded. `nil` when today has no value for the
+    /// metric, or there's no prior measured data at all.
+    func sevenDayDelta(for metric: TrendMetric) -> Double? {
+        guard let measurement = todayRecord?.measurement else { return nil }
+
+        let todayValue: Double?
+        switch metric {
+        case .rmssd: todayValue = measurement.rmssdMs
+        case .rhr: todayValue = measurement.avgLyingHr
+        case .gapPeak: todayValue = measurement.orthostaticSkipped ? nil : measurement.gapPeak
+        }
+        guard let todayValue else { return nil }
+
+        let priorDays = historyDays(limit: 30)
+            .filter { $0.localDate != today.string }
+            .sorted { $0.localDate > $1.localDate }
+
+        let priorValues: [Double]
+        switch metric {
+        case .rmssd: priorValues = priorDays.compactMap { $0.measurement?.rmssdMs }
+        case .rhr: priorValues = priorDays.compactMap { $0.measurement?.avgLyingHr }
+        case .gapPeak: priorValues = priorDays.compactMap { $0.measurement?.orthostaticSkipped == false ? $0.measurement?.gapPeak : nil }
+        }
+
+        let last7 = Array(priorValues.prefix(7))
+        guard !last7.isEmpty else { return nil }
+        let mean = last7.reduce(0, +) / Double(last7.count)
+        return todayValue - mean
+    }
+
+    /// Mirrors the "building" branch `TrendBuilder`/`BaselineCalculator` would
+    /// hit for this metric's newest measured value — lets the UI show
+    /// "BASELINE BUILDING — N/7" even when a `TrendSeries`'s band is nil for
+    /// that same reason.
+    func baselineProgress(for metric: TrendMetric) -> BaselineProgress? {
+        let measuredDays = historyDays(limit: 90)
+            .filter { $0.measurement != nil }
+            .sorted { $0.localDate < $1.localDate }
+
+        let values: [Double]
+        switch metric {
+        case .rmssd: values = measuredDays.compactMap { $0.measurement?.rmssdMs }
+        case .rhr: values = measuredDays.compactMap { $0.measurement?.avgLyingHr }
+        case .gapPeak: values = measuredDays.compactMap { day in
+                day.measurement?.orthostaticSkipped == false ? day.measurement?.gapPeak : nil
+            }
+        }
+        guard let latest = values.last else { return nil }
+        let status = BaselineCalculator.assess(today: latest, priorValues: Array(values.dropLast()), sdFloor: 1)
+        guard case .building(let collected, let needed) = status else { return nil }
+        return BaselineProgress(collected: collected, needed: needed)
+    }
+
     /// Assesses a not-yet-saved measurement against prior days only (today is
     /// never in `historyDays()` until `recordMeasurement` is called, so this is
     /// safe to call before persisting).

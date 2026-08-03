@@ -28,15 +28,18 @@ struct TodayView: View {
             VStack(spacing: 0) {
                 band
                 greetingBlock
-                quoteBlock
+
+                if isQuestionnaireDoneToday, isMeasurementDoneToday, let measurement = viewModel.todayRecord?.measurement {
+                    sectionLabel("TODAY'S READING")
+                    heroCard(measurement)
+                    tipCard(for: measurement)
+                }
 
                 sectionLabel("TO-DO")
                 todoTable
 
-                if isQuestionnaireDoneToday, isMeasurementDoneToday, let measurement = viewModel.todayRecord?.measurement {
-                    sectionLabel("TODAY'S READING")
-                    readoutsGrid(measurement)
-                    tipCard(for: measurement)
+                if isQuestionnaireDoneToday, isMeasurementDoneToday {
+                    quoteBlock
                 }
 
                 sectionLabel("LEARN")
@@ -126,6 +129,7 @@ struct TodayView: View {
         .overlay(alignment: .leading) { Rectangle().fill(CGTheme.accent).frame(width: 2) }
         .padding(.horizontal, 20)
         .padding(.top, 4)
+        .padding(.bottom, 4)
     }
 
     private func sectionLabel(_ text: String) -> some View {
@@ -146,8 +150,10 @@ struct TodayView: View {
         VStack(spacing: 0) {
             todoRow(
                 title: "Questionnaire",
-                subtitle: "Fatigue, mood, soreness, stress, sleep",
-                state: isQuestionnaireDoneToday ? .done : .pending
+                subtitle: isQuestionnaireDoneToday ? "7 SCORES LOGGED" : "Fatigue, mood, soreness, stress, sleep",
+                state: isQuestionnaireDoneToday ? .done : .pending,
+                doneTagText: "EDIT",
+                doneTagColor: CGTheme.inkFaint
             ) {
                 showQuestionnaire = true
             }
@@ -155,8 +161,10 @@ struct TodayView: View {
 
             todoRow(
                 title: "HR reading",
-                subtitle: "HRV + orthostatic, ~2 minutes",
-                state: !isQuestionnaireDoneToday ? .locked : (isMeasurementDoneToday ? .done : .pending)
+                subtitle: measurementSubtitle,
+                state: !isQuestionnaireDoneToday ? .locked : (isMeasurementDoneToday ? .done : .pending),
+                doneTagText: "DONE",
+                doneTagColor: CGTheme.statusOk
             ) {
                 showMeasurementSession = true
             }
@@ -166,16 +174,39 @@ struct TodayView: View {
         .padding(.horizontal, 20)
     }
 
-    private func todoRow(title: String, subtitle: String, state: TodoState, action: @escaping () -> Void) -> some View {
+    private var measurementSubtitle: String {
+        guard let measurement = viewModel.todayRecord?.measurement else {
+            return "HRV + orthostatic, ~2 minutes"
+        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        let time = formatter.string(from: measurement.measuredAt)
+        let quality = (measurement.hrvQuality ?? "ok").uppercased()
+        return "SESSION \(time) · QUALITY \(quality)"
+    }
+
+    private func todoRow(
+        title: String,
+        subtitle: String,
+        state: TodoState,
+        doneTagText: String,
+        doneTagColor: Color,
+        action: @escaping () -> Void
+    ) -> some View {
         let markerColor: Color = switch state {
         case .locked: CGTheme.lineStrong
         case .pending: CGTheme.accent
-        case .done: CGTheme.accent2
+        case .done: CGTheme.statusOk
         }
         let tagText = switch state {
         case .locked: "LOCKED"
         case .pending: "PENDING"
-        case .done: "DONE"
+        case .done: doneTagText
+        }
+        let tagColor: Color = switch state {
+        case .locked: CGTheme.lineStrong
+        case .pending: CGTheme.accent
+        case .done: doneTagColor
         }
 
         return Button(action: action) {
@@ -197,65 +228,174 @@ struct TodayView: View {
                     Text(subtitle).font(CGTheme.monoSmall).foregroundStyle(CGTheme.inkFaint)
                 }
                 Spacer()
-                Text(tagText).font(.system(size: 9.5, weight: .bold, design: .monospaced)).foregroundStyle(markerColor)
+                Text(tagText).font(.system(size: 9.5, weight: .bold, design: .monospaced)).foregroundStyle(tagColor)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 14)
-            .opacity(state == .done ? 0.6 : 1)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .disabled(state == .locked)
     }
 
-    // MARK: - Readouts
+    // MARK: - Hero readout
 
-    private func readoutsGrid(_ measurement: MeasurementRecord) -> some View {
-        let columns = [GridItem(.flexible(), spacing: 1), GridItem(.flexible(), spacing: 1)]
-        return LazyVGrid(columns: columns, spacing: 1) {
-            readout("rMSSD", measurement.rmssdMs, "ms")
-            if !measurement.orthostaticSkipped, let gapPeak = measurement.gapPeak {
-                readout("Gap (peak)", gapPeak, "bpm")
-            } else {
-                readoutPlaceholder("Gap (peak)", "skipped")
+    private func heroCard(_ measurement: MeasurementRecord) -> some View {
+        let analysis = viewModel.analyze(
+            rmssdMs: measurement.rmssdMs,
+            avgLyingHr: measurement.avgLyingHr,
+            gapPeak: measurement.orthostaticSkipped ? nil : measurement.gapPeak
+        )
+        let trend = viewModel.trendData(windowDays: 14)
+        let delta = viewModel.sevenDayDelta(for: .rmssd)
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("RMSSD")
+                    .font(CGTheme.monoSmall)
+                    .foregroundStyle(CGTheme.inkFaint)
+                Spacer()
+                if let delta {
+                    Text("\(delta >= 0 ? "+" : "")\(delta, specifier: "%.0f") VS 7-DAY")
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .foregroundStyle(delta >= 0 ? CGTheme.statusOk : CGTheme.statusWatch)
+                }
+            }
+
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                if let value = measurement.rmssdMs {
+                    Text("\(value, specifier: "%.0f")")
+                        .font(.system(size: 44, weight: .bold, design: .monospaced))
+                        .foregroundStyle(CGTheme.ink)
+                    Text(" ms")
+                        .font(.system(size: 14, design: .monospaced))
+                        .foregroundStyle(CGTheme.inkFaint)
+                } else {
+                    Text("—")
+                        .font(.system(size: 44, weight: .bold, design: .monospaced))
+                        .foregroundStyle(CGTheme.inkFaint)
+                }
+            }
+
+            BandChart(series: trend.rmssd, height: 44, showXAxisDates: false)
+
+            HStack(spacing: 8) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(heroDotColor(analysis.rmssd))
+                    .frame(width: 7, height: 7)
+                Text(heroContextSentence(analysis.rmssd))
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(CGTheme.inkDim)
+            }
+
+            Rectangle().fill(CGTheme.line).frame(height: 1)
+                .padding(.top, 2)
+
+            HStack(spacing: 0) {
+                subCell(
+                    label: "RHR",
+                    value: measurement.avgLyingHr,
+                    status: analysis.rhr,
+                    skippedNote: nil
+                )
+                Rectangle().fill(CGTheme.line).frame(width: 1)
+                subCell(
+                    label: "GAP (PEAK)",
+                    value: measurement.orthostaticSkipped ? nil : measurement.gapPeak,
+                    status: analysis.gapPeak,
+                    skippedNote: measurement.orthostaticSkipped ? "skipped" : nil
+                )
             }
         }
-        .background(CGTheme.line)
+        .padding(14)
+        .background(CGTheme.surface)
         .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
         .padding(.horizontal, 20)
     }
 
-    private func readout(_ label: String, _ value: Double?, _ unit: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label.uppercased()).font(.system(size: 9.5, design: .monospaced)).tracking(0.6).foregroundStyle(CGTheme.inkFaint)
-            if let value {
-                (Text("\(value, specifier: "%.0f")").font(.system(size: 22, weight: .bold, design: .monospaced))
-                    + Text(" \(unit)").font(.system(size: 12, design: .monospaced)))
+    private func heroDotColor(_ status: BaselineStatus?) -> Color {
+        switch status {
+        case .none: CGTheme.lineStrong
+        case .building: CGTheme.lineStrong
+        case .established(let assessment): assessment.light.color
+        }
+    }
+
+    private func heroContextSentence(_ status: BaselineStatus?) -> String {
+        switch status {
+        case .none:
+            return "No data yet"
+        case .building(let collected, let needed):
+            return "Baseline building — \(collected) of \(needed) days"
+        case .established(let assessment):
+            switch assessment.direction {
+            case .withinNormal: return "Inside your 60-day normal range"
+            case .aboveNormal: return "Higher than your usual range"
+            case .belowNormal: return "Below your usual range"
+            }
+        }
+    }
+
+    private func subCell(label: String, value: Double?, status: BaselineStatus?, skippedNote: String?) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(CGTheme.monoSmall)
+                .foregroundStyle(CGTheme.inkFaint)
+
+            if let skippedNote {
+                Text(skippedNote)
+                    .font(.system(size: 13))
+                    .foregroundStyle(CGTheme.inkFaint)
+            } else if let value {
+                Text("\(value, specifier: "%.0f")")
+                    .font(.system(size: 17, weight: .bold, design: .monospaced))
                     .foregroundStyle(CGTheme.ink)
+                directionLine(status)
             } else {
-                Text("—").font(.system(size: 22, weight: .bold, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
+                Text("—")
+                    .font(.system(size: 17, weight: .bold, design: .monospaced))
+                    .foregroundStyle(CGTheme.inkFaint)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(CGTheme.surface)
+        .padding(.top, 10)
+        .padding(.horizontal, 2)
     }
 
-    private func readoutPlaceholder(_ label: String, _ note: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label.uppercased()).font(.system(size: 9.5, design: .monospaced)).tracking(0.6).foregroundStyle(CGTheme.inkFaint)
-            Text(note).font(.system(size: 13)).foregroundStyle(CGTheme.inkFaint)
+    private func directionLine(_ status: BaselineStatus?) -> some View {
+        let text: String
+        let color: Color
+        switch status {
+        case .none:
+            text = ""
+            color = CGTheme.inkFaint
+        case .building:
+            text = "▪ building"
+            color = CGTheme.lineStrong
+        case .established(let assessment):
+            switch assessment.direction {
+            case .withinNormal: text = "▪ usual"
+            case .aboveNormal: text = "▪ higher than usual"
+            case .belowNormal: text = "▪ lower than usual"
+            }
+            color = assessment.light.color
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(CGTheme.surface)
+        return Group {
+            if !text.isEmpty {
+                Text(text)
+                    .font(CGTheme.monoSmall)
+                    .foregroundStyle(color)
+            }
+        }
     }
+
+    // MARK: - Tip
 
     private func tipCard(for measurement: MeasurementRecord) -> some View {
         let analysis = viewModel.analyze(
             rmssdMs: measurement.rmssdMs,
             avgLyingHr: measurement.avgLyingHr,
-            gapPeak: measurement.gapPeak
+            gapPeak: measurement.orthostaticSkipped ? nil : measurement.gapPeak
         )
         let summary = ResultsAnalyzer.analyze(
             rmssd: analysis.rmssd,
@@ -264,30 +404,16 @@ struct TodayView: View {
             soreness: viewModel.todayRecord?.soreness
         )
 
-        return VStack(alignment: .leading, spacing: 10) {
-            ForEach(summary.lines, id: \.label) { line in
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack {
-                        Text(line.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(CGTheme.ink)
-                        Spacer()
-                        HStack(spacing: 6) {
-                            if let light = line.light {
-                                Circle().fill(light.color).frame(width: 7, height: 7)
-                            }
-                            Text(line.text).font(.system(size: 11.5)).foregroundStyle(CGTheme.inkDim)
-                        }
-                    }
-                    if let maturityNote = line.maturityNote {
-                        Text(maturityNote)
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(CGTheme.inkFaint)
-                    }
-                }
-            }
-            Text(summary.tip)
-                .font(.system(size: 12.5))
+        return VStack(alignment: .leading, spacing: 6) {
+            (Text("Read: ").font(.system(size: 12.5, weight: .bold))
+                + Text(summary.tip).font(.system(size: 12.5)))
                 .foregroundStyle(CGTheme.inkDim)
-                .padding(.top, 4)
+
+            ForEach(summary.lines.compactMap(\.maturityNote), id: \.self) { note in
+                Text(note)
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(CGTheme.inkFaint)
+            }
         }
         .padding(14)
         .background(CGTheme.surface2)
@@ -296,5 +422,4 @@ struct TodayView: View {
         .padding(.top, 12)
         .padding(.bottom, 24)
     }
-
 }
