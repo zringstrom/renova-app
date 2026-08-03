@@ -188,6 +188,188 @@ final class AppViewModel {
         )
     }
 
+    // MARK: - Phase 8: habit-chip correlations
+
+    /// All seven habit chips' effects on next-morning rMSSD/RHR, sorted by
+    /// magnitude, below-threshold chips filtered out entirely (RecoveryKit
+    /// enforces `minGroupSize` and the division-by-zero guard). Pure group
+    /// means — no p-values, no causal language anywhere downstream.
+    func chipEffects() -> [ChipEffect] {
+        let days = historyDays(limit: 90).map { day in
+            ChipDayInputs(
+                habitAlcohol: day.habitAlcohol,
+                habitIntenseTraining: day.habitIntenseTrainingYesterday,
+                habitLongTraining: day.habitLongTrainingYesterday,
+                habitTravel: day.habitTravel,
+                habitLateNight: day.habitLateNight,
+                habitSick: day.habitSick,
+                habitBreathwork: day.habitMeditationYesterday,
+                rmssd: day.measurement?.rmssdMs,
+                rhr: day.measurement?.avgLyingHr
+            )
+        }
+        return CorrelationEngine.effects(from: days)
+    }
+
+    // MARK: - Phase 9: adherence
+
+    private func adherenceInputDays(limit: Int = 90) -> [AdherenceDay] {
+        historyDays(limit: limit).map { day in
+            AdherenceDay(
+                localDate: day.localDate,
+                questionnaireComplete: day.isQuestionnaireComplete,
+                hasMeasurement: day.measurement != nil
+            )
+        }
+    }
+
+    /// Consecutive complete days ending at today-or-yesterday — counts
+    /// through yesterday even before today's ritual is done (see
+    /// `Adherence.currentStreak`'s doc comment).
+    func currentStreak() -> Int {
+        Adherence.currentStreak(days: adherenceInputDays(), today: today, timeZone: .current)
+    }
+
+    /// Percentage (0...100) of the trailing `last` days that are complete.
+    func completionRate(last: Int = 30) -> Double {
+        Adherence.completionRate(days: adherenceInputDays(limit: max(last, 90)), today: today, timeZone: .current, last: last)
+    }
+
+    /// Exactly `count` cells, oldest first, most recent last — one per
+    /// trailing calendar day ending today, with days that have no record on
+    /// file synthesized as "missed" (no data logged at all is a missed day,
+    /// not an unknown one). Powers the Trends 28-day adherence strip.
+    func adherenceStrip(count: Int = 28) -> [AdherenceDay] {
+        let recordedByDate = Dictionary(uniqueKeysWithValues: historyDays(limit: 90).map { ($0.localDate, $0) })
+        var result: [AdherenceDay] = []
+        for offset in stride(from: count - 1, through: 0, by: -1) {
+            let date = today.adding(days: -offset, timeZone: .current)
+            if let day = recordedByDate[date.string] {
+                result.append(AdherenceDay(
+                    localDate: date.string,
+                    questionnaireComplete: day.isQuestionnaireComplete,
+                    hasMeasurement: day.measurement != nil
+                ))
+            } else {
+                result.append(AdherenceDay(localDate: date.string, questionnaireComplete: false, hasMeasurement: false))
+            }
+        }
+        return result
+    }
+
+    // MARK: - Phase 10: weekly readout
+
+    struct WeeklyMetricRow {
+        let sevenDayMean: Double?
+        let sixtyDayMean: Double?
+        let sixtyDaySD: Double?
+        let light: BaselineLight?
+        let direction: BaselineDirection?
+    }
+
+    struct WeeklyReadout {
+        let weekLabel: String
+        let dateRangeLabel: String
+        let rmssd: WeeklyMetricRow
+        let rhr: WeeklyMetricRow
+        let gapPeak: WeeklyMetricRow
+        let daysOutsideBand: Int
+        let subjectiveAverage: Double?
+        let topChipEffect: ChipEffect?
+        let loggedDaysCount: Int
+    }
+
+    /// Total days on file with at least a questionnaire or a measurement —
+    /// gates the Trends "WEEKLY READOUT →" entry point (visible at >= 7).
+    func loggedDaysCount() -> Int {
+        historyDays(limit: 100_000).count
+    }
+
+    private func weeklyMetricRow(values: [Double], sdFloor: Double) -> WeeklyMetricRow {
+        guard !values.isEmpty else {
+            return WeeklyMetricRow(sevenDayMean: nil, sixtyDayMean: nil, sixtyDaySD: nil, light: nil, direction: nil)
+        }
+        let last7 = Array(values.suffix(7))
+        let sevenDayMean = last7.reduce(0, +) / Double(last7.count)
+        let priorValues = values.dropLast(min(7, values.count)).map { $0 }
+
+        let status = BaselineCalculator.assess(today: sevenDayMean, priorValues: Array(priorValues), sdFloor: sdFloor)
+        switch status {
+        case .building:
+            return WeeklyMetricRow(sevenDayMean: sevenDayMean, sixtyDayMean: nil, sixtyDaySD: nil, light: nil, direction: nil)
+        case .established(let assessment):
+            return WeeklyMetricRow(
+                sevenDayMean: sevenDayMean,
+                sixtyDayMean: assessment.normMean,
+                sixtyDaySD: assessment.normSD,
+                light: assessment.light,
+                direction: assessment.direction
+            )
+        }
+    }
+
+    /// Everything the Weekly readout screen (Phase 10) needs, computed fresh
+    /// from the trailing measured/logged days — never a blended score, just
+    /// per-metric comparisons shown side by side.
+    func weeklyReadout() -> WeeklyReadout {
+        let measuredDays = historyDays(limit: 90).filter { $0.measurement != nil }.sorted { $0.localDate < $1.localDate }
+        let rmssdValues = measuredDays.compactMap { $0.measurement?.rmssdMs }
+        let rhrValues = measuredDays.compactMap { $0.measurement?.avgLyingHr }
+        let gapValues = measuredDays.compactMap { $0.measurement?.orthostaticSkipped == false ? $0.measurement?.gapPeak : nil }
+
+        let rmssdRow = weeklyMetricRow(values: rmssdValues, sdFloor: 1)
+        let rhrRow = weeklyMetricRow(values: rhrValues, sdFloor: 1)
+        let gapRow = weeklyMetricRow(values: gapValues, sdFloor: 1)
+
+        // Days outside band among the last 7 measured days, using the same
+        // per-day light logic as the Trends log-list dots.
+        let rmssdPairs = measuredDays.compactMap { day -> (String, Double)? in
+            guard let value = day.measurement?.rmssdMs else { return nil }
+            return (day.localDate, value)
+        }
+        let fullSeries = TrendBuilder.series(values: rmssdPairs, windowDays: rmssdPairs.count, sdFloor: 1)
+        let last7Indices = fullSeries.points.indices.suffix(7)
+        let daysOutsideBand = last7Indices.reduce(into: 0) { count, index in
+            if let light = fullSeries.light(at: index, sdFloor: 1), light != .green {
+                count += 1
+            }
+        }
+
+        // Subjective average over the last 7 logged (questionnaire) days.
+        let loggedDays = historyDays(limit: 7)
+        let dailyAverages = loggedDays.map { day in
+            SubjectiveScore.dailyAverage(
+                fatigue: day.fatigue, mood: day.mood, soreness: day.soreness, sleepQuality: day.sleepQuality,
+                workStress: day.workStress, relationshipStress: day.relationshipStress, overallLifeStress: day.overallLifeStress
+            )
+        }
+        let subjectiveAverage = SubjectiveScore.weeklyAverage(dailyAverages)
+
+        let topChip = chipEffects().first
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .current
+        let endDate = today.startOfDay(timeZone: .current)
+        let startDate = today.adding(days: -6, timeZone: .current).startOfDay(timeZone: .current)
+        let weekOfYear = calendar.component(.weekOfYear, from: endDate)
+
+        let dayMonthFormatter = DateFormatter()
+        dayMonthFormatter.dateFormat = "dd MMM"
+        let dateRangeLabel = "\(dayMonthFormatter.string(from: startDate).uppercased())\u{2013}\(dayMonthFormatter.string(from: endDate).uppercased())"
+
+        return WeeklyReadout(
+            weekLabel: "WEEK \(weekOfYear)",
+            dateRangeLabel: dateRangeLabel,
+            rmssd: rmssdRow,
+            rhr: rhrRow,
+            gapPeak: gapRow,
+            daysOutsideBand: daysOutsideBand,
+            subjectiveAverage: subjectiveAverage,
+            topChipEffect: topChip,
+            loggedDaysCount: loggedDaysCount()
+        )
+    }
+
     /// A full reset, not just a data wipe: also clears every `@AppStorage`
     /// setting (display name, notification prefs, and — critically —
     /// `hasOnboarded`), so the app drops back to the very first onboarding

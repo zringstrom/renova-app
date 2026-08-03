@@ -87,10 +87,18 @@ struct TodayView: View {
                 .font(.system(size: 15, weight: .heavy))
                 .tracking(0.5)
             Spacer()
-            Text(dateMeta)
-                .font(CGTheme.monoSmall)
-                .foregroundStyle(CGTheme.inkFaint)
-                .multilineTextAlignment(.trailing)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(dateMeta)
+                    .font(CGTheme.monoSmall)
+                    .foregroundStyle(CGTheme.inkFaint)
+                    .multilineTextAlignment(.trailing)
+                let streak = viewModel.currentStreak()
+                if streak >= 2 {
+                    Text("STREAK \(streak)")
+                        .font(CGTheme.monoSmall)
+                        .foregroundStyle(CGTheme.inkFaint)
+                }
+            }
         }
         .foregroundStyle(CGTheme.ink)
         .padding(.horizontal, 20)

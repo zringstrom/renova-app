@@ -35,6 +35,7 @@
 		A9E297D013ADA2997BE14A2D /* ReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627497518BF96CF02BDD2FA /* ReminderScheduler.swift */; };
 		AF34F02390D3D43C7F5B00CC /* MeasurementSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 205040B9FDA737AF103EEA30 /* MeasurementSessionViewModel.swift */; };
 		B37B254D7466B4D9A83D4503 /* HeartRateClientProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B381017F774112CF46080A3 /* HeartRateClientProtocol.swift */; };
+		B94660BBC93FB9AADB93022D /* WeeklyReadoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBCFEBD494F359CF9299C73F /* WeeklyReadoutView.swift */; };
 		C890D93ECE2D5019F2AD5F2D /* ControlGridTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDF1322421C604CE851ED8E /* ControlGridTheme.swift */; };
 		CC818CDEF16D9BD356F8C61F /* RecoveryExplainerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F22836ECEE9AB8394AC3DEA /* RecoveryExplainerCard.swift */; };
 		CE65EB5ADC339ADF5FB84127 /* ControlGridToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2D00AAB7EE52A7A2EDF473 /* ControlGridToggle.swift */; };
@@ -93,6 +94,7 @@
 		C7F481B6DA03B3540201A210 /* ScanLineProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanLineProgress.swift; sourceTree = "<group>"; };
 		D065FCAC93EA68E8353970EC /* DayRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayRepository.swift; sourceTree = "<group>"; };
 		D7A32FC9778B48BC7A276399 /* RecoveryKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RecoveryKit; path = Packages/RecoveryKit; sourceTree = SOURCE_ROOT; };
+		DBCFEBD494F359CF9299C73F /* WeeklyReadoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyReadoutView.swift; sourceTree = "<group>"; };
 		DBE89128263DBA15BC670E98 /* BandChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandChart.swift; sourceTree = "<group>"; };
 		E23D890514ABE822F713697C /* ExportCSV.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCSV.swift; sourceTree = "<group>"; };
 		E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryExplainers.swift; sourceTree = "<group>"; };
@@ -239,6 +241,14 @@
 			path = MorningMeasurement;
 			sourceTree = "<group>";
 		};
+		8A24491871394DF83D83C652 /* Trends */ = {
+			isa = PBXGroup;
+			children = (
+				DBCFEBD494F359CF9299C73F /* WeeklyReadoutView.swift */,
+			);
+			path = Trends;
+			sourceTree = "<group>";
+		};
 		8B38E1548D44B19D76B95E08 /* Renova */ = {
 			isa = PBXGroup;
 			children = (
@@ -297,6 +307,7 @@
 				5E930D5293B267242C19E080 /* Settings */,
 				0FE0754738AA91B1EA07F3A9 /* Shared */,
 				B20A4508FF7A612676579F0A /* Today */,
+				8A24491871394DF83D83C652 /* Trends */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -444,6 +455,7 @@
 				EC6A64AA66D25AB7A4D29B9D /* SettingsView.swift in Sources */,
 				9E169AD79E89BCFD0E716E6E /* ShareSheet.swift in Sources */,
 				37B7F795634C1DC59F5AD990 /* TodayView.swift in Sources */,
+				B94660BBC93FB9AADB93022D /* WeeklyReadoutView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -19,10 +19,19 @@ struct HistoryView: View {
                         if days.isEmpty {
                             emptyState
                         } else {
+                            adherenceSection
+
                             let trend = viewModel.trendData(windowDays: Self.chartWindowDays)
                             if trend.rmssd.points.count >= 2 {
                                 chartsSection(trend)
                             }
+
+                            patternsSection
+
+                            if viewModel.loggedDaysCount() >= 7 {
+                                weeklyReadoutRow
+                            }
+
                             sectionLabel("LOG")
                             dayList(days)
                         }
@@ -166,6 +175,131 @@ struct HistoryView: View {
             return "BASELINE BUILDING — \(progress.collected)/\(progress.needed)"
         }
         return ""
+    }
+
+    // MARK: - Adherence (Phase 9)
+
+    private var adherenceSection: some View {
+        VStack(spacing: 0) {
+            sectionLabel("ADHERENCE")
+
+            VStack(alignment: .leading, spacing: 10) {
+                let cells = viewModel.adherenceStrip(count: 28)
+                let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
+                LazyVGrid(columns: columns, spacing: 4) {
+                    ForEach(Array(cells.enumerated()), id: \.offset) { _, cell in
+                        adherenceCell(cell)
+                    }
+                }
+
+                let rate = viewModel.completionRate(last: 30)
+                Text("LAST 30 DAYS: \(Int(rate.rounded()))% COMPLETE")
+                    .font(CGTheme.monoSmall)
+                    .foregroundStyle(CGTheme.inkFaint)
+            }
+            .padding(14)
+            .background(CGTheme.surface)
+            .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
+            .padding(.horizontal, 20)
+        }
+        .padding(.bottom, 4)
+    }
+
+    private func adherenceCell(_ cell: AdherenceDay) -> some View {
+        Group {
+            if cell.isComplete {
+                Rectangle().fill(CGTheme.statusOk)
+            } else if cell.isPartial {
+                Rectangle().fill(Color.clear).overlay(Rectangle().stroke(CGTheme.lineStrong, lineWidth: 1.4))
+            } else {
+                Rectangle().fill(Color.clear).overlay(Rectangle().stroke(CGTheme.line, lineWidth: 1))
+            }
+        }
+        .aspectRatio(1, contentMode: .fit)
+    }
+
+    // MARK: - Patterns (Phase 8)
+
+    private var patternsSection: some View {
+        let effects = viewModel.chipEffects().prefix(4)
+        return Group {
+            if !effects.isEmpty {
+                VStack(spacing: 0) {
+                    sectionLabel("PATTERNS")
+
+                    VStack(spacing: 0) {
+                        ForEach(Array(effects), id: \.chip) { effect in
+                            patternRow(effect)
+                                .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+                        }
+
+                        Text("Small-sample averages on your own log. Correlation, not causation.")
+                            .font(CGTheme.monoSmall)
+                            .foregroundStyle(CGTheme.inkFaint)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                    }
+                    .background(CGTheme.surface)
+                    .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
+                    .padding(.horizontal, 20)
+                }
+                .padding(.bottom, 4)
+            }
+        }
+    }
+
+    private func patternRow(_ effect: ChipEffect) -> some View {
+        let rmssdColor: Color = (effect.rmssdPctDelta ?? 0) < 0 ? CGTheme.statusWatch : CGTheme.statusOk
+        return HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(CorrelationEngine.displayName(for: effect.chip))
+                    .font(.system(size: 12.5, weight: .bold))
+                    .foregroundStyle(CGTheme.ink)
+                Text("N=\(effect.nWith)")
+                    .font(CGTheme.monoSmall)
+                    .foregroundStyle(CGTheme.inkFaint)
+            }
+            Spacer()
+            HStack(spacing: 4) {
+                if let pct = effect.rmssdPctDelta {
+                    Text("rMSSD \(pct >= 0 ? "+" : "")\(pct, specifier: "%.0f")%")
+                        .foregroundStyle(rmssdColor)
+                }
+                if let rhr = effect.rhrBpmDelta {
+                    Text("· RHR \(rhr >= 0 ? "+" : "")\(rhr, specifier: "%.0f")bpm")
+                        .foregroundStyle(CGTheme.ink)
+                }
+            }
+            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+    }
+
+    // MARK: - Weekly readout entry point (Phase 10)
+
+    private var weeklyReadoutRow: some View {
+        NavigationLink {
+            WeeklyReadoutView(viewModel: viewModel)
+        } label: {
+            HStack {
+                Text("WEEKLY READOUT")
+                    .font(.system(size: 12.5, weight: .bold, design: .monospaced))
+                    .foregroundStyle(CGTheme.ink)
+                Spacer()
+                Text("→")
+                    .font(.system(size: 13, weight: .bold, design: .monospaced))
+                    .foregroundStyle(CGTheme.inkFaint)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .background(CGTheme.surface)
+            .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 4)
     }
 
     // MARK: - List
