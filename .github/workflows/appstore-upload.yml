@@ -1,0 +1,93 @@
+name: App Store Upload
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-upload:
+    runs-on: macos-15
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: RecoveryDeck
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select latest stable (non-beta) Xcode
+        run: |
+          XCODE_APP=$(ls -d /Applications/Xcode_*.app 2>/dev/null | grep -vi beta | sort -V | tail -1)
+          echo "Selected: $XCODE_APP"
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
+          sw_vers
+
+      - name: Write App Store Connect API key
+        env:
+          APPSTORE_API_KEY_P8: ${{ secrets.APPSTORE_API_KEY_P8 }}
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APPSTORE_API_KEY_P8" > ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+
+      - name: Bump build number
+        run: |
+          BUILD_NUMBER=$((100 + GITHUB_RUN_NUMBER))
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${BUILD_NUMBER};/g" Renova.xcodeproj/project.pbxproj
+
+      - name: Archive
+        run: |
+          rm -rf build/Renova.xcarchive build/export
+          xcodebuild archive \
+            -project Renova.xcodeproj \
+            -scheme Renova \
+            -configuration Release \
+            -archivePath build/Renova.xcarchive \
+            -destination "generic/platform=iOS" \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
+            -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
+            -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }} \
+            -allowProvisioningUpdates
+
+      - name: Verify SDK stamp
+        run: |
+          /usr/libexec/PlistBuddy -c "Print :DTXcodeBuild" -c "Print :DTSDKName" -c "Print :BuildMachineOSBuild" build/Renova.xcarchive/Products/Applications/Renova.app/Info.plist
+
+      - name: Export
+        run: |
+          cat > build/ExportOptions.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>destination</key><string>export</string>
+            <key>generateAppStoreInformation</key><false/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+            <key>method</key><string>app-store-connect</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>stripSwiftSymbols</key><true/>
+            <key>teamID</key><string>${{ secrets.APPSTORE_TEAM_ID }}</string>
+            <key>testFlightInternalTestingOnly</key><false/>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath build/Renova.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist build/ExportOptions.plist \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8 \
+            -authenticationKeyID ${{ secrets.APPSTORE_API_KEY_ID }} \
+            -authenticationKeyIssuerID ${{ secrets.APPSTORE_API_ISSUER_ID }} \
+            -allowProvisioningUpdates
+
+      - name: Upload to App Store Connect
+        run: |
+          xcrun altool --upload-package build/export/Renova.ipa \
+            --type ios \
+            --apple-id 6797707916 \
+            --bundle-id com.zringstrom.recoverydeck \
+            --bundle-version "$BUILD_NUMBER" \
+            --bundle-short-version-string 1.0 \
+            --apiKey ${{ secrets.APPSTORE_API_KEY_ID }} \
+            --apiIssuer ${{ secrets.APPSTORE_API_ISSUER_ID }}

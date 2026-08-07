@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 import RecoveryKit
 import Observation
+import WidgetKit
 
 @MainActor
 @Observable
@@ -27,21 +28,55 @@ final class AppViewModel {
         let repository = DayRepository(context: modelContext)
         self.repository = repository
         self.today = repository.today()
+
+        #if RENOVA_DEV
+        if repository.allDays(limit: 1).isEmpty {
+            repository.seedDemoData()
+        }
+        #endif
+
         self.todayRecord = repository.dayRecord(for: today)
     }
 
     func refresh() {
         today = repository.today()
         todayRecord = repository.dayRecord(for: today)
+        publishWidgetSnapshot()
     }
 
     func submitQuestionnaire(_ answers: DayRepository.QuestionnaireAnswers) {
         todayRecord = repository.upsertQuestionnaire(for: today, answers: answers)
+        publishWidgetSnapshot()
     }
 
     func recordMeasurement(rmssd: RMSSDResult, orthostatic: OrthostaticResult?) {
         _ = repository.recordMeasurement(for: today, rmssd: rmssd, orthostatic: orthostatic)
         todayRecord = repository.dayRecord(for: today)
+        publishWidgetSnapshot()
+    }
+
+    /// Phase 11: mirror today's state into the App Group so the widget can
+    /// render it without the app running.
+    private func publishWidgetSnapshot() {
+        let questionnaireDone = todayRecord?.isQuestionnaireComplete ?? false
+        let measurement = todayRecord?.measurement
+        let tasksPending = (questionnaireDone ? 0 : 1) + (measurement == nil ? 1 : 0)
+
+        var light: String?
+        if let rmssdMs = measurement?.rmssdMs,
+           case .established(let assessment) = analyze(rmssdMs: rmssdMs, avgLyingHr: nil, gapPeak: nil).rmssd {
+            light = assessment.light.rawValue
+        }
+
+        WidgetSnapshotStore.write(
+            WidgetSnapshot(
+                localDate: today.string,
+                tasksPending: tasksPending,
+                rmssdMs: measurement?.rmssdMs,
+                light: light
+            )
+        )
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     func historyDays(limit: Int = 60) -> [DayRecord] {
@@ -67,6 +102,25 @@ final class AppViewModel {
             .sorted { $0.localDate < $1.localDate }
             .map(\.exportRecord)
         return ExportCSV.build(from: days)
+    }
+
+    enum ImportError: Error {
+        case invalidFile
+    }
+
+    /// Restores days from a previously-exported JSON file (Settings "Import
+    /// Data"). Returns the number of days upserted. Idempotent — re-importing
+    /// the same file just re-writes the same days.
+    @discardableResult
+    func importJSON(_ data: Data) throws -> Int {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        guard let days = try? decoder.decode([ExportDay].self, from: data) else {
+            throw ImportError.invalidFile
+        }
+        let count = repository.importDays(days)
+        refresh()
+        return count
     }
 
     struct MeasurementAnalysis {
@@ -382,7 +436,7 @@ final class AppViewModel {
         refresh()
     }
 
-    #if DEBUG
+    #if RENOVA_DEV
     /// Dev/screenshot helper only — see `DayRepository.seedDemoData`.
     func seedDemoData(days: Int = 45) {
         repository.seedDemoData(days: days)

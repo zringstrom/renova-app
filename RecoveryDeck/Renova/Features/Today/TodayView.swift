@@ -115,9 +115,17 @@ struct TodayView: View {
         return "\(formatter.string(from: Date()).uppercased())\n\(time.string(from: Date())) LOCAL"
     }
 
+    private var timeOfDayGreeting: String {
+        switch Calendar.current.component(.hour, from: Date()) {
+        case 0..<12: return "Good morning"
+        case 12..<17: return "Good afternoon"
+        default: return "Good evening"
+        }
+    }
+
     private var greetingBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(displayName.isEmpty ? "Good morning" : "Good morning, \(displayName)")
+            Text(displayName.isEmpty ? timeOfDayGreeting : "\(timeOfDayGreeting), \(displayName)")
                 .font(.system(size: 22, weight: .heavy))
                 .foregroundStyle(CGTheme.ink)
             Text(statusLine)
@@ -133,8 +141,8 @@ struct TodayView: View {
 
     private var statusLine: String {
         switch doneCount {
-        case 0: "Two things left before your morning readout."
-        case 1: "One thing left before your morning readout."
+        case 0: "Two things left before your readout."
+        case 1: "One thing left before your readout."
         default: "All done. See you tomorrow."
         }
     }

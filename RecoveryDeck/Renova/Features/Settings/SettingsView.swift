@@ -14,6 +14,8 @@ struct SettingsView: View {
     @State private var showDeleteConfirmation = false
     @State private var exportFile: ExportFile?
     @State private var openExplainer: RecoveryExplainerTopic?
+    @State private var showImporter = false
+    @State private var importResultMessage: String?
 
     var body: some View {
         ZStack {
@@ -136,6 +138,22 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
 
                     Button {
+                        showImporter = true
+                    } label: {
+                        HStack {
+                            Text("IMPORT DATA")
+                                .font(.system(size: 12.5, weight: .bold, design: .monospaced))
+                                .foregroundStyle(CGTheme.ink)
+                            Spacer()
+                            Text("JSON").font(.system(size: 10, weight: .bold, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 13)
+                        .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
                         showDeleteConfirmation = true
                     } label: {
                         HStack {
@@ -146,13 +164,13 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
-                        #if DEBUG
+                        #if RENOVA_DEV
                         .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
                         #endif
                     }
                     .buttonStyle(.plain)
 
-                    #if DEBUG
+                    #if RENOVA_DEV
                     Button {
                         viewModel.seedDemoData()
                     } label: {
@@ -161,7 +179,7 @@ struct SettingsView: View {
                                 .font(.system(size: 12.5, weight: .bold, design: .monospaced))
                                 .foregroundStyle(CGTheme.ink)
                             Spacer()
-                            Text("DEBUG").font(.system(size: 10, weight: .bold, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
+                            Text("DEV").font(.system(size: 10, weight: .bold, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 13)
@@ -194,9 +212,37 @@ struct SettingsView: View {
         .sheet(item: $exportFile) { file in
             ShareSheet(activityItems: [file.url])
         }
+        .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json]) { result in
+            handleImport(result)
+        }
+        .alert("IMPORT", isPresented: Binding(
+            get: { importResultMessage != nil },
+            set: { if !$0 { importResultMessage = nil } }
+        )) {
+            Button("OK") { importResultMessage = nil }
+        } message: {
+            Text(importResultMessage ?? "")
+        }
         .onChange(of: notificationsEnabled) { _, _ in ReminderScheduler.sync() }
         .onChange(of: notificationHour) { _, _ in ReminderScheduler.sync() }
         .onChange(of: notificationMinute) { _, _ in ReminderScheduler.sync() }
+    }
+
+    private func handleImport(_ result: Result<URL, Error>) {
+        switch result {
+        case .failure(let error):
+            importResultMessage = "Couldn't read file: \(error.localizedDescription)"
+        case .success(let url):
+            let accessed = url.startAccessingSecurityScopedResource()
+            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let data = try Data(contentsOf: url)
+                let count = try viewModel.importJSON(data)
+                importResultMessage = "Imported \(count) day\(count == 1 ? "" : "s")."
+            } catch {
+                importResultMessage = "That file isn't a valid Renova export."
+            }
+        }
     }
 
     private var reminderTime: Binding<Date> {

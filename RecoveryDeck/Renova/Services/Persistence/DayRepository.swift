@@ -138,6 +138,73 @@ final class DayRepository {
         return record
     }
 
+    /// Restores days from a JSON export (Settings "Import Data"). Upserts by
+    /// `localDate`, so re-importing the same file — or a file with overlapping
+    /// days — is idempotent rather than creating duplicates; days already on
+    /// device but absent from the file are left untouched.
+    @discardableResult
+    func importDays(_ days: [ExportDay]) -> Int {
+        var imported = 0
+        for day in days {
+            guard let localDate = LocalDate(string: day.localDate) else { continue }
+
+            let record = dayRecord(for: localDate) ?? {
+                let created = DayRecord(localDate: localDate.string, timezoneIdentifier: timeZone.identifier)
+                context.insert(created)
+                return created
+            }()
+
+            record.fatigue = day.fatigue
+            record.mood = day.mood
+            record.soreness = day.soreness
+            record.sleepQuality = day.sleepQuality
+            record.workStress = day.workStress
+            record.relationshipStress = day.relationshipStress
+            record.overallLifeStress = day.overallLifeStress
+            record.lastCaffeineAt = day.lastCaffeineAt
+            record.caffeineAmountMg = day.caffeineAmountMg
+            record.lastMealAt = day.lastMealAt
+            record.habitAlcohol = day.habitAlcohol
+            record.habitIntenseTrainingYesterday = day.habitIntenseTrainingYesterday
+            record.habitLongTrainingYesterday = day.habitLongTrainingYesterday
+            record.habitTravel = day.habitTravel
+            record.habitLateNight = day.habitLateNight
+            record.habitSick = day.habitSick
+            record.habitMeditationYesterday = day.habitMeditationYesterday
+            record.notes = day.notes
+            if record.questionnaireCompletedAt == nil, day.fatigue != nil {
+                record.questionnaireCompletedAt = day.measurement?.measuredAt ?? Date()
+            }
+
+            if let export = day.measurement {
+                let measurement = record.measurement ?? MeasurementRecord(localDate: localDate.string, measuredAt: export.measuredAt)
+                measurement.measuredAt = export.measuredAt
+                measurement.protocolVersion = export.protocolVersion
+                measurement.rmssdMs = export.rmssdMs
+                measurement.meanHrBpm = export.meanHrBpm
+                measurement.hrvQuality = export.hrvQuality
+                measurement.avgLyingHr = export.avgLyingHr
+                measurement.avgStandingHr = export.avgStandingHr
+                measurement.peakStandingHr = export.peakStandingHr
+                measurement.gapAvg = export.gapAvg
+                measurement.gapPeak = export.gapPeak
+                measurement.orthostaticSkipped = export.orthostaticSkipped
+                measurement.orthostaticQuality = export.orthostaticSkipped ? "skipped" : "ok"
+                measurement.rrAcceptedCount = nil
+                measurement.artifactRatio = nil
+
+                if record.measurement == nil {
+                    context.insert(measurement)
+                    record.measurement = measurement
+                }
+            }
+
+            imported += 1
+        }
+        try? context.save()
+        return imported
+    }
+
     func allDays(limit: Int = 60) -> [DayRecord] {
         var descriptor = FetchDescriptor<DayRecord>(
             sortBy: [SortDescriptor(\.localDate, order: .reverse)]
@@ -153,7 +220,7 @@ final class DayRepository {
         try? context.save()
     }
 
-    #if DEBUG
+    #if RENOVA_DEV
     /// Dev/screenshot helper only — generates `days` trailing days of plausible
     /// history ending today: full questionnaires with varied scores, rMSSD
     /// ~N(58, 9) clamped 30–90, RHR ~N(47, 3), gap (peak) ~N(25, 6), ~20%
@@ -262,7 +329,7 @@ final class DayRepository {
     #endif
 }
 
-#if DEBUG
+#if RENOVA_DEV
 private extension Double {
     func clamped(to range: ClosedRange<Double>) -> Double {
         Swift.min(Swift.max(self, range.lowerBound), range.upperBound)

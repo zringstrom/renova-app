@@ -16,9 +16,12 @@ targets:
       - path: Renova
     dependencies:
       - package: RecoveryKit
+      - target: RenovaWidget
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.zringstrom.recoverydeck
+        CODE_SIGN_ENTITLEMENTS: Renova/Renova.entitlements
         PRODUCT_NAME: Renova
         INFOPLIST_KEY_CFBundleDisplayName: Renova
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -35,6 +38,59 @@ targets:
         INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: "Bluetooth is used to connect to your heart-rate chest strap for morning heart-rate measurements."
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
         ENABLE_PREVIEWS: true
+  RenovaDev:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Renova
+    dependencies:
+      - package: RecoveryKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zringstrom.recoverydeck.dev
+        CODE_SIGN_ENTITLEMENTS: Renova/Renova.entitlements
+        PRODUCT_NAME: Renova Dev
+        INFOPLIST_KEY_CFBundleDisplayName: Renova Dev
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIconDev
+        DEVELOPMENT_TEAM: Q68R2888XW
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: true
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_KEY_UILaunchStoryboardName: LaunchScreen
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: "Bluetooth is used to connect to your heart-rate chest strap for morning heart-rate measurements."
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
+        ENABLE_PREVIEWS: true
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) RENOVA_DEV"
+  RenovaWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: RenovaWidget
+      - path: Renova/Services/Widget/WidgetSnapshot.swift
+      - path: Renova/Features/Questionnaire/ControlGridTheme.swift
+    dependencies:
+      - package: RecoveryKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zringstrom.recoverydeck.widget
+        PRODUCT_NAME: RenovaWidget
+        DEVELOPMENT_TEAM: Q68R2888XW
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: RenovaWidget/RenovaWidget.entitlements
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: false
+        INFOPLIST_FILE: RenovaWidget/Info.plist
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SKIP_INSTALL: true
   RenovaTests:
     type: bundle.unit-test
     platform: iOS
@@ -59,3 +115,9 @@ schemes:
       config: Debug
       targets:
         - RenovaTests
+  RenovaDev:
+    build:
+      targets:
+        RenovaDev: all
+    run:
+      config: Debug
