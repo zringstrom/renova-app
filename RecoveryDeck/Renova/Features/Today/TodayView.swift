@@ -108,15 +108,16 @@ struct TodayView: View {
     }
 
     private var dateMeta: String {
+        let now = viewModel.lastRefreshedAt
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE dd MMM yyyy"
         let time = DateFormatter()
         time.dateFormat = "HH:mm"
-        return "\(formatter.string(from: Date()).uppercased())\n\(time.string(from: Date())) LOCAL"
+        return "\(formatter.string(from: now).uppercased())\n\(time.string(from: now)) LOCAL"
     }
 
     private var timeOfDayGreeting: String {
-        switch Calendar.current.component(.hour, from: Date()) {
+        switch Calendar.current.component(.hour, from: viewModel.lastRefreshedAt) {
         case 0..<12: return "Good morning"
         case 12..<17: return "Good afternoon"
         default: return "Good evening"

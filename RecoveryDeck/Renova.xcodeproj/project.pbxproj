@@ -24,6 +24,7 @@
 		2ABB5783FC1EC712D5F882D7 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADEF3E4A6E38A60178F0ACE1 /* AppContainer.swift */; };
 		2CB6B90066F57DB7BC8F0C05 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499B3C5777479D689D35D807 /* RootView.swift */; };
 		3054A7C9E7ED5C49D5876D45 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9D044FDF395C008D0D4DE73D /* LaunchScreen.storyboard */; };
+		30A4FE83CF3142FF74EF3638 /* LastDeviceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F33482D11D339A01EC35FD /* LastDeviceStore.swift */; };
 		37B7F795634C1DC59F5AD990 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58BD6CD05109A6D160F161D /* TodayView.swift */; };
 		43BE9C2E43AB0660D029236D /* DayRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D065FCAC93EA68E8353970EC /* DayRepository.swift */; };
 		445D63559AAD5D0E885F014A /* BandChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE89128263DBA15BC670E98 /* BandChart.swift */; };
@@ -43,6 +44,7 @@
 		67AEFBB1C7018B23BE5E6AA1 /* RecoveryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 785A0F7FFBEB67F0E31E570C /* RecoveryKit */; };
 		6EBE4217837E0029E83EB4DB /* RenovaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58FE73E4E12A33A66BE7541B /* RenovaApp.swift */; };
 		6F8CC3DCADC747138ED0B651 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6848CA1E0FC38E22E54D54 /* AppViewModel.swift */; };
+		7071E6AD563484477B5D53BB /* WeightUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3284A2866A44C7C67BF636 /* WeightUnit.swift */; };
 		71A59AA2CBBF7460B88AFFC6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E731F0B67012AE50EDCD62 /* Models.swift */; };
 		740C324B7AA033F555DE9BCB /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CF0EA50C3C75CFF43E2294 /* HistoryView.swift */; };
 		75FBE852E215E60932F68E2A /* SessionCueService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC248272DEC07869304FC67 /* SessionCueService.swift */; };
@@ -59,6 +61,7 @@
 		9B1F84B267059C85F66433F5 /* ReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627497518BF96CF02BDD2FA /* ReminderScheduler.swift */; };
 		9C80E91FD8CF3F7223CF4A9F /* HeartRateSensorIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E47C78BF2E5C99B40E0BC4E /* HeartRateSensorIdentifiers.swift */; };
 		9E169AD79E89BCFD0E716E6E /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */; };
+		A3A3D6FCCFE7AD3EB317936F /* LastDeviceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F33482D11D339A01EC35FD /* LastDeviceStore.swift */; };
 		A7902E02ED7334B9F76E6FC3 /* BaselineLight+Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F1C129E9FD558DC7B39BC /* BaselineLight+Color.swift */; };
 		A898DAEEC7F03003ED07B795 /* BandChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE89128263DBA15BC670E98 /* BandChart.swift */; };
 		A9E297D013ADA2997BE14A2D /* ReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627497518BF96CF02BDD2FA /* ReminderScheduler.swift */; };
@@ -79,6 +82,7 @@
 		CC818CDEF16D9BD356F8C61F /* RecoveryExplainerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F22836ECEE9AB8394AC3DEA /* RecoveryExplainerCard.swift */; };
 		CE65EB5ADC339ADF5FB84127 /* ControlGridToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2D00AAB7EE52A7A2EDF473 /* ControlGridToggle.swift */; };
 		D0668B5A47941F72548B2C8D /* ControlGridSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69A0C3307CB0083611F5F52 /* ControlGridSlider.swift */; };
+		D9DFE50B20DA7CAE3951AC96 /* WeightUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3284A2866A44C7C67BF636 /* WeightUnit.swift */; };
 		DAFC0EB67CF0C31C1A512979 /* DailyQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F958DC54F33670D9261A37 /* DailyQuote.swift */; };
 		DD22CDCFEAC91EDE57143B64 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */; };
 		DDD6B42F16A771D057FA3B20 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4317BF006E901FE9B7AE0A53 /* Assets.xcassets */; };
@@ -148,6 +152,7 @@
 		4317BF006E901FE9B7AE0A53 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4627497518BF96CF02BDD2FA /* ReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderScheduler.swift; sourceTree = "<group>"; };
 		499B3C5777479D689D35D807 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		49F33482D11D339A01EC35FD /* LastDeviceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastDeviceStore.swift; sourceTree = "<group>"; };
 		4BB31AC8A8E4BAEE928AD657 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		4DFDF28CE3C6036AA234CDD6 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		4F6848CA1E0FC38E22E54D54 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
@@ -155,6 +160,7 @@
 		58FE73E4E12A33A66BE7541B /* RenovaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenovaApp.swift; sourceTree = "<group>"; };
 		74E731F0B67012AE50EDCD62 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		850E98671224756B98A51409 /* RenovaWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenovaWidget.swift; sourceTree = "<group>"; };
+		8F3284A2866A44C7C67BF636 /* WeightUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightUnit.swift; sourceTree = "<group>"; };
 		9749570BE58C8B6BD257FED3 /* RenovaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenovaTests.swift; sourceTree = "<group>"; };
 		9D044FDF395C008D0D4DE73D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9E9F8BC5AA3FCBD4784FD0F4 /* QuestionnaireView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionnaireView.swift; sourceTree = "<group>"; };
@@ -218,6 +224,7 @@
 				A06F1C129E9FD558DC7B39BC /* BaselineLight+Color.swift */,
 				1F22836ECEE9AB8394AC3DEA /* RecoveryExplainerCard.swift */,
 				E3E82283963E81EA36EE1D19 /* RecoveryExplainers.swift */,
+				8F3284A2866A44C7C67BF636 /* WeightUnit.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -335,6 +342,7 @@
 				B347E312D54A76D7151A7F7A /* HeartRateClient.swift */,
 				0B381017F774112CF46080A3 /* HeartRateClientProtocol.swift */,
 				0E47C78BF2E5C99B40E0BC4E /* HeartRateSensorIdentifiers.swift */,
+				49F33482D11D339A01EC35FD /* LastDeviceStore.swift */,
 			);
 			path = Bluetooth;
 			sourceTree = "<group>";
@@ -619,6 +627,7 @@
 				B37B254D7466B4D9A83D4503 /* HeartRateClientProtocol.swift in Sources */,
 				82A06D15347A32E3C485605E /* HeartRateSensorIdentifiers.swift in Sources */,
 				740C324B7AA033F555DE9BCB /* HistoryView.swift in Sources */,
+				A3A3D6FCCFE7AD3EB317936F /* LastDeviceStore.swift in Sources */,
 				597D27C3B489B039E0C092EC /* MainTabView.swift in Sources */,
 				66C1309A9DBC8B5A3351168B /* MeasurementSessionView.swift in Sources */,
 				AF34F02390D3D43C7F5B00CC /* MeasurementSessionViewModel.swift in Sources */,
@@ -638,6 +647,7 @@
 				9E169AD79E89BCFD0E716E6E /* ShareSheet.swift in Sources */,
 				37B7F795634C1DC59F5AD990 /* TodayView.swift in Sources */,
 				B94660BBC93FB9AADB93022D /* WeeklyReadoutView.swift in Sources */,
+				D9DFE50B20DA7CAE3951AC96 /* WeightUnit.swift in Sources */,
 				83F0C5CA5F41622F6EF9B187 /* WidgetSnapshot.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -663,6 +673,7 @@
 				0F31BC63E53F1E002B465180 /* HeartRateClientProtocol.swift in Sources */,
 				9C80E91FD8CF3F7223CF4A9F /* HeartRateSensorIdentifiers.swift in Sources */,
 				90720B5B149E12C3ADA77C06 /* HistoryView.swift in Sources */,
+				30A4FE83CF3142FF74EF3638 /* LastDeviceStore.swift in Sources */,
 				B69A3F9EFB7547A4385D325D /* MainTabView.swift in Sources */,
 				27F5593BEEDAF6CB0111ECBA /* MeasurementSessionView.swift in Sources */,
 				BF21F54F92C76A3F64FD2F51 /* MeasurementSessionViewModel.swift in Sources */,
@@ -682,6 +693,7 @@
 				DD22CDCFEAC91EDE57143B64 /* ShareSheet.swift in Sources */,
 				BE236ABECE09384416CA45DC /* TodayView.swift in Sources */,
 				C68287AA02BC3DA64678D685 /* WeeklyReadoutView.swift in Sources */,
+				7071E6AD563484477B5D53BB /* WeightUnit.swift in Sources */,
 				096EC1248081689FB5B4340A /* WidgetSnapshot.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -784,7 +796,7 @@
 				CODE_SIGN_ENTITLEMENTS = Renova/Renova.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q68R2888XW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -814,7 +826,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = RenovaWidget/RenovaWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q68R2888XW;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = RenovaWidget/Info.plist;
@@ -839,7 +851,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = RenovaWidget/RenovaWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q68R2888XW;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = RenovaWidget/Info.plist;
@@ -866,7 +878,7 @@
 				CODE_SIGN_ENTITLEMENTS = Renova/Renova.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q68R2888XW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -998,7 +1010,7 @@
 				CODE_SIGN_ENTITLEMENTS = Renova/Renova.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q68R2888XW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1029,7 +1041,7 @@
 				CODE_SIGN_ENTITLEMENTS = Renova/Renova.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q68R2888XW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

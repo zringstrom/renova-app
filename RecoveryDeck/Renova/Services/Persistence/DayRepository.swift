@@ -40,6 +40,7 @@ final class DayRepository {
         var workStress: Int
         var relationshipStress: Int
         var overallLifeStress: Int
+        var bodyWeightKg: Double?
         var lastCaffeineAt: Date?
         var caffeineAmountMg: Double?
         var caffeineAmountBand: String?
@@ -76,6 +77,7 @@ final class DayRepository {
         record.workStress = answers.workStress
         record.relationshipStress = answers.relationshipStress
         record.overallLifeStress = answers.overallLifeStress
+        record.bodyWeightKg = answers.bodyWeightKg
         record.lastCaffeineAt = answers.lastCaffeineAt
         record.caffeineAmountMg = answers.caffeineAmountMg
         record.caffeineAmountBand = answers.caffeineAmountBand
@@ -98,7 +100,7 @@ final class DayRepository {
     /// and `orthostatic` come straight from RecoveryKit's calculators — no
     /// synthesizing rMSSD from BPM alone (TECH_SPEC §4.1).
     @discardableResult
-    func recordMeasurement(for localDate: LocalDate, rmssd: RMSSDResult, orthostatic: OrthostaticResult?) -> MeasurementRecord {
+    func recordMeasurement(for localDate: LocalDate, rmssd: RMSSDResult, orthostatic: OrthostaticResult?, deviceName: String? = nil) -> MeasurementRecord {
         guard let day = dayRecord(for: localDate) else {
             fatalError("recordMeasurement called before questionnaire exists for \(localDate)")
         }
@@ -111,6 +113,7 @@ final class DayRepository {
         record.rrAcceptedCount = rmssd.acceptedCount
         record.artifactRatio = rmssd.artifactRatio
         record.hrvQuality = rmssd.quality.rawValue
+        record.deviceName = deviceName
 
         if let orthostatic {
             record.avgLyingHr = orthostatic.avgLyingHR
@@ -161,6 +164,7 @@ final class DayRepository {
             record.workStress = day.workStress
             record.relationshipStress = day.relationshipStress
             record.overallLifeStress = day.overallLifeStress
+            record.bodyWeightKg = day.bodyWeightKg
             record.lastCaffeineAt = day.lastCaffeineAt
             record.caffeineAmountMg = day.caffeineAmountMg
             record.lastMealAt = day.lastMealAt
@@ -255,6 +259,7 @@ final class DayRepository {
                 workStress: Int.random(in: 1...7, using: &rng),
                 relationshipStress: Int.random(in: 1...7, using: &rng),
                 overallLifeStress: Int.random(in: 1...7, using: &rng),
+                bodyWeightKg: gaussian(mean: 75, sd: 0.6, using: &rng),
                 lastCaffeineAt: nil,
                 caffeineAmountMg: nil,
                 caffeineAmountBand: nil,

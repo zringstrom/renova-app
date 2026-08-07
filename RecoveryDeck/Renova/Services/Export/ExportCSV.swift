@@ -9,7 +9,7 @@ import RecoveryKit
 enum ExportCSV {
     static let header = [
         "localDate", "fatigue", "mood", "soreness", "sleepQuality", "workStress",
-        "relationshipStress", "overallLifeStress", "lastCaffeineAt", "caffeineAmountMg",
+        "relationshipStress", "overallLifeStress", "bodyWeightKg", "lastCaffeineAt", "caffeineAmountMg",
         "lastMealAt", "habitAlcohol", "habitIntenseTrainingYesterday", "habitLongTrainingYesterday",
         "habitTravel", "habitLateNight", "habitSick", "habitMeditationYesterday", "notes",
         "measuredAt", "protocolVersion", "rmssdMs", "meanHrBpm", "hrvQuality", "avgLyingHr",
@@ -35,6 +35,7 @@ enum ExportCSV {
                 str(day.workStress),
                 str(day.relationshipStress),
                 str(day.overallLifeStress),
+                str(day.bodyWeightKg),
                 str(day.lastCaffeineAt),
                 str(day.caffeineAmountMg),
                 str(day.lastMealAt),

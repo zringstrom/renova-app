@@ -13,6 +13,9 @@ struct QuestionnaireView: View {
     @State private var relationshipStress: Int?
     @State private var overallLifeStress: Int?
 
+    @AppStorage("weightUnit") private var weightUnit = WeightUnit.kg.rawValue
+    @State private var weightText: String = ""
+
     @State private var contextSkipped = false
     @State private var lastCaffeineAt: Date?
     @State private var caffeineAmountMg: String = ""
@@ -41,6 +44,8 @@ struct QuestionnaireView: View {
         _workStress = State(initialValue: existing?.workStress)
         _relationshipStress = State(initialValue: existing?.relationshipStress)
         _overallLifeStress = State(initialValue: existing?.overallLifeStress)
+        let storedUnit = WeightUnit(rawValue: UserDefaults.standard.string(forKey: "weightUnit") ?? "") ?? .kg
+        _weightText = State(initialValue: existing?.bodyWeightKg.map { String(format: "%.1f", storedUnit.fromKg($0)) } ?? "")
         _lastCaffeineAt = State(initialValue: existing?.lastCaffeineAt)
         _caffeineAmountMg = State(initialValue: existing?.caffeineAmountMg.map { String(format: "%.0f", $0) } ?? "")
         _lastMealAt = State(initialValue: existing?.lastMealAt)
@@ -81,6 +86,9 @@ struct QuestionnaireView: View {
                 metricRow(title: "Work stress", low: "Low", high: "Very high", value: $workStress)
                 metricRow(title: "Relationship stress", low: "Low", high: "Very high", value: $relationshipStress)
                 metricRow(title: "Overall life stress", low: "Low", high: "Very high", value: $overallLifeStress)
+
+                sectionLabel("WEIGHT")
+                weightSection
 
                 sectionLabel("LAST CAFFEINE INTAKE & LAST CALORIE INTAKE")
                 contextDisclosure
@@ -208,6 +216,62 @@ struct QuestionnaireView: View {
         .padding(.vertical, 12)
         .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
         .background(CGTheme.surface)
+    }
+
+    // MARK: - Weight
+
+    private var currentWeightUnit: WeightUnit {
+        WeightUnit(rawValue: weightUnit) ?? .kg
+    }
+
+    /// Optional — deliberately not part of `scores`/`isComplete`, so leaving
+    /// it blank never blocks submission.
+    private var weightSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 0) {
+                contextSubField("WEIGHT (\(currentWeightUnit.label))") {
+                    TextField(currentWeightUnit == .kg ? "70.0" : "154.0", text: $weightText)
+                        .keyboardType(.decimalPad)
+                        .focused($isTextFieldFocused)
+                }
+                Rectangle().fill(CGTheme.lineStrong).frame(width: 1).padding(.vertical, 10)
+                HStack(spacing: 6) {
+                    ForEach(WeightUnit.allCases, id: \.self) { unit in
+                        Button {
+                            switchUnit(to: unit)
+                        } label: {
+                            Text(unit.label)
+                                .font(.system(size: 10.5, weight: .bold, design: .monospaced))
+                                .foregroundStyle(currentWeightUnit == unit ? CGTheme.accent : CGTheme.inkFaint)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 14)
+            }
+            .background(CGTheme.surface2)
+            .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.lineStrong, lineWidth: 1))
+        }
+        .padding(14)
+        .background(CGTheme.surface)
+        .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
+        .padding(.horizontal, 20)
+        .padding(.bottom, 4)
+    }
+
+    /// Re-expresses the currently typed value in the new unit rather than
+    /// clearing it, so switching units mid-entry doesn't lose input.
+    private func switchUnit(to unit: WeightUnit) {
+        guard unit.rawValue != weightUnit else { return }
+        if let parsed = parsedWeightInput, currentWeightUnit != unit {
+            let kg = currentWeightUnit.toKg(parsed)
+            weightText = String(format: "%.1f", unit.fromKg(kg))
+        }
+        weightUnit = unit.rawValue
+    }
+
+    private var parsedWeightInput: Double? {
+        Double(weightText.replacingOccurrences(of: ",", with: "."))
     }
 
     // MARK: - Context
@@ -349,6 +413,16 @@ struct QuestionnaireView: View {
         .overlay(alignment: .top) { Rectangle().fill(CGTheme.line).frame(height: 1) }
     }
 
+    /// Converts the typed weight to kg, discarding anything outside a
+    /// plausible human body-weight range rather than saving a fat-fingered
+    /// value (e.g. a stray extra digit) as gospel.
+    private var sanitizedBodyWeightKg: Double? {
+        guard let parsed = parsedWeightInput else { return nil }
+        let kg = currentWeightUnit.toKg(parsed)
+        guard (20...400).contains(kg) else { return nil }
+        return kg
+    }
+
     private func submit() {
         guard let fatigue, let mood, let soreness, let sleepQuality,
               let workStress, let relationshipStress, let overallLifeStress else { return }
@@ -360,6 +434,7 @@ struct QuestionnaireView: View {
             workStress: workStress,
             relationshipStress: relationshipStress,
             overallLifeStress: overallLifeStress,
+            bodyWeightKg: sanitizedBodyWeightKg,
             lastCaffeineAt: lastCaffeineAt,
             caffeineAmountMg: Double(caffeineAmountMg),
             caffeineAmountBand: nil,

@@ -28,6 +28,9 @@ struct MeasurementSessionView: View {
                         statusCard(title: "Connection problem", subtitle: message(for: error), accent: CGTheme.accent)
                         secondaryButton("RETRY") { session = MeasurementSessionViewModel() }
 
+                    case .selectDevice(let devices):
+                        deviceSelectionBlock(devices)
+
                     case .readyToLieDown(let name, let battery):
                         readyToLieDownBlock(name: name, battery: battery)
                         primaryButton("START") { session.confirmLyingDown() }
@@ -104,6 +107,7 @@ struct MeasurementSessionView: View {
         switch session.phase {
         case .scanning: "CONNECTING"
         case .failed: "ERROR"
+        case .selectDevice: "SELECT"
         case .readyToLieDown: "READY"
         case .settle: "01 / 04"
         case .lying: "02 / 04"
@@ -129,6 +133,52 @@ struct MeasurementSessionView: View {
                     .frame(height: 3)
             }
         }
+    }
+
+    // MARK: - Device selection
+
+    /// Shown when the scan found two or more chest straps and none matches
+    /// the remembered last-used device — the app can't safely guess which
+    /// one is the user's, so it asks. Sorted strongest signal first.
+    private func deviceSelectionBlock(_ devices: [DiscoveredDevice]) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("MULTIPLE SENSORS FOUND")
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .tracking(0.6)
+                .foregroundStyle(CGTheme.ink)
+            Text("Pick the one you're wearing.")
+                .font(.system(size: 13))
+                .foregroundStyle(CGTheme.inkDim)
+
+            VStack(spacing: 0) {
+                ForEach(devices) { device in
+                    Button {
+                        session.selectDevice(device)
+                    } label: {
+                        HStack {
+                            Text(device.name)
+                                .font(.system(size: 14.5, weight: .bold))
+                                .foregroundStyle(CGTheme.ink)
+                            Spacer()
+                            Text("\(device.rssi) dBm")
+                                .font(CGTheme.monoSmall)
+                                .foregroundStyle(CGTheme.inkFaint)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 14)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+                }
+            }
+            .background(CGTheme.surface)
+            .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(24)
+        .background(CGTheme.surface2)
+        .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
     }
 
     // MARK: - Ready to lie down
@@ -385,7 +435,7 @@ struct MeasurementSessionView: View {
                 .multilineTextAlignment(.center)
 
             primaryButton("SEE RESULTS") {
-                viewModel.recordMeasurement(rmssd: rmssd, orthostatic: orthostatic)
+                viewModel.recordMeasurement(rmssd: rmssd, orthostatic: orthostatic, deviceName: session.connectedDeviceName)
                 dismiss()
             }
         }

@@ -4,6 +4,7 @@ struct SettingsView: View {
     let viewModel: AppViewModel
 
     @AppStorage("displayName") private var displayName = ""
+    @AppStorage("weightUnit") private var weightUnit = WeightUnit.kg.rawValue
     @AppStorage("habitChipsEnabled") private var habitChipsEnabled = true
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
     @AppStorage("notificationHour") private var notificationHour = 6
@@ -34,6 +35,20 @@ struct SettingsView: View {
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
+                    .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+
+                    HStack {
+                        Text("Weight unit").font(.system(size: 13))
+                        Spacer()
+                        Picker("", selection: $weightUnit) {
+                            Text("KG").tag(WeightUnit.kg.rawValue)
+                            Text("LBS").tag(WeightUnit.lbs.rawValue)
+                        }
+                        .labelsHidden()
+                        .tint(CGTheme.accent)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
                 }
 
                 sectionLabel("RITUAL")

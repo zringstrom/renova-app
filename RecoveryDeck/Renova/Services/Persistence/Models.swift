@@ -21,6 +21,10 @@ final class DayRecord {
     var relationshipStress: Int?
     var overallLifeStress: Int?
 
+    // Morning body weight, always stored in kg regardless of the user's
+    // display unit preference (`WeightUnit`, converted at the UI edge).
+    var bodyWeightKg: Double?
+
     // Block C (optional context)
     var lastCaffeineAt: Date?
     var caffeineAmountMg: Double?

@@ -9,6 +9,19 @@ enum HeartRateConnectionState: Sendable, Equatable {
     case rrUnavailable
     case failed(HeartRateClientError)
     case disconnected
+    /// Two or more chest straps are visible at once and no remembered
+    /// last-used device was found among them — the app can't safely guess,
+    /// so the user picks. Re-yielded (same case, updated list) as later
+    /// devices are discovered while still in this state.
+    case selectDevice([DiscoveredDevice])
+}
+
+/// One BLE peripheral seen during a scan, sorted/display-ready for the
+/// device-picker UI.
+struct DiscoveredDevice: Sendable, Equatable, Identifiable {
+    let id: UUID
+    let name: String
+    let rssi: Int
 }
 
 /// User-visible error codes from TECH_SPEC §13.
@@ -32,5 +45,9 @@ protocol HeartRateClientProtocol: AnyObject, Sendable {
     var connectionState: AsyncStream<HeartRateConnectionState> { get }
     var samples: AsyncStream<HRSample> { get }
     func connect()
+    /// Connects to a specific device from a `.selectDevice` list (the user's
+    /// explicit choice) — bypasses the last-device-then-auto-pick logic in
+    /// `connect()` entirely.
+    func connect(to deviceID: UUID)
     func disconnect()
 }

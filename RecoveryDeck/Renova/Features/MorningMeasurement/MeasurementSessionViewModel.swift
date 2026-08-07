@@ -9,6 +9,9 @@ final class MeasurementSessionViewModel {
     enum Phase: Equatable {
         case scanning
         case failed(HeartRateClientError)
+        /// Two or more chest straps are visible and none is the remembered
+        /// last-used device — the app can't safely guess, so the user picks.
+        case selectDevice([DiscoveredDevice])
         /// Connected, but waiting on the user to actually lie down and confirm —
         /// never auto-starts the settle timer (feedback: unclear when to begin).
         case readyToLieDown(deviceName: String, batteryPercent: Int?)
@@ -35,6 +38,9 @@ final class MeasurementSessionViewModel {
     /// One-time note shown when the Lying phase runs past its 60s target
     /// because it hasn't hit the RR quality floor yet (§5.1's 75s cap).
     private(set) var extensionNote: String?
+    /// Name of the strap this session ended up connected to — persisted
+    /// alongside the measurement result.
+    private(set) var connectedDeviceName: String?
 
     private var orthostaticSkipped = false
     private let client: HeartRateClientProtocol
@@ -56,7 +62,7 @@ final class MeasurementSessionViewModel {
 
     private var isPreSessionPhase: Bool {
         switch phase {
-        case .scanning, .failed, .readyToLieDown: true
+        case .scanning, .failed, .selectDevice, .readyToLieDown: true
         default: false
         }
     }
@@ -78,13 +84,22 @@ final class MeasurementSessionViewModel {
         switch state {
         case .scanning, .connecting:
             if isPreSessionPhase { phase = .scanning }
+        case .selectDevice(let devices):
+            if isPreSessionPhase { phase = .selectDevice(devices) }
         case .connected(let name, let battery):
+            connectedDeviceName = name
             if isPreSessionPhase { phase = .readyToLieDown(deviceName: name, batteryPercent: battery) }
         case .failed(let error):
             phase = .failed(error)
         case .idle, .rrUnavailable, .disconnected:
             break
         }
+    }
+
+    /// User's explicit pick from a `.selectDevice` list.
+    func selectDevice(_ device: DiscoveredDevice) {
+        phase = .scanning
+        client.connect(to: device.id)
     }
 
     private func handle(_ sample: HRSample) {

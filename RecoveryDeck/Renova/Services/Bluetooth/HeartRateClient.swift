@@ -30,6 +30,18 @@ final class HeartRateClient: NSObject, HeartRateClientProtocol, @unchecked Senda
     /// Sensor Location) — skipped if seen again while still scanning.
     private var rejectedPeripheralIDs: Set<UUID> = []
 
+    /// Candidates seen during the current scan window that passed the
+    /// name-based watch filter and aren't the remembered last device (that
+    /// one connects immediately, see `centralManager(_:didDiscover:...)`).
+    private var discoveredPeripherals: [UUID: CBPeripheral] = [:]
+    private var latestRSSI: [UUID: Int] = [:]
+    /// True once a `.selectDevice` state has been yielded — while true, every
+    /// new discovery re-yields an updated list instead of waiting for the
+    /// selection timeout again.
+    private var isSelecting = false
+    private var selectionTimeoutTask: Task<Void, Never>?
+    private var notFoundTimeoutTask: Task<Void, Never>?
+
     override init() {
         var stateContinuation: AsyncStream<HeartRateConnectionState>.Continuation!
         let stateStream = AsyncStream<HeartRateConnectionState> { continuation in
@@ -56,8 +68,21 @@ final class HeartRateClient: NSObject, HeartRateClientProtocol, @unchecked Senda
         startScanning()
     }
 
+    /// User's explicit pick from a `.selectDevice` list — bypasses the
+    /// last-device/auto-pick logic in `startScanning()` entirely.
+    func connect(to deviceID: UUID) {
+        if let match = discoveredPeripherals[deviceID] {
+            connectTo(match)
+            return
+        }
+        if let match = central.retrievePeripherals(withIdentifiers: [deviceID]).first {
+            connectTo(match)
+        }
+    }
+
     func disconnect() {
         wantsToConnect = false
+        cancelDiscoveryTimers()
         central.stopScan()
         if let peripheral {
             central.cancelPeripheralConnection(peripheral)
@@ -69,14 +94,87 @@ final class HeartRateClient: NSObject, HeartRateClientProtocol, @unchecked Senda
 
     private func startScanning() {
         stateContinuation?.yield(.scanning)
-        // Prefer an already-bonded peripheral (TECH_SPEC §4.2: iPhone may
-        // already be bonded to the strap from a prior session).
+        discoveredPeripherals = [:]
+        latestRSSI = [:]
+        isSelecting = false
+
+        // Prefer the remembered last-used device (TECH_SPEC §4.2 extended):
+        // check both a still-bonded system peripheral and, if that misses, an
+        // already-connected one filtered to chest straps.
+        if let lastID = LastDeviceStore.lastDeviceID,
+           let match = central.retrievePeripherals(withIdentifiers: [lastID]).first {
+            connectTo(match)
+            return
+        }
         let known = central.retrieveConnectedPeripherals(withServices: [HeartRateSensorIdentifiers.heartRateService])
         if let match = known.first(where: isLikelyChestStrap) {
             connectTo(match)
             return
         }
+
         central.scanForPeripherals(withServices: [HeartRateSensorIdentifiers.heartRateService], options: nil)
+        armDiscoveryTimers()
+    }
+
+    /// 5s window to decide between "exactly one strap around → just connect"
+    /// and "several around → ask" (see `evaluateAfterSelectionTimeout`), plus
+    /// a longer 20s window that fails outright if nothing showed up at all —
+    /// otherwise a user with no strap nearby would stare at "Looking for your
+    /// HR strap…" forever with no way to know it's hopeless.
+    private func armDiscoveryTimers() {
+        selectionTimeoutTask?.cancel()
+        selectionTimeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(5))
+            guard !Task.isCancelled else { return }
+            self?.evaluateAfterSelectionTimeout()
+        }
+        notFoundTimeoutTask?.cancel()
+        notFoundTimeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(20))
+            guard !Task.isCancelled else { return }
+            self?.evaluateAfterNotFoundTimeout()
+        }
+    }
+
+    private func cancelDiscoveryTimers() {
+        selectionTimeoutTask?.cancel()
+        selectionTimeoutTask = nil
+        notFoundTimeoutTask?.cancel()
+        notFoundTimeoutTask = nil
+    }
+
+    private func evaluateAfterSelectionTimeout() {
+        guard wantsToConnect, central.state == .poweredOn, peripheral == nil else { return }
+        switch discoveredPeripherals.count {
+        case 0:
+            break // keep scanning; notFoundTimeoutTask covers the "never showed up" case
+        case 1:
+            if let only = discoveredPeripherals.values.first {
+                connectTo(only)
+            }
+        default:
+            isSelecting = true
+            yieldSelection()
+        }
+    }
+
+    private func evaluateAfterNotFoundTimeout() {
+        guard wantsToConnect, central.state == .poweredOn, peripheral == nil, discoveredPeripherals.isEmpty else { return }
+        central.stopScan()
+        stateContinuation?.yield(.failed(.deviceNotFound))
+    }
+
+    private func yieldSelection() {
+        let devices = discoveredPeripherals.values
+            .map { peripheral in
+                DiscoveredDevice(
+                    id: peripheral.identifier,
+                    name: peripheral.name ?? "HR strap",
+                    rssi: latestRSSI[peripheral.identifier] ?? Int.min
+                )
+            }
+            .sorted { $0.rssi > $1.rssi }
+        stateContinuation?.yield(.selectDevice(devices))
     }
 
     /// Pre-connect optimization only, not the real filter: the standard
@@ -95,6 +193,9 @@ final class HeartRateClient: NSObject, HeartRateClientProtocol, @unchecked Senda
 
     private func connectTo(_ peripheral: CBPeripheral) {
         central.stopScan()
+        cancelDiscoveryTimers()
+        isSelecting = false
+        discoveredPeripherals = [:]
         self.peripheral = peripheral
         peripheral.delegate = self
         currentDeviceName = peripheral.name ?? "HR strap"
@@ -107,12 +208,15 @@ final class HeartRateClient: NSObject, HeartRateClientProtocol, @unchecked Senda
     /// than surfacing an error the user didn't cause.
     private func rejectAsWatch(_ peripheral: CBPeripheral) {
         rejectedPeripheralIDs.insert(peripheral.identifier)
+        discoveredPeripherals.removeValue(forKey: peripheral.identifier)
+        LastDeviceStore.forget(ifMatches: peripheral.identifier)
         central.cancelPeripheralConnection(peripheral)
         self.peripheral = nil
         hrCharacteristic = nil
         guard wantsToConnect else { return }
         stateContinuation?.yield(.scanning)
         central.scanForPeripherals(withServices: [HeartRateSensorIdentifiers.heartRateService], options: nil)
+        armDiscoveryTimers()
     }
 }
 
@@ -132,7 +236,19 @@ extension HeartRateClient: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         guard !rejectedPeripheralIDs.contains(peripheral.identifier), isLikelyChestStrap(peripheral) else { return }
-        connectTo(peripheral)
+        latestRSSI[peripheral.identifier] = RSSI.intValue
+
+        // The remembered device always wins outright, even mid-selection —
+        // that's the whole point of remembering it.
+        if peripheral.identifier == LastDeviceStore.lastDeviceID {
+            connectTo(peripheral)
+            return
+        }
+
+        discoveredPeripherals[peripheral.identifier] = peripheral
+        if isSelecting {
+            yieldSelection()
+        }
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -171,6 +287,7 @@ extension HeartRateClient: CBPeripheralDelegate {
             if characteristic.uuid == HeartRateSensorIdentifiers.heartRateMeasurement {
                 hrCharacteristic = characteristic
                 peripheral.setNotifyValue(true, for: characteristic)
+                LastDeviceStore.remember(id: peripheral.identifier, name: currentDeviceName)
                 stateContinuation?.yield(.connected(deviceName: currentDeviceName, batteryPercent: currentBatteryPercent))
             } else if characteristic.uuid == HeartRateSensorIdentifiers.bodySensorLocation {
                 peripheral.readValue(for: characteristic)

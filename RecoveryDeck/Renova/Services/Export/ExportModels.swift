@@ -11,6 +11,7 @@ struct ExportDay: Codable {
     let workStress: Int?
     let relationshipStress: Int?
     let overallLifeStress: Int?
+    let bodyWeightKg: Double?
     let lastCaffeineAt: Date?
     let caffeineAmountMg: Double?
     let lastMealAt: Date?
@@ -50,6 +51,7 @@ extension DayRecord {
             workStress: workStress,
             relationshipStress: relationshipStress,
             overallLifeStress: overallLifeStress,
+            bodyWeightKg: bodyWeightKg,
             lastCaffeineAt: lastCaffeineAt,
             caffeineAmountMg: caffeineAmountMg,
             lastMealAt: lastMealAt,

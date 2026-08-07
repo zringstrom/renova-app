@@ -10,6 +10,11 @@ final class AppViewModel {
     private let repository: DayRepository
     private(set) var today: LocalDate
     private(set) var todayRecord: DayRecord?
+    /// Bumped on every `refresh()` — lets time-derived UI (the Today
+    /// greeting/date, which otherwise only reads `Date()` once per render)
+    /// invalidate itself when the app resumes from background or crosses
+    /// midnight in the foreground, even if `today`/`todayRecord` didn't change.
+    private(set) var lastRefreshedAt = Date()
 
     var canStartMeasurement: Bool {
         GateLogic.canStartMeasurement(today: today, questionnaire: questionnaireStatus)
@@ -41,6 +46,7 @@ final class AppViewModel {
     func refresh() {
         today = repository.today()
         todayRecord = repository.dayRecord(for: today)
+        lastRefreshedAt = Date()
         publishWidgetSnapshot()
     }
 
@@ -49,8 +55,8 @@ final class AppViewModel {
         publishWidgetSnapshot()
     }
 
-    func recordMeasurement(rmssd: RMSSDResult, orthostatic: OrthostaticResult?) {
-        _ = repository.recordMeasurement(for: today, rmssd: rmssd, orthostatic: orthostatic)
+    func recordMeasurement(rmssd: RMSSDResult, orthostatic: OrthostaticResult?, deviceName: String? = nil) {
+        _ = repository.recordMeasurement(for: today, rmssd: rmssd, orthostatic: orthostatic, deviceName: deviceName)
         todayRecord = repository.dayRecord(for: today)
         publishWidgetSnapshot()
     }
