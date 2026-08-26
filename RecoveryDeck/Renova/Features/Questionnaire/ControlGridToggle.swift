@@ -20,6 +20,7 @@ struct ControlGridToggle: View {
                     .frame(width: 30, alignment: .trailing)
 
                 Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     withAnimation(.easeOut(duration: 0.16)) { isOn.toggle() }
                 } label: {
                     ZStack(alignment: isOn ? .trailing : .leading) {

@@ -279,7 +279,7 @@ struct TodayView: View {
             gapPeak: measurement.orthostaticSkipped ? nil : measurement.gapPeak
         )
         let trend = viewModel.trendData(windowDays: 14)
-        let delta = viewModel.sevenDayDelta(for: .rmssd)
+        let baselineDelta = viewModel.baselineDelta(for: .rmssd)
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
@@ -287,10 +287,10 @@ struct TodayView: View {
                     .font(CGTheme.monoSmall)
                     .foregroundStyle(CGTheme.inkFaint)
                 Spacer()
-                if let delta {
-                    Text("\(delta >= 0 ? "+" : "")\(delta, specifier: "%.0f") VS 7-DAY")
+                if let baselineDelta {
+                    Text("\(baselineDelta.delta >= 0 ? "+" : "")\(baselineDelta.delta, specifier: "%.0f") VS \(baselineDelta.windowDays)-DAY")
                         .font(.system(size: 10, weight: .bold, design: .monospaced))
-                        .foregroundStyle(delta >= 0 ? CGTheme.statusOk : CGTheme.statusWatch)
+                        .foregroundStyle(baselineDelta.delta >= 0 ? CGTheme.statusOk : CGTheme.statusWatch)
                 }
             }
 
@@ -462,11 +462,19 @@ struct TodayView: View {
     /// Returns nil once every metric is fully mature (or still in the
     /// pre-comparison "building" state), so no maturity line is shown at all.
     private func maturityLine(for analysis: AppViewModel.MeasurementAnalysis) -> String? {
-        let stillBuilding: [BaselineAssessment] = [analysis.rmssd, analysis.rhr, analysis.gapPeak].compactMap { status in
+        let labeled: [(label: String, status: BaselineStatus?)] = [
+            ("RMSSD", analysis.rmssd), ("RHR", analysis.rhr), ("GAP", analysis.gapPeak)
+        ]
+        let stillBuilding: [(label: String, assessment: BaselineAssessment)] = labeled.compactMap { label, status in
             guard case .established(let assessment) = status, !assessment.isFullyMature else { return nil }
-            return assessment
+            return (label, assessment)
         }
-        guard let leastMature = stillBuilding.min(by: { $0.priorDaysUsed < $1.priorDaysUsed }) else { return nil }
-        return "Baseline still building — \(leastMature.priorDaysUsed)/\(BaselineCalculator.normWindowDays) days"
+        // Named explicitly — this can be a different metric than the one in
+        // the hero card's "vs N-day" readout above (RMSSD), most often GAP
+        // since the orthostatic phase is skippable and so matures slower.
+        // Leaving the metric unnamed here read as the same number contradicting
+        // the hero card's, when they're actually about different metrics.
+        guard let leastMature = stillBuilding.min(by: { $0.assessment.priorDaysUsed < $1.assessment.priorDaysUsed }) else { return nil }
+        return "\(leastMature.label) baseline still building — \(leastMature.assessment.priorDaysUsed)/\(BaselineCalculator.normWindowDays) days"
     }
 }

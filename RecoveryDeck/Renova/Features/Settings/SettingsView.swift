@@ -5,11 +5,11 @@ struct SettingsView: View {
 
     @AppStorage("displayName") private var displayName = ""
     @AppStorage("weightUnit") private var weightUnit = WeightUnit.kg.rawValue
+    @AppStorage("weightTrackingEnabled") private var weightTrackingEnabled = true
     @AppStorage("habitChipsEnabled") private var habitChipsEnabled = true
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
-    @AppStorage("notificationHour") private var notificationHour = 6
-    @AppStorage("notificationMinute") private var notificationMinute = 30
-    @AppStorage("baselineWindowDays") private var baselineWindowDays = 7
+    @AppStorage("notificationHour") private var notificationHour = 5
+    @AppStorage("notificationMinute") private var notificationMinute = 0
     @AppStorage("cueStyle") private var cueStyle = CueStyle.both
 
     @State private var showDeleteConfirmation = false
@@ -38,17 +38,30 @@ struct SettingsView: View {
                     .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
 
                     HStack {
-                        Text("Weight unit").font(.system(size: 13))
+                        Text("Track morning weight").font(.system(size: 13))
                         Spacer()
-                        Picker("", selection: $weightUnit) {
-                            Text("KG").tag(WeightUnit.kg.rawValue)
-                            Text("LBS").tag(WeightUnit.lbs.rawValue)
-                        }
-                        .labelsHidden()
-                        .tint(CGTheme.accent)
+                        rockerToggle(isOn: $weightTrackingEnabled)
                     }
                     .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 12)
+                    .overlay(alignment: .bottom) {
+                        if weightTrackingEnabled { Rectangle().fill(CGTheme.line).frame(height: 1) }
+                    }
+
+                    if weightTrackingEnabled {
+                        HStack {
+                            Text("Weight unit").font(.system(size: 13))
+                            Spacer()
+                            Picker("", selection: $weightUnit) {
+                                Text("KG").tag(WeightUnit.kg.rawValue)
+                                Text("LBS").tag(WeightUnit.lbs.rawValue)
+                            }
+                            .labelsHidden()
+                            .tint(CGTheme.accent)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                    }
                 }
 
                 sectionLabel("RITUAL")
@@ -56,7 +69,7 @@ struct SettingsView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Daily reminder").font(.system(size: 13))
-                            Text("Questionnaire first. Then HR reading.").font(CGTheme.monoSmall).foregroundStyle(CGTheme.inkFaint)
+                            Text("\"Morning Check-in\"").font(CGTheme.monoSmall).foregroundStyle(CGTheme.inkFaint)
                         }
                         Spacer()
                         rockerToggle(isOn: $notificationsEnabled)
@@ -73,19 +86,6 @@ struct SettingsView: View {
                             .fixedSize()
                     }
                     .padding(.horizontal, 14).padding(.vertical, 12)
-                    .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
-
-                    HStack {
-                        Text("Baseline window").font(.system(size: 13))
-                        Spacer()
-                        Picker("", selection: $baselineWindowDays) {
-                            Text("7 DAYS").tag(7)
-                            Text("14 DAYS").tag(14)
-                        }
-                        .labelsHidden()
-                        .tint(CGTheme.accent)
-                    }
-                    .padding(.horizontal, 14).padding(.vertical, 8)
                     .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
 
                     HStack {

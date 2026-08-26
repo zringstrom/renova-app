@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct QuestionnaireView: View {
     let viewModel: AppViewModel
@@ -14,12 +15,14 @@ struct QuestionnaireView: View {
     @State private var overallLifeStress: Int?
 
     @AppStorage("weightUnit") private var weightUnit = WeightUnit.kg.rawValue
+    @AppStorage("weightTrackingEnabled") private var weightTrackingEnabled = true
     @State private var weightText: String = ""
 
     @State private var contextSkipped = false
     @State private var lastCaffeineAt: Date?
     @State private var caffeineAmountMg: String = ""
     @State private var lastMealAt: Date?
+    @State private var showCaffeineWheel = false
 
     @AppStorage("habitChipsEnabled") private var habitChipsEnabled = true
     @State private var habitAlcohol = false
@@ -46,9 +49,15 @@ struct QuestionnaireView: View {
         _overallLifeStress = State(initialValue: existing?.overallLifeStress)
         let storedUnit = WeightUnit(rawValue: UserDefaults.standard.string(forKey: "weightUnit") ?? "") ?? .kg
         _weightText = State(initialValue: existing?.bodyWeightKg.map { String(format: "%.1f", storedUnit.fromKg($0)) } ?? "")
-        _lastCaffeineAt = State(initialValue: existing?.lastCaffeineAt)
-        _caffeineAmountMg = State(initialValue: existing?.caffeineAmountMg.map { String(format: "%.0f", $0) } ?? "")
-        _lastMealAt = State(initialValue: existing?.lastMealAt)
+        // Caffeine/meal timing tends to repeat day to day, so default all
+        // three fields to whatever was logged yesterday instead of starting
+        // blank.
+        let yesterday = viewModel.dayRecord(for: viewModel.today.adding(days: -1, timeZone: .current))
+        _lastCaffeineAt = State(initialValue: existing?.lastCaffeineAt ?? yesterday?.lastCaffeineAt)
+        _caffeineAmountMg = State(initialValue: existing?.caffeineAmountMg.map { String(format: "%.0f", $0) }
+            ?? yesterday?.caffeineAmountMg.map { String(format: "%.0f", $0) }
+            ?? "")
+        _lastMealAt = State(initialValue: existing?.lastMealAt ?? yesterday?.lastMealAt)
         _habitAlcohol = State(initialValue: existing?.habitAlcohol ?? false)
         _habitIntenseTraining = State(initialValue: existing?.habitIntenseTrainingYesterday ?? false)
         _habitLongTraining = State(initialValue: existing?.habitLongTrainingYesterday ?? false)
@@ -64,6 +73,17 @@ struct QuestionnaireView: View {
     /// silently implies a real answer that was never given.
     private static var defaultTimeSlotDate: Date {
         Calendar.current.startOfDay(for: Date())
+    }
+
+    /// Only the true fallback — once yesterday's value is available (see
+    /// `init`), that wins over this. A more plausible starting point than
+    /// midnight for the first time either field is ever touched.
+    private static var defaultCaffeineTimeSlotDate: Date {
+        Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: Date()) ?? defaultTimeSlotDate
+    }
+
+    private static var defaultMealTimeSlotDate: Date {
+        Calendar.current.date(bySettingHour: 18, minute: 30, second: 0, of: Date()) ?? defaultTimeSlotDate
     }
 
     private var scores: [Int?] { [fatigue, mood, soreness, sleepQuality, workStress, relationshipStress, overallLifeStress] }
@@ -87,8 +107,10 @@ struct QuestionnaireView: View {
                 metricRow(title: "Relationship stress", low: "Low", high: "Very high", value: $relationshipStress)
                 metricRow(title: "Overall life stress", low: "Low", high: "Very high", value: $overallLifeStress)
 
-                sectionLabel("WEIGHT")
-                weightSection
+                if weightTrackingEnabled {
+                    sectionLabel("MORNING WEIGHT")
+                    weightSection
+                }
 
                 sectionLabel("LAST CAFFEINE INTAKE & LAST CALORIE INTAKE")
                 contextDisclosure
@@ -101,6 +123,7 @@ struct QuestionnaireView: View {
                 sectionLabel("NOTES")
                 notesField
                     .padding(.bottom, 20)
+                    .background(CGTheme.surface)
 
                 submitBlock
             }
@@ -229,7 +252,7 @@ struct QuestionnaireView: View {
     private var weightSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 0) {
-                contextSubField("WEIGHT (\(currentWeightUnit.label))") {
+                contextSubField("MORNING WEIGHT (\(currentWeightUnit.label))") {
                     TextField(currentWeightUnit == .kg ? "70.0" : "154.0", text: $weightText)
                         .keyboardType(.decimalPad)
                         .focused($isTextFieldFocused)
@@ -254,9 +277,10 @@ struct QuestionnaireView: View {
         }
         .padding(14)
         .background(CGTheme.surface)
-        .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.lineStrong, lineWidth: 1))
         .padding(.horizontal, 20)
         .padding(.bottom, 4)
+        .background(CGTheme.surface)
     }
 
     /// Re-expresses the currently typed value in the new unit rather than
@@ -290,14 +314,11 @@ struct QuestionnaireView: View {
                     Text("LAST CAFFEINE INTAKE | TOTAL CAFFEINE YESTERDAY").font(CGTheme.monoSmall).foregroundStyle(CGTheme.inkFaint)
                     HStack(spacing: 0) {
                         contextSubField("TIME") {
-                            DatePicker("", selection: Binding(get: { lastCaffeineAt ?? Self.defaultTimeSlotDate }, set: { lastCaffeineAt = $0 }), displayedComponents: .hourAndMinute)
-                                .labelsHidden()
+                            timePicker(selection: Binding(get: { lastCaffeineAt ?? Self.defaultCaffeineTimeSlotDate }, set: { lastCaffeineAt = $0 }))
                         }
                         Rectangle().fill(CGTheme.lineStrong).frame(width: 1).padding(.vertical, 10)
                         contextSubField("TOTAL (MG)") {
-                            TextField("95", text: $caffeineAmountMg)
-                                .keyboardType(.numberPad)
-                                .focused($isTextFieldFocused)
+                            caffeineAmountField
                         }
                     }
                     .background(CGTheme.surface2)
@@ -308,8 +329,7 @@ struct QuestionnaireView: View {
                     Text("LAST CALORIE INTAKE").font(CGTheme.monoSmall).foregroundStyle(CGTheme.inkFaint)
                     HStack(spacing: 0) {
                         contextSubField("TIME") {
-                            DatePicker("", selection: Binding(get: { lastMealAt ?? Self.defaultTimeSlotDate }, set: { lastMealAt = $0 }), displayedComponents: .hourAndMinute)
-                                .labelsHidden()
+                            timePicker(selection: Binding(get: { lastMealAt ?? Self.defaultMealTimeSlotDate }, set: { lastMealAt = $0 }))
                         }
                     }
                     .background(CGTheme.surface2)
@@ -341,9 +361,10 @@ struct QuestionnaireView: View {
         }
         .padding(14)
         .background(CGTheme.surface)
-        .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.line, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.lineStrong, lineWidth: 1))
         .padding(.horizontal, 20)
         .padding(.bottom, 4)
+        .background(CGTheme.surface)
     }
 
     private func contextSubField(_ label: String, @ViewBuilder content: () -> some View) -> some View {
@@ -353,6 +374,58 @@ struct QuestionnaireView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(10)
+    }
+
+    /// A fixed list of 15-minute slots in a wheel, same pattern as
+    /// `caffeineAmountField` below. An earlier version snapped a plain
+    /// `DatePicker`'s value to the nearest 15 minutes *after* selection —
+    /// that left the wheel itself still scrolling every single minute, which
+    /// didn't read as "15-minute increments" at all. A still-earlier version
+    /// wrapped `UIDatePicker` directly to get real `minuteInterval` scrolling,
+    /// but two `.compact`-style `UIDatePicker`s on one screen is a known
+    /// UIKit bug — the second one renders blank. Building the wheel's option
+    /// list ourselves sidesteps both problems.
+    private func timePicker(selection: Binding<Date>) -> some View {
+        QuarterHourTimeField(selection: selection)
+    }
+
+    /// Same pill look as the plain text field it replaces — tapping it opens
+    /// a scrollable wheel (values in steps of 10) instead of typing on the
+    /// keyboard or repeatedly tapping +/- buttons.
+    private var caffeineAmountField: some View {
+        Button {
+            showCaffeineWheel = true
+        } label: {
+            Text(caffeineAmountMg.isEmpty ? "0" : caffeineAmountMg)
+                .foregroundStyle(CGTheme.ink)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $showCaffeineWheel) {
+            Picker("", selection: caffeineAmountBinding) {
+                ForEach(Array(stride(from: 0, through: 750, by: 10)), id: \.self) { value in
+                    Text("\(value) mg").tag(value)
+                }
+            }
+            .pickerStyle(.wheel)
+            .frame(width: 200, height: 200)
+            .presentationCompactAdaptation(.popover)
+        }
+    }
+
+    /// Rounds to the nearest 10 on read — a yesterday-carried-forward default
+    /// (or a value typed before this build existed) might not already land
+    /// on a multiple of 10.
+    private var caffeineAmountBinding: Binding<Int> {
+        Binding(
+            get: {
+                let current = Int(caffeineAmountMg) ?? 0
+                return Int((Double(current) / 10).rounded()) * 10
+            },
+            set: { newValue in
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                caffeineAmountMg = String(newValue)
+            }
+        )
     }
 
     // MARK: - Habits
@@ -409,7 +482,7 @@ struct QuestionnaireView: View {
             .disabled(!isComplete)
         }
         .padding(20)
-        .background(CGTheme.surface2)
+        .background(CGTheme.surface)
         .overlay(alignment: .top) { Rectangle().fill(CGTheme.line).frame(height: 1) }
     }
 
@@ -434,7 +507,7 @@ struct QuestionnaireView: View {
             workStress: workStress,
             relationshipStress: relationshipStress,
             overallLifeStress: overallLifeStress,
-            bodyWeightKg: sanitizedBodyWeightKg,
+            bodyWeightKg: weightTrackingEnabled ? sanitizedBodyWeightKg : viewModel.todayRecord?.bodyWeightKg,
             lastCaffeineAt: lastCaffeineAt,
             caffeineAmountMg: Double(caffeineAmountMg),
             caffeineAmountBand: nil,
@@ -452,3 +525,73 @@ struct QuestionnaireView: View {
         dismiss()
     }
 }
+
+/// Same pill-button-opens-a-wheel pattern as the caffeine mg field, just
+/// over a fixed list of 15-minute-of-day slots instead of numbers. Picking
+/// the option list ourselves (rather than relying on `UIDatePicker.minuteInterval`,
+/// which needs a `UIViewRepresentable` and breaks when there's more than one
+/// `.compact`-style instance on screen) is what actually gets real 15-minute
+/// steps in the wheel.
+private struct QuarterHourTimeField: View {
+    @Binding var selection: Date
+    @State private var showPicker = false
+
+    private static let minuteOptions: [Int] = Array(stride(from: 0, to: 24 * 60, by: 15))
+
+    private static let formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter
+    }()
+
+    private func date(forMinutesSinceMidnight minutes: Int) -> Date {
+        Calendar.current.date(bySettingHour: minutes / 60, minute: minutes % 60, second: 0, of: selection)
+            ?? selection
+    }
+
+    private func label(forMinutesSinceMidnight minutes: Int) -> String {
+        Self.formatter.string(from: date(forMinutesSinceMidnight: minutes))
+    }
+
+    /// Rounds whatever's currently stored to the nearest slot in the list —
+    /// covers values set before this build existed, or the once-a-day
+    /// yesterday-carried-forward default.
+    private var currentMinutesSinceMidnight: Int {
+        let calendar = Calendar.current
+        let raw = calendar.component(.hour, from: selection) * 60 + calendar.component(.minute, from: selection)
+        let remainder = raw % 15
+        return remainder < 8 ? raw - remainder : raw + (15 - remainder)
+    }
+
+    var body: some View {
+        Button {
+            showPicker = true
+        } label: {
+            Text(Self.formatter.string(from: selection))
+                .font(.system(size: 17))
+                .foregroundStyle(CGTheme.ink)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(CGTheme.surface)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $showPicker) {
+            Picker(
+                "",
+                selection: Binding(
+                    get: { currentMinutesSinceMidnight },
+                    set: { selection = date(forMinutesSinceMidnight: $0) }
+                )
+            ) {
+                ForEach(Self.minuteOptions, id: \.self) { minutes in
+                    Text(label(forMinutesSinceMidnight: minutes)).tag(minutes)
+                }
+            }
+            .pickerStyle(.wheel)
+            .frame(width: 200, height: 200)
+            .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+

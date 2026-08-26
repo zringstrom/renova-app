@@ -26,7 +26,10 @@ struct MeasurementSessionView: View {
 
                     case .failed(let error):
                         statusCard(title: "Connection problem", subtitle: message(for: error), accent: CGTheme.accent)
-                        secondaryButton("RETRY") { session = MeasurementSessionViewModel() }
+                        secondaryButton("RETRY") {
+                            session.cancel()
+                            session = MeasurementSessionViewModel()
+                        }
 
                     case .selectDevice(let devices):
                         deviceSelectionBlock(devices)

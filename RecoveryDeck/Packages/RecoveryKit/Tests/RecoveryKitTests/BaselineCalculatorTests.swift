@@ -103,4 +103,26 @@ struct BaselineCalculatorTests {
         #expect(abs(assessment.normSD - sampleSD) < 1e-9)
         #expect(abs(assessment.normSD - populationSD) > 1e-6)
     }
+
+    @Test("deltaWindowDays is nil below the minimum prior days")
+    func deltaWindowNilBelowMinimum() {
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 0) == nil)
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 6) == nil)
+    }
+
+    @Test("deltaWindowDays steps up in whole weeks as prior days accrue")
+    func deltaWindowStepsInWeeks() {
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 7) == 7)
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 13) == 7)
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 14) == 14)
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 20) == 14)
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 21) == 21)
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 59) == 56)
+    }
+
+    @Test("deltaWindowDays caps at 60 once there's enough history")
+    func deltaWindowCapsAtSixty() {
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 60) == 60)
+        #expect(BaselineCalculator.deltaWindowDays(priorCount: 200) == 60)
+    }
 }

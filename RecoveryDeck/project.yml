@@ -67,6 +67,35 @@ targets:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
         ENABLE_PREVIEWS: true
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) RENOVA_DEV"
+  RenovaStaging:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Renova
+    dependencies:
+      - package: RecoveryKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zringstrom.recoverydeck.staging
+        CODE_SIGN_ENTITLEMENTS: Renova/Renova.entitlements
+        PRODUCT_NAME: RenovaStaging
+        INFOPLIST_KEY_CFBundleDisplayName: Renova
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIconStaging
+        DEVELOPMENT_TEAM: Q68R2888XW
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: true
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_KEY_UILaunchStoryboardName: LaunchScreen
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: "Bluetooth is used to connect to your heart-rate chest strap for morning heart-rate measurements."
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: true
+        ENABLE_PREVIEWS: true
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) RENOVA_STAGING"
   RenovaWidget:
     type: app-extension
     platform: iOS
@@ -119,5 +148,11 @@ schemes:
     build:
       targets:
         RenovaDev: all
+    run:
+      config: Debug
+  RenovaStaging:
+    build:
+      targets:
+        RenovaStaging: all
     run:
       config: Debug

@@ -20,8 +20,12 @@ public struct RMSSDResult: Sendable, Equatable {
 /// (TECH_SPEC §5.1). Quality fails, and rMSSD should be treated as unreliable,
 /// when `artifactRatio > 0.20` or `acceptedCount < 45`.
 public enum RMSSDCalculator {
-    private static let minAcceptedCount = 45
-    private static let maxArtifactRatio = 0.20
+    /// Below this accepted-beat count, rMSSD is considered unreliable — also used
+    /// as the sufficiency gate for extending the Lying phase (TECH_SPEC §5.1).
+    public static let minAcceptedCount = 45
+    /// Above this artifact ratio, rMSSD is considered unreliable — also used
+    /// as the sufficiency gate for extending the Lying phase (TECH_SPEC §5.1).
+    public static let maxArtifactRatio = 0.20
 
     public static func compute(rawRRMs: [Double]) -> RMSSDResult {
         let filtered = ArtifactFilter.filter(rawRRMs)

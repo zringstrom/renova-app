@@ -71,4 +71,15 @@ public enum BaselineCalculator {
 
         return .established(BaselineAssessment(light: light, direction: direction, normMean: mean, normSD: sd, priorDaysUsed: window.count))
     }
+
+    /// The comparison window size for a "vs. baseline" delta, given how many
+    /// prior measured days are available: steps up in whole weeks (7, 14, 21,
+    /// …) as data accrues, capping at `normWindowDays` (60) once there's
+    /// enough history — never stuck showing a 7-day comparison forever.
+    /// `nil` below `minimumPriorDays`, matching `assess`'s "building" cutoff.
+    public static func deltaWindowDays(priorCount: Int) -> Int? {
+        guard priorCount >= minimumPriorDays else { return nil }
+        guard priorCount < normWindowDays else { return normWindowDays }
+        return (priorCount / minimumPriorDays) * minimumPriorDays
+    }
 }

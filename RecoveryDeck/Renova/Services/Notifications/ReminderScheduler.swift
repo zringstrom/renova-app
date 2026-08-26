@@ -7,8 +7,8 @@ enum ReminderScheduler {
     static func sync() {
         let defaults = UserDefaults.standard
         let enabled = defaults.object(forKey: "notificationsEnabled") as? Bool ?? true
-        let hour = defaults.object(forKey: "notificationHour") as? Int ?? 6
-        let minute = defaults.object(forKey: "notificationMinute") as? Int ?? 30
+        let hour = defaults.object(forKey: "notificationHour") as? Int ?? 5
+        let minute = defaults.object(forKey: "notificationMinute") as? Int ?? 0
 
         let center = UNUserNotificationCenter.current()
         center.removePendingNotificationRequests(withIdentifiers: [identifier])
@@ -19,8 +19,8 @@ enum ReminderScheduler {
             guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
 
             let content = UNMutableNotificationContent()
-            content.title = "Morning check-in"
-            content.body = "Questionnaire first — then H10."
+            content.title = "Morning Check-in"
+            content.body = "Time for your questionnaire and HR reading."
             content.sound = .default
 
             var components = DateComponents()

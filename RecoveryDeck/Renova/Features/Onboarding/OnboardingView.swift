@@ -7,8 +7,9 @@ struct OnboardingView: View {
 
     @AppStorage("displayName") private var displayName = ""
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
-    @AppStorage("notificationHour") private var notificationHour = 6
-    @AppStorage("notificationMinute") private var notificationMinute = 30
+    @AppStorage("notificationHour") private var notificationHour = 5
+    @AppStorage("notificationMinute") private var notificationMinute = 0
+    @AppStorage("weightTrackingEnabled") private var weightTrackingEnabled = true
     /// One or none — never both. Opening one closes the other.
     @State private var openExplainer: RecoveryExplainerTopic?
 
@@ -28,6 +29,7 @@ struct OnboardingView: View {
 
                     sectionLabel("SCHEDULE")
                     scheduleRow
+                    weightTrackingRow
 
                     submitBlock
                 }
@@ -194,29 +196,97 @@ struct OnboardingView: View {
     // MARK: - Schedule
 
     private var scheduleRow: some View {
+        VStack(spacing: 0) {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Daily reminder").font(.system(size: 13))
+                    Text("\"Morning Check-in\"")
+                        .font(CGTheme.monoSmall)
+                        .foregroundStyle(CGTheme.inkFaint)
+                }
+                Spacer()
+                HStack(spacing: 8) {
+                    Text(notificationsEnabled ? "ON" : "OFF")
+                        .font(CGTheme.monoSmall)
+                        .foregroundStyle(CGTheme.inkFaint)
+                        .frame(width: 30, alignment: .trailing)
+                    Button {
+                        withAnimation(.easeOut(duration: 0.16)) { notificationsEnabled.toggle() }
+                    } label: {
+                        ZStack(alignment: notificationsEnabled ? .trailing : .leading) {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(notificationsEnabled ? CGTheme.accent.opacity(0.18) : CGTheme.surface2)
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(notificationsEnabled ? CGTheme.accent : CGTheme.lineStrong, lineWidth: 1))
+                                .frame(width: 46, height: 24)
+                            Circle()
+                                .fill(notificationsEnabled ? CGTheme.accent : CGTheme.inkFaint)
+                                .frame(width: 20, height: 20)
+                                .padding(1)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.vertical, 13)
+
+            if notificationsEnabled {
+                HStack {
+                    Text("Reminder time").font(.system(size: 13))
+                    Spacer()
+                    DatePicker("", selection: reminderTime, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                        .font(.system(size: 12, design: .monospaced))
+                        .fixedSize()
+                }
+                .padding(.vertical, 13)
+                .overlay(alignment: .top) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+            }
+        }
+        .overlay(alignment: .top) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+        .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
+        .padding(.horizontal, 20)
+    }
+
+    private var reminderTime: Binding<Date> {
+        Binding(
+            get: {
+                var components = DateComponents()
+                components.hour = notificationHour
+                components.minute = notificationMinute
+                return Calendar.current.date(from: components) ?? Date()
+            },
+            set: { newValue in
+                let components = Calendar.current.dateComponents([.hour, .minute], from: newValue)
+                notificationHour = components.hour ?? notificationHour
+                notificationMinute = components.minute ?? notificationMinute
+            }
+        )
+    }
+
+    private var weightTrackingRow: some View {
         HStack {
             VStack(alignment: .leading, spacing: 3) {
-                Text("Daily reminder").font(.system(size: 13))
-                Text("\(String(format: "%02d:%02d", notificationHour, notificationMinute)) · \"Questionnaire first. Then HR reading.\"")
+                Text("Track morning weight").font(.system(size: 13))
+                Text("You can change this anytime in Settings.")
                     .font(CGTheme.monoSmall)
                     .foregroundStyle(CGTheme.inkFaint)
             }
             Spacer()
             HStack(spacing: 8) {
-                Text(notificationsEnabled ? "ON" : "OFF")
+                Text(weightTrackingEnabled ? "ON" : "OFF")
                     .font(CGTheme.monoSmall)
                     .foregroundStyle(CGTheme.inkFaint)
                     .frame(width: 30, alignment: .trailing)
                 Button {
-                    withAnimation(.easeOut(duration: 0.16)) { notificationsEnabled.toggle() }
+                    withAnimation(.easeOut(duration: 0.16)) { weightTrackingEnabled.toggle() }
                 } label: {
-                    ZStack(alignment: notificationsEnabled ? .trailing : .leading) {
+                    ZStack(alignment: weightTrackingEnabled ? .trailing : .leading) {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(notificationsEnabled ? CGTheme.accent.opacity(0.18) : CGTheme.surface2)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(notificationsEnabled ? CGTheme.accent : CGTheme.lineStrong, lineWidth: 1))
+                            .fill(weightTrackingEnabled ? CGTheme.accent.opacity(0.18) : CGTheme.surface2)
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(weightTrackingEnabled ? CGTheme.accent : CGTheme.lineStrong, lineWidth: 1))
                             .frame(width: 46, height: 24)
                         Circle()
-                            .fill(notificationsEnabled ? CGTheme.accent : CGTheme.inkFaint)
+                            .fill(weightTrackingEnabled ? CGTheme.accent : CGTheme.inkFaint)
                             .frame(width: 20, height: 20)
                             .padding(1)
                     }
@@ -225,9 +295,9 @@ struct OnboardingView: View {
             }
         }
         .padding(.vertical, 13)
-        .overlay(alignment: .top) { Rectangle().fill(CGTheme.line).frame(height: 1) }
         .overlay(alignment: .bottom) { Rectangle().fill(CGTheme.line).frame(height: 1) }
         .padding(.horizontal, 20)
+        .background(CGTheme.surface)
     }
 
     // MARK: - Submit

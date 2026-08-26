@@ -31,12 +31,14 @@ final class MeasurementSessionViewModel {
     private(set) var phase: Phase = .scanning
     private(set) var liveBpm: Double?
     private(set) var rrAvailable = false
-    /// Rotating "still working" copy shown every ~10s during long phases.
+    /// "Still working" copy for the current timed phase — advances forward
+    /// through phase-appropriate messages as `phaseElapsedSeconds` progresses.
     private(set) var statusMessage: String?
     /// Seconds elapsed in the current timed phase — drives the corner timer.
     private(set) var phaseElapsedSeconds: Int = 0
     /// One-time note shown when the Lying phase runs past its 60s target
-    /// because it hasn't hit the RR quality floor yet (§5.1's 75s cap).
+    /// because it hasn't cleared RMSSDCalculator's reliability gate yet
+    /// (§5.1's 75s cap). Cleared whenever the Lying phase ends.
     private(set) var extensionNote: String?
     /// Name of the strap this session ended up connected to — persisted
     /// alongside the measurement result.
@@ -48,7 +50,6 @@ final class MeasurementSessionViewModel {
     private var stateTask: Task<Void, Never>?
     private var sampleTask: Task<Void, Never>?
     private var phaseTask: Task<Void, Never>?
-    private var tickerTask: Task<Void, Never>?
 
     private var lyingRRBuffer: [Double] = []
     private var standingBpmBuffer: [Double] = []
@@ -149,15 +150,24 @@ final class MeasurementSessionViewModel {
 
     /// TECH_SPEC §5.1 (v3.1): 60s target — matches the classic Couzens lying
     /// duration and doubles as the orthostatic lying reference — extendable to
-    /// a 75s hard cap if sum(accepted RR) hasn't reached 60,000ms yet (a slow
-    /// resting HR shouldn't get shortchanged on data). Feeds both rMSSD and
-    /// avgLyingHR from this one buffer.
+    /// a 75s hard cap if the buffer hasn't yet cleared RMSSDCalculator's own
+    /// reliability gate (accepted-beat count + artifact ratio) — a slow resting
+    /// HR or a noisy signal shouldn't get shortchanged on data. Feeds both
+    /// rMSSD and avgLyingHR from this one buffer.
+    ///
+    /// This gate is deliberately the same one `RMSSDCalculator.compute` uses to
+    /// decide `.quality == .ok` — reusing it here (rather than a wall-clock
+    /// proxy like "accepted RR sum ≥ 60s") means the extension only fires when
+    /// the session would otherwise come back low-quality, and never fires on a
+    /// clean session (RR intervals tile elapsed time, so their sum is always
+    /// slightly under 60,000ms even on a perfect signal — a sum-based test
+    /// could never pass at the 60s mark).
     private func runLying() {
         phase = .lying
         phaseElapsedSeconds = 0
         extensionNote = nil
+        statusMessage = Self.lyingMessage(elapsedFraction: 0)
         cues.cue(.lyingStart)
-        startTicker(["Collecting heartbeats…", "Measuring resting heart rate…", "Almost there…"])
         phaseTask = Task {
             let start = Date()
             var hasNotedExtension = false
@@ -165,13 +175,15 @@ final class MeasurementSessionViewModel {
                 try? await Task.sleep(for: .seconds(1))
                 let elapsed = Date().timeIntervalSince(start)
                 self.phaseElapsedSeconds = Int(elapsed.rounded())
+                self.statusMessage = Self.lyingMessage(elapsedFraction: elapsed / 60)
                 let filtered = ArtifactFilter.filter(self.lyingRRBuffer)
-                let acceptedSumMs = filtered.segments.flatMap { $0 }.reduce(0, +)
-                if elapsed >= 60 && acceptedSumMs < 60_000 && !hasNotedExtension {
+                let sufficientData = filtered.acceptedCount >= RMSSDCalculator.minAcceptedCount
+                    && filtered.artifactRatio <= RMSSDCalculator.maxArtifactRatio
+                if elapsed >= 60 && !sufficientData && !hasNotedExtension {
                     hasNotedExtension = true
-                    self.extensionNote = "Settling down is taking a bit longer. Added a few extra seconds."
+                    self.extensionNote = "Still collecting clean beats — a few more seconds."
                 }
-                if (elapsed >= 60 && acceptedSumMs >= 60_000) || elapsed >= 75 {
+                if (elapsed >= 60 && sufficientData) || elapsed >= 75 {
                     break
                 }
             }
@@ -181,8 +193,8 @@ final class MeasurementSessionViewModel {
     }
 
     private func enterWaitingForStand() {
-        tickerTask?.cancel()
         statusMessage = nil
+        extensionNote = nil
         phase = .waitingForStand
         cues.cue(.standNow)
         // Distinct double-buzz so it reads as "do something now", not a routine tick.
@@ -204,13 +216,14 @@ final class MeasurementSessionViewModel {
     private func runStanding() {
         phase = .standing
         phaseElapsedSeconds = 0
+        statusMessage = Self.standingMessage(elapsedFraction: 0)
         cues.cue(.standingStart)
-        startTicker(["Stand still…", "Still measuring…", "Almost done…"])
         phaseTask = Task {
             for second in 1...60 {
                 try? await Task.sleep(for: .seconds(1))
                 guard !Task.isCancelled else { return }
                 self.phaseElapsedSeconds = second
+                self.statusMessage = Self.standingMessage(elapsedFraction: Double(second) / 60)
             }
             self.finish()
         }
@@ -220,12 +233,11 @@ final class MeasurementSessionViewModel {
     func skipOrthostatic() {
         orthostaticSkipped = true
         phaseTask?.cancel()
-        tickerTask?.cancel()
+        extensionNote = nil
         finish()
     }
 
     private func finish() {
-        tickerTask?.cancel()
         statusMessage = nil
         let rmssdResult = RMSSDCalculator.compute(rawRRMs: lyingRRBuffer)
         let orthoResult: OrthostaticResult?
@@ -244,26 +256,30 @@ final class MeasurementSessionViewModel {
 
     func cancel() {
         phaseTask?.cancel()
-        tickerTask?.cancel()
         stateTask?.cancel()
         sampleTask?.cancel()
         client.disconnect()
         cues.stopSpeaking()
     }
 
-    // MARK: - Ticker
+    // MARK: - Status copy
 
-    private func startTicker(_ messages: [String]) {
-        tickerTask?.cancel()
-        tickerTask = Task {
-            var index = 0
-            statusMessage = messages[0]
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(10))
-                guard !Task.isCancelled else { return }
-                index += 1
-                statusMessage = messages[index % messages.count]
-            }
+    /// Forward-only copy keyed on actual phase progress rather than a flat
+    /// repeating timer — holds on the last message instead of looping back to
+    /// the first if the phase runs long (e.g. the Lying extension).
+    private static func lyingMessage(elapsedFraction: Double) -> String {
+        switch elapsedFraction {
+        case ..<0.33: "Collecting heartbeats…"
+        case ..<0.75: "Measuring resting heart rate…"
+        default: "Almost there…"
+        }
+    }
+
+    private static func standingMessage(elapsedFraction: Double) -> String {
+        switch elapsedFraction {
+        case ..<0.33: "Stand still…"
+        case ..<0.75: "Still measuring…"
+        default: "Almost done…"
         }
     }
 

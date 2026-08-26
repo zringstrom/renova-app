@@ -89,6 +89,10 @@ final class AppViewModel {
         repository.allDays(limit: limit)
     }
 
+    func dayRecord(for localDate: LocalDate) -> DayRecord? {
+        repository.dayRecord(for: localDate)
+    }
+
     /// Every day on file, oldest-first, as pretty-printed JSON — for the
     /// Settings export (share sheet: email to self, save to Files, AirDrop, ...).
     func exportJSON() -> Data {
@@ -177,10 +181,13 @@ final class AppViewModel {
         )
     }
 
-    /// Today vs the mean of the last (up to) 7 prior measured days for the
-    /// given metric, today excluded. `nil` when today has no value for the
-    /// metric, or there's no prior measured data at all.
-    func sevenDayDelta(for metric: TrendMetric) -> Double? {
+    /// Today vs the mean of the last N prior measured days for the given
+    /// metric, today excluded. N grows in whole weeks as history accrues —
+    /// 7, 14, 21, … — capping at `BaselineCalculator.normWindowDays` (60), so
+    /// the comparison keeps sharpening instead of staying pinned to a 7-day
+    /// baseline forever. `nil` when today has no value for the metric, or
+    /// fewer than 7 prior measured days exist.
+    func baselineDelta(for metric: TrendMetric) -> (delta: Double, windowDays: Int)? {
         guard let measurement = todayRecord?.measurement else { return nil }
 
         let todayValue: Double?
@@ -191,7 +198,7 @@ final class AppViewModel {
         }
         guard let todayValue else { return nil }
 
-        let priorDays = historyDays(limit: 30)
+        let priorDays = historyDays(limit: BaselineCalculator.normWindowDays + 30)
             .filter { $0.localDate != today.string }
             .sorted { $0.localDate > $1.localDate }
 
@@ -202,10 +209,10 @@ final class AppViewModel {
         case .gapPeak: priorValues = priorDays.compactMap { $0.measurement?.orthostaticSkipped == false ? $0.measurement?.gapPeak : nil }
         }
 
-        let last7 = Array(priorValues.prefix(7))
-        guard !last7.isEmpty else { return nil }
-        let mean = last7.reduce(0, +) / Double(last7.count)
-        return todayValue - mean
+        guard let windowDays = BaselineCalculator.deltaWindowDays(priorCount: priorValues.count) else { return nil }
+        let window = Array(priorValues.prefix(windowDays))
+        let mean = window.reduce(0, +) / Double(window.count)
+        return (delta: todayValue - mean, windowDays: windowDays)
     }
 
     /// Mirrors the "building" branch `TrendBuilder`/`BaselineCalculator` would
@@ -235,7 +242,12 @@ final class AppViewModel {
     /// never in `historyDays()` until `recordMeasurement` is called, so this is
     /// safe to call before persisting).
     func analyze(rmssdMs: Double?, avgLyingHr: Double?, gapPeak: Double?) -> MeasurementAnalysis {
-        let priorDays = historyDays(limit: BaselineCalculator.normWindowDays + 1)
+        // Calendar lookback must be wide enough to actually find up to
+        // `normWindowDays` measured days even with gaps — matches the window
+        // `baselineDelta`/`baselineProgress` use, so all three agree on how
+        // many prior days exist instead of disagreeing whenever mornings were
+        // missed inside the tighter window.
+        let priorDays = historyDays(limit: BaselineCalculator.normWindowDays + 30)
             .filter { $0.localDate != today.string }
         let rmssdPrior = priorDays.compactMap { $0.measurement?.rmssdMs }
         let rhrPrior = priorDays.compactMap { $0.measurement?.avgLyingHr }

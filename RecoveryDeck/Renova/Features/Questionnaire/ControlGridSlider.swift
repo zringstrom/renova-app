@@ -13,6 +13,9 @@ struct ControlGridSlider: View {
     /// started on top of this row) — see `body`'s `.gesture` for why this
     /// exists at all.
     @State private var dragAxis: Axis?
+    /// Kept as `@State` (not a fresh instance per body evaluation) so `.prepare()`
+    /// actually has time to warm up the Taptic Engine before the first tick fires.
+    @State private var feedback = UISelectionFeedbackGenerator()
 
     private enum Axis { case horizontal, vertical }
 
@@ -64,16 +67,18 @@ struct ControlGridSlider: View {
                         if dragAxis == nil {
                             let horizontal = abs(drag.translation.width) >= abs(drag.translation.height)
                             dragAxis = horizontal ? .horizontal : .vertical
+                            if dragAxis == .horizontal { feedback.prepare() }
                         }
                         guard dragAxis == .horizontal else { return }
-                        value = resolvedValue(atX: drag.location.x, width: width)
+                        setValue(resolvedValue(atX: drag.location.x, width: width))
                     }
                     .onEnded { _ in dragAxis = nil }
             )
             // `minimumDistance: 10` above means a plain tap never reaches
             // `onChanged`, so a direct tap on a tick needs its own gesture.
             .onTapGesture { location in
-                value = resolvedValue(atX: location.x, width: width)
+                feedback.prepare()
+                setValue(resolvedValue(atX: location.x, width: width))
             }
         }
         .frame(height: 28)
@@ -84,5 +89,15 @@ struct ControlGridSlider: View {
         let frac = width > 0 ? clampedX / width : 0
         let raw = Int((frac * CGFloat(range.upperBound - range.lowerBound)).rounded()) + range.lowerBound
         return min(max(raw, range.lowerBound), range.upperBound)
+    }
+
+    /// Ticks only on an actual change of score — scrubbing across the rail
+    /// should feel like passing over 7 detents, not buzz continuously with
+    /// every pixel of finger movement.
+    private func setValue(_ newValue: Int) {
+        if value != newValue {
+            feedback.selectionChanged()
+        }
+        value = newValue
     }
 }

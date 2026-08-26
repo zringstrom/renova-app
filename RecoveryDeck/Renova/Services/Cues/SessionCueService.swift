@@ -32,6 +32,17 @@ enum CueStyle: String {
 final class SessionCueService: NSObject {
     private let synthesizer: AVSpeechSynthesizer
     private var audioSessionActive = false
+    /// Set true when the `.done` cue is spoken — the only signal that no more
+    /// cues are coming, so the delegate knows it's safe to tear the session
+    /// down once that utterance finishes (as opposed to the gap *between*
+    /// cues mid-session, which must hold the session open).
+    private var sessionEnding = false
+    /// Resolved once, not per-utterance: an enhanced/premium voice if the
+    /// user has one installed (Settings > Accessibility > Spoken Content),
+    /// falling back to the system default. The default *compact* voice is
+    /// the main source of "robotic"-sounding cues — this is a bigger
+    /// perceptual win than anything about audio session timing.
+    private lazy var voice: AVSpeechSynthesisVoice? = Self.bestAvailableVoice()
 
     override init() {
         synthesizer = AVSpeechSynthesizer()
@@ -47,12 +58,14 @@ final class SessionCueService: NSObject {
     /// Speaks `line` via `AVSpeechSynthesizer` at a slightly slower-than-default
     /// rate. Activates the `.playback` + `.duckOthers` audio session on first
     /// use so speech plays through the silent switch — intentional (PRD
-    /// §6.5): the user's eyes are closed for this whole ritual.
+    /// §6.5): the user's eyes are closed for this whole ritual. The session is
+    /// held open across the whole measurement (see `sessionEnding`) rather than
+    /// being torn down and rebuilt between every cue.
     func speak(_ line: String) {
         activateAudioSessionIfNeeded()
         let utterance = AVSpeechUtterance(string: line)
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.85
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        utterance.voice = voice
         synthesizer.speak(utterance)
     }
 
@@ -60,6 +73,7 @@ final class SessionCueService: NSObject {
     /// voice cues are enabled.
     func cue(_ event: CueEvent) {
         guard cueStyle == .voice || cueStyle == .both else { return }
+        if event == .done { sessionEnding = true }
         speak(spokenLine(for: event))
     }
 
@@ -77,6 +91,15 @@ final class SessionCueService: NSObject {
         case .standingStart: "Sixty seconds. Stand still."
         case .done: "Done"
         }
+    }
+
+    /// Prefers a downloaded premium, then enhanced, en-US voice over the
+    /// always-available compact default.
+    private static func bestAvailableVoice() -> AVSpeechSynthesisVoice? {
+        let enUSVoices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language == "en-US" }
+        return enUSVoices.first { $0.quality == .premium }
+            ?? enUSVoices.first { $0.quality == .enhanced }
+            ?? AVSpeechSynthesisVoice(language: "en-US")
     }
 
     private func activateAudioSessionIfNeeded() {
@@ -100,20 +123,25 @@ final class SessionCueService: NSObject {
             // Ignore — nothing user-visible depends on this succeeding.
         }
         audioSessionActive = false
+        sessionEnding = false
     }
 }
 
 extension SessionCueService: AVSpeechSynthesizerDelegate {
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in self?.deactivateIfQueueIsEmpty() }
+        Task { @MainActor [weak self] in self?.deactivateIfSessionEnding() }
     }
 
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in self?.deactivateIfQueueIsEmpty() }
+        Task { @MainActor [weak self] in self?.deactivateIfSessionEnding() }
     }
 
-    private func deactivateIfQueueIsEmpty() {
-        guard !synthesizer.isSpeaking else { return }
+    /// Only tears the audio session down once the `.done` cue has finished —
+    /// the queue also goes momentarily empty *between* every other cue, and
+    /// deactivating then was what caused each cue to pay an activation-glitch
+    /// cost and made background audio duck/unduck five times per session.
+    private func deactivateIfSessionEnding() {
+        guard sessionEnding, !synthesizer.isSpeaking else { return }
         deactivateAudioSessionIfNeeded()
     }
 }

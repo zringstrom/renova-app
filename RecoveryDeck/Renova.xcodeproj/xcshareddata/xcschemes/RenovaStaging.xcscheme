@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "3070225554559E5CC07596F3"
-               BuildableName = "RenovaDev.app"
-               BlueprintName = "RenovaDev"
+               BlueprintIdentifier = "EEFDEF4B96036B4DCB1A9684"
+               BuildableName = "RenovaStaging.app"
+               BlueprintName = "RenovaStaging"
                ReferencedContainer = "container:Renova.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3070225554559E5CC07596F3"
-            BuildableName = "RenovaDev.app"
-            BlueprintName = "RenovaDev"
+            BlueprintIdentifier = "EEFDEF4B96036B4DCB1A9684"
+            BuildableName = "RenovaStaging.app"
+            BlueprintName = "RenovaStaging"
             ReferencedContainer = "container:Renova.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -55,9 +55,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3070225554559E5CC07596F3"
-            BuildableName = "RenovaDev.app"
-            BlueprintName = "RenovaDev"
+            BlueprintIdentifier = "EEFDEF4B96036B4DCB1A9684"
+            BuildableName = "RenovaStaging.app"
+            BlueprintName = "RenovaStaging"
             ReferencedContainer = "container:Renova.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -74,9 +74,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3070225554559E5CC07596F3"
-            BuildableName = "RenovaDev.app"
-            BlueprintName = "RenovaDev"
+            BlueprintIdentifier = "EEFDEF4B96036B4DCB1A9684"
+            BuildableName = "RenovaStaging.app"
+            BlueprintName = "RenovaStaging"
             ReferencedContainer = "container:Renova.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
