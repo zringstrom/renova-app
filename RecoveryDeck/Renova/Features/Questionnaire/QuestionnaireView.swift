@@ -86,9 +86,29 @@ struct QuestionnaireView: View {
         Calendar.current.date(bySettingHour: 18, minute: 30, second: 0, of: Date()) ?? defaultTimeSlotDate
     }
 
-    private var scores: [Int?] { [fatigue, mood, soreness, sleepQuality, workStress, relationshipStress, overallLifeStress] }
+    /// Life Stress collapses three underlying fields into one row, so it
+    /// only counts once here — otherwise touching that one slider jumps the
+    /// counter by 3 at once (e.g. straight from 4/7 to 7/7, skipping 5 and 6
+    /// entirely) since it writes all three fields simultaneously.
+    private var scores: [Int?] { [fatigue, mood, soreness, sleepQuality, lifeStressBinding.wrappedValue] }
     private var setCount: Int { scores.compactMap { $0 }.count }
-    private var isComplete: Bool { setCount == 7 }
+    private var isComplete: Bool { setCount == scores.count }
+
+    /// One slider standing in for all three stress fields — writes the same
+    /// value to `workStress`/`relationshipStress`/`overallLifeStress` so
+    /// nothing downstream (baselines, exports) has to change. Reads back
+    /// whichever of the three is set (they're always equal once touched
+    /// through this binding).
+    private var lifeStressBinding: Binding<Int?> {
+        Binding(
+            get: { workStress ?? relationshipStress ?? overallLifeStress },
+            set: { newValue in
+                workStress = newValue
+                relationshipStress = newValue
+                overallLifeStress = newValue
+            }
+        )
+    }
 
     var body: some View {
         ScrollView {
@@ -102,10 +122,7 @@ struct QuestionnaireView: View {
                 metricRow(title: "Soreness / heavy legs", low: "None", high: "Very sore", value: $soreness)
                 metricRow(title: "Sleep quality", low: "Terrible", high: "Excellent", value: $sleepQuality)
 
-                sectionLabel("STRESS")
-                metricRow(title: "Work stress", low: "Low", high: "Very high", value: $workStress)
-                metricRow(title: "Relationship stress", low: "Low", high: "Very high", value: $relationshipStress)
-                metricRow(title: "Overall life stress", low: "Low", high: "Very high", value: $overallLifeStress)
+                metricRow(title: "Life stress", low: "Low", high: "Very high", value: lifeStressBinding)
 
                 if weightTrackingEnabled {
                     sectionLabel("MORNING WEIGHT")
@@ -465,12 +482,12 @@ struct QuestionnaireView: View {
             HStack {
                 Text("FIELDS SET").font(CGTheme.monoSmall).foregroundStyle(CGTheme.inkFaint)
                 Spacer()
-                Text("\(setCount) / 7").font(CGTheme.monoSmall).fontWeight(.bold).foregroundStyle(CGTheme.ink)
+                Text("\(setCount) / \(scores.count)").font(CGTheme.monoSmall).fontWeight(.bold).foregroundStyle(CGTheme.ink)
             }
             Button {
                 submit()
             } label: {
-                Text(isComplete ? (isEditing ? "SAVE CHANGES" : "SUBMIT READINESS") : "SET ALL 7 METRICS TO SUBMIT")
+                Text(isComplete ? (isEditing ? "SAVE CHANGES" : "SUBMIT READINESS") : "SET ALL \(scores.count) METRICS TO SUBMIT")
                     .font(.system(size: 13, weight: .heavy))
                     .tracking(1)
                     .frame(maxWidth: .infinity)

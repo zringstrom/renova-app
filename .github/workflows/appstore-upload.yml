@@ -88,6 +88,6 @@ jobs:
             --apple-id 6797707916 \
             --bundle-id com.zringstrom.recoverydeck \
             --bundle-version "$BUILD_NUMBER" \
-            --bundle-short-version-string 1.1 \
+            --bundle-short-version-string 1.2 \
             --apiKey ${{ secrets.APPSTORE_API_KEY_ID }} \
             --apiIssuer ${{ secrets.APPSTORE_API_ISSUER_ID }}
