@@ -10,16 +10,19 @@ final class DayRecord {
     @Attribute(.unique) var localDate: String
     var timezoneIdentifier: String
 
-    // Block A + B (PRD §6.3, revised), 1...7.
-    // Fatigue and the three stress fields are "amount" scales (1 = little/good,
-    // 7 = a lot/bad); Mood, Soreness, Sleep quality are "higher = better" scales.
+    // Block A + B (PRD §6.3), 1...7.
+    // Fatigue and lifeStress are "amount" scales (1 = little/good, 7 = a lot/bad);
+    // Mood, Soreness, Sleep quality are "higher = better" scales.
     var fatigue: Int?
     var mood: Int?
     var soreness: Int?
     var sleepQuality: Int?
-    var workStress: Int?
-    var relationshipStress: Int?
-    var overallLifeStress: Int?
+    // Stress was briefly split three ways (Work/Relationship/Overall); that was
+    // reverted back to one score. `originalName` maps onto the old
+    // `overallLifeStress` column so SwiftData's lightweight migration carries
+    // existing values forward instead of losing them — the three fields were
+    // always kept equal by the UI, so overallLifeStress is as good as any.
+    @Attribute(originalName: "overallLifeStress") var lifeStress: Int?
 
     // Morning body weight, always stored in kg regardless of the user's
     // display unit preference (`WeightUnit`, converted at the UI edge).
@@ -57,8 +60,7 @@ final class DayRecord {
 
     var isQuestionnaireComplete: Bool {
         GateLogic.isQuestionnaireComplete(
-            fatigue: fatigue, mood: mood, soreness: soreness, sleepQuality: sleepQuality,
-            workStress: workStress, relationshipStress: relationshipStress, overallLifeStress: overallLifeStress
+            fatigue: fatigue, mood: mood, soreness: soreness, sleepQuality: sleepQuality, lifeStress: lifeStress
         )
     }
 }

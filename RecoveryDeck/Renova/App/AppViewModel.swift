@@ -412,7 +412,7 @@ final class AppViewModel {
         let dailyAverages = loggedDays.map { day in
             SubjectiveScore.dailyAverage(
                 fatigue: day.fatigue, mood: day.mood, soreness: day.soreness, sleepQuality: day.sleepQuality,
-                workStress: day.workStress, relationshipStress: day.relationshipStress, overallLifeStress: day.overallLifeStress
+                lifeStress: day.lifeStress
             )
         }
         let subjectiveAverage = SubjectiveScore.weeklyAverage(dailyAverages)

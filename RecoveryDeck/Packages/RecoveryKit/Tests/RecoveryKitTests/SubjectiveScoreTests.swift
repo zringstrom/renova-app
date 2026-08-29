@@ -6,36 +6,31 @@ struct SubjectiveScoreTests {
     @Test("all-good day: mood/soreness/sleep at 7, fatigue/stress at 1 (least of the bad amount) -> high average")
     func allGoodDay() {
         let avg = SubjectiveScore.dailyAverage(
-            fatigue: 1, mood: 7, soreness: 7, sleepQuality: 7,
-            workStress: 1, relationshipStress: 1, overallLifeStress: 1
+            fatigue: 1, mood: 7, soreness: 7, sleepQuality: 7, lifeStress: 1
         )
-        // fatigue/stress flip to 8-1=7 each; all seven values are 7.
+        // fatigue/stress flip to 8-1=7 each; all five values are 7.
         #expect(avg == 7.0)
     }
 
     @Test("polarity trap: fatigue=7 (worst) must LOWER the average, not raise it")
     func fatigueMaxLowersAverage() {
         let lowFatigue = SubjectiveScore.dailyAverage(
-            fatigue: 1, mood: 4, soreness: 4, sleepQuality: 4,
-            workStress: 4, relationshipStress: 4, overallLifeStress: 4
+            fatigue: 1, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: 4
         )
         let highFatigue = SubjectiveScore.dailyAverage(
-            fatigue: 7, mood: 4, soreness: 4, sleepQuality: 4,
-            workStress: 4, relationshipStress: 4, overallLifeStress: 4
+            fatigue: 7, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: 4
         )
         #expect(lowFatigue != nil && highFatigue != nil)
         #expect(highFatigue! < lowFatigue!)
     }
 
-    @Test("polarity trap: a week of stress=7 (worst) must also lower the average")
+    @Test("polarity trap: lifeStress=7 (worst) must also lower the average")
     func stressMaxLowersAverage() {
         let lowStress = SubjectiveScore.dailyAverage(
-            fatigue: 4, mood: 4, soreness: 4, sleepQuality: 4,
-            workStress: 1, relationshipStress: 1, overallLifeStress: 1
+            fatigue: 4, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: 1
         )
         let highStress = SubjectiveScore.dailyAverage(
-            fatigue: 4, mood: 4, soreness: 4, sleepQuality: 4,
-            workStress: 7, relationshipStress: 7, overallLifeStress: 7
+            fatigue: 4, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: 7
         )
         #expect(lowStress != nil && highStress != nil)
         #expect(highStress! < lowStress!)
@@ -44,12 +39,10 @@ struct SubjectiveScoreTests {
     @Test("mood/soreness/sleepQuality are NOT flipped -- higher raises the average directly")
     func higherIsBetterFieldsNotFlipped() {
         let low = SubjectiveScore.dailyAverage(
-            fatigue: 4, mood: 1, soreness: 1, sleepQuality: 1,
-            workStress: 4, relationshipStress: 4, overallLifeStress: 4
+            fatigue: 4, mood: 1, soreness: 1, sleepQuality: 1, lifeStress: 4
         )
         let high = SubjectiveScore.dailyAverage(
-            fatigue: 4, mood: 7, soreness: 7, sleepQuality: 7,
-            workStress: 4, relationshipStress: 4, overallLifeStress: 4
+            fatigue: 4, mood: 7, soreness: 7, sleepQuality: 7, lifeStress: 4
         )
         #expect(low != nil && high != nil)
         #expect(high! > low!)
@@ -58,8 +51,7 @@ struct SubjectiveScoreTests {
     @Test("partial data: average over whatever's present")
     func partialData() {
         let avg = SubjectiveScore.dailyAverage(
-            fatigue: nil, mood: 6, soreness: nil, sleepQuality: nil,
-            workStress: nil, relationshipStress: nil, overallLifeStress: nil
+            fatigue: nil, mood: 6, soreness: nil, sleepQuality: nil, lifeStress: nil
         )
         #expect(avg == 6.0)
     }
@@ -67,8 +59,7 @@ struct SubjectiveScoreTests {
     @Test("no data at all -> nil")
     func noData() {
         let avg = SubjectiveScore.dailyAverage(
-            fatigue: nil, mood: nil, soreness: nil, sleepQuality: nil,
-            workStress: nil, relationshipStress: nil, overallLifeStress: nil
+            fatigue: nil, mood: nil, soreness: nil, sleepQuality: nil, lifeStress: nil
         )
         #expect(avg == nil)
     }

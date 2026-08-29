@@ -12,9 +12,7 @@ struct DayDetailView: View {
                     scoreRow("Mood", day.mood)
                     scoreRow("Soreness / heavy legs", day.soreness)
                     scoreRow("Sleep quality", day.sleepQuality)
-                    scoreRow("Work stress", day.workStress)
-                    scoreRow("Relationship stress", day.relationshipStress)
-                    scoreRow("Overall life stress", day.overallLifeStress, last: true)
+                    scoreRow("Life stress", day.lifeStress, last: true)
                 }
 
                 if hasAnyHabitAnswer {

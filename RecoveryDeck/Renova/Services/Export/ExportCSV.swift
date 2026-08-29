@@ -8,8 +8,8 @@ import RecoveryKit
 /// `CSVBuilder`, which knows nothing about this app's models.
 enum ExportCSV {
     static let header = [
-        "localDate", "fatigue", "mood", "soreness", "sleepQuality", "workStress",
-        "relationshipStress", "overallLifeStress", "bodyWeightKg", "lastCaffeineAt", "caffeineAmountMg",
+        "localDate", "fatigue", "mood", "soreness", "sleepQuality", "lifeStress",
+        "bodyWeightKg", "lastCaffeineAt", "caffeineAmountMg",
         "lastMealAt", "habitAlcohol", "habitIntenseTrainingYesterday", "habitLongTrainingYesterday",
         "habitTravel", "habitLateNight", "habitSick", "habitMeditationYesterday", "notes",
         "measuredAt", "protocolVersion", "rmssdMs", "meanHrBpm", "hrvQuality", "avgLyingHr",
@@ -32,9 +32,7 @@ enum ExportCSV {
                 str(day.mood),
                 str(day.soreness),
                 str(day.sleepQuality),
-                str(day.workStress),
-                str(day.relationshipStress),
-                str(day.overallLifeStress),
+                str(day.lifeStress),
                 str(day.bodyWeightKg),
                 str(day.lastCaffeineAt),
                 str(day.caffeineAmountMg),

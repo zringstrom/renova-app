@@ -33,16 +33,16 @@ struct GateLogicTests {
         #expect(GateLogic.canStartMeasurement(today: today, questionnaire: complete) == true)
     }
 
-    @Test("isQuestionnaireComplete requires all seven scores in range")
-    func requiresAllSevenScores() {
-        #expect(GateLogic.isQuestionnaireComplete(fatigue: 4, mood: 4, soreness: 4, sleepQuality: 4, workStress: 4, relationshipStress: 4, overallLifeStress: 4) == true)
-        #expect(GateLogic.isQuestionnaireComplete(fatigue: nil, mood: 4, soreness: 4, sleepQuality: 4, workStress: 4, relationshipStress: 4, overallLifeStress: 4) == false)
-        #expect(GateLogic.isQuestionnaireComplete(fatigue: 4, mood: 4, soreness: 4, sleepQuality: 4, workStress: 4, relationshipStress: 4, overallLifeStress: nil) == false)
+    @Test("isQuestionnaireComplete requires all five scores in range")
+    func requiresAllFiveScores() {
+        #expect(GateLogic.isQuestionnaireComplete(fatigue: 4, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: 4) == true)
+        #expect(GateLogic.isQuestionnaireComplete(fatigue: nil, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: 4) == false)
+        #expect(GateLogic.isQuestionnaireComplete(fatigue: 4, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: nil) == false)
     }
 
     @Test("isQuestionnaireComplete rejects out-of-range scores")
     func rejectsOutOfRange() {
-        #expect(GateLogic.isQuestionnaireComplete(fatigue: 0, mood: 4, soreness: 4, sleepQuality: 4, workStress: 4, relationshipStress: 4, overallLifeStress: 4) == false)
-        #expect(GateLogic.isQuestionnaireComplete(fatigue: 8, mood: 4, soreness: 4, sleepQuality: 4, workStress: 4, relationshipStress: 4, overallLifeStress: 4) == false)
+        #expect(GateLogic.isQuestionnaireComplete(fatigue: 0, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: 4) == false)
+        #expect(GateLogic.isQuestionnaireComplete(fatigue: 8, mood: 4, soreness: 4, sleepQuality: 4, lifeStress: 4) == false)
     }
 }

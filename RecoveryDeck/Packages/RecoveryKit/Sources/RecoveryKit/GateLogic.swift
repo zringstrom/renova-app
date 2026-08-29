@@ -31,12 +31,14 @@ public enum GateLogic {
         return questionnaire.localDate == today && questionnaire.isComplete
     }
 
-    /// Block A + B (PRD §6.3, revised): seven required 1–7 scores — Fatigue,
-    /// Mood, Soreness, Sleep quality, and stress split three ways (Work,
-    /// Relationship, Overall). Submit enables only when all seven have been set.
+    /// Block A + B (PRD §6.3): five required 1–7 scores — Fatigue, Mood,
+    /// Soreness, Sleep quality, Life stress. Submit enables only when all
+    /// five have been set. (Stress was briefly split three ways — Work,
+    /// Relationship, Overall — but that was reverted; a single Life stress
+    /// score is the only stress input now.)
     ///
-    /// Note on polarity: Fatigue and the three stress fields are "amount" scales
-    /// (1 = little/good, 7 = a lot/bad); Mood, Soreness, and Sleep quality are
+    /// Note on polarity: Fatigue and Life stress are "amount" scales (1 =
+    /// little/good, 7 = a lot/bad); Mood, Soreness, and Sleep quality are
     /// "higher = better" scales. `isQuestionnaireComplete` only checks presence
     /// and range — it does not need to know about polarity, since nothing here
     /// averages the scores together.
@@ -45,11 +47,9 @@ public enum GateLogic {
         mood: Int?,
         soreness: Int?,
         sleepQuality: Int?,
-        workStress: Int?,
-        relationshipStress: Int?,
-        overallLifeStress: Int?
+        lifeStress: Int?
     ) -> Bool {
-        let scores = [fatigue, mood, soreness, sleepQuality, workStress, relationshipStress, overallLifeStress]
+        let scores = [fatigue, mood, soreness, sleepQuality, lifeStress]
         for score in scores {
             guard let score, (1...7).contains(score) else { return false }
         }

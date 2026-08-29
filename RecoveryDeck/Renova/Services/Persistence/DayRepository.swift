@@ -37,9 +37,7 @@ final class DayRepository {
         var mood: Int
         var soreness: Int
         var sleepQuality: Int
-        var workStress: Int
-        var relationshipStress: Int
-        var overallLifeStress: Int
+        var lifeStress: Int
         var bodyWeightKg: Double?
         var lastCaffeineAt: Date?
         var caffeineAmountMg: Double?
@@ -74,9 +72,7 @@ final class DayRepository {
         record.mood = answers.mood
         record.soreness = answers.soreness
         record.sleepQuality = answers.sleepQuality
-        record.workStress = answers.workStress
-        record.relationshipStress = answers.relationshipStress
-        record.overallLifeStress = answers.overallLifeStress
+        record.lifeStress = answers.lifeStress
         record.bodyWeightKg = answers.bodyWeightKg
         record.lastCaffeineAt = answers.lastCaffeineAt
         record.caffeineAmountMg = answers.caffeineAmountMg
@@ -161,9 +157,7 @@ final class DayRepository {
             record.mood = day.mood
             record.soreness = day.soreness
             record.sleepQuality = day.sleepQuality
-            record.workStress = day.workStress
-            record.relationshipStress = day.relationshipStress
-            record.overallLifeStress = day.overallLifeStress
+            record.lifeStress = day.lifeStress
             record.bodyWeightKg = day.bodyWeightKg
             record.lastCaffeineAt = day.lastCaffeineAt
             record.caffeineAmountMg = day.caffeineAmountMg
@@ -256,9 +250,7 @@ final class DayRepository {
                 mood: Int.random(in: 1...7, using: &rng),
                 soreness: Int.random(in: 1...7, using: &rng),
                 sleepQuality: Int.random(in: 1...7, using: &rng),
-                workStress: Int.random(in: 1...7, using: &rng),
-                relationshipStress: Int.random(in: 1...7, using: &rng),
-                overallLifeStress: Int.random(in: 1...7, using: &rng),
+                lifeStress: Int.random(in: 1...7, using: &rng),
                 bodyWeightKg: gaussian(mean: 75, sd: 0.6, using: &rng),
                 lastCaffeineAt: nil,
                 caffeineAmountMg: nil,

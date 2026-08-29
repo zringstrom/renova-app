@@ -3,11 +3,12 @@
 **Product name:** **Renova**  
 **Owner:** Zachery Ringstrom  
 **Status:** Approved (2026-08-02) — implementation in progress  
-**Version:** 1.4  
-**Date:** 2026-08-02  
+**Version:** 1.5  
+**Date:** 2026-08-29  
 **Changelog 1.2:** Rename Renova; local analytics; 1–7 scales; Alan + WHOOP-style questionnaire; optional display name; TP/Intervals future; evidence notes.  
 **Changelog 1.3:** Keep short orthostatic; G/Y/R reframed to Couzens 7d vs 60d ±1 SD; optional caffeine time/amount + last meal time; HealthKit not v3 confirmed.  
 **Changelog 1.4:** Merged rMSSD + lying-HR into one 60–75 s Lying phase (O2 superseded), session now ~2–2.5 min; questionnaire revised to 7 scores (stress split 3 ways, Fatigue/Stress now amount-scaled); habit chips split/renamed + default on; export added; Control Grid visual system adopted for the real app (not just mockups).  
+**Changelog 1.5:** Reverted the 1.4 three-way stress split (Work/Relationship/Overall) back to a single **Life stress** score — questionnaire is 5 required scores, not 7. `workStress`/`relationshipStress` are gone from the schema; existing data carries forward via `overallLifeStress`, which the three fields always mirrored anyway.  
 **Companion:** [`TECH_SPEC.md`](./TECH_SPEC.md) · [`REVIEW_NOTES_RESPONSE.md`](./REVIEW_NOTES_RESPONSE.md)
 
 ---

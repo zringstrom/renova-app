@@ -182,7 +182,7 @@ struct TodayView: View {
         VStack(spacing: 0) {
             todoRow(
                 title: "Questionnaire",
-                subtitle: isQuestionnaireDoneToday ? "7 SCORES LOGGED" : "Fatigue, mood, soreness, stress, sleep",
+                subtitle: isQuestionnaireDoneToday ? "5 SCORES LOGGED" : "Fatigue, mood, soreness, stress, sleep",
                 state: isQuestionnaireDoneToday ? .done : .pending,
                 doneTagText: "EDIT",
                 doneTagColor: CGTheme.inkFaint

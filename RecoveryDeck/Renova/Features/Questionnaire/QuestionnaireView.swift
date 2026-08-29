@@ -10,9 +10,7 @@ struct QuestionnaireView: View {
     @State private var mood: Int?
     @State private var soreness: Int?
     @State private var sleepQuality: Int?
-    @State private var workStress: Int?
-    @State private var relationshipStress: Int?
-    @State private var overallLifeStress: Int?
+    @State private var lifeStress: Int?
 
     @AppStorage("weightUnit") private var weightUnit = WeightUnit.kg.rawValue
     @AppStorage("weightTrackingEnabled") private var weightTrackingEnabled = true
@@ -44,9 +42,7 @@ struct QuestionnaireView: View {
         _mood = State(initialValue: existing?.mood)
         _soreness = State(initialValue: existing?.soreness)
         _sleepQuality = State(initialValue: existing?.sleepQuality)
-        _workStress = State(initialValue: existing?.workStress)
-        _relationshipStress = State(initialValue: existing?.relationshipStress)
-        _overallLifeStress = State(initialValue: existing?.overallLifeStress)
+        _lifeStress = State(initialValue: existing?.lifeStress)
         let storedUnit = WeightUnit(rawValue: UserDefaults.standard.string(forKey: "weightUnit") ?? "") ?? .kg
         _weightText = State(initialValue: existing?.bodyWeightKg.map { String(format: "%.1f", storedUnit.fromKg($0)) } ?? "")
         // Caffeine/meal timing tends to repeat day to day, so default all
@@ -86,29 +82,9 @@ struct QuestionnaireView: View {
         Calendar.current.date(bySettingHour: 18, minute: 30, second: 0, of: Date()) ?? defaultTimeSlotDate
     }
 
-    /// Life Stress collapses three underlying fields into one row, so it
-    /// only counts once here — otherwise touching that one slider jumps the
-    /// counter by 3 at once (e.g. straight from 4/7 to 7/7, skipping 5 and 6
-    /// entirely) since it writes all three fields simultaneously.
-    private var scores: [Int?] { [fatigue, mood, soreness, sleepQuality, lifeStressBinding.wrappedValue] }
+    private var scores: [Int?] { [fatigue, mood, soreness, sleepQuality, lifeStress] }
     private var setCount: Int { scores.compactMap { $0 }.count }
     private var isComplete: Bool { setCount == scores.count }
-
-    /// One slider standing in for all three stress fields — writes the same
-    /// value to `workStress`/`relationshipStress`/`overallLifeStress` so
-    /// nothing downstream (baselines, exports) has to change. Reads back
-    /// whichever of the three is set (they're always equal once touched
-    /// through this binding).
-    private var lifeStressBinding: Binding<Int?> {
-        Binding(
-            get: { workStress ?? relationshipStress ?? overallLifeStress },
-            set: { newValue in
-                workStress = newValue
-                relationshipStress = newValue
-                overallLifeStress = newValue
-            }
-        )
-    }
 
     var body: some View {
         ScrollView {
@@ -122,7 +98,7 @@ struct QuestionnaireView: View {
                 metricRow(title: "Soreness / heavy legs", low: "None", high: "Very sore", value: $soreness)
                 metricRow(title: "Sleep quality", low: "Terrible", high: "Excellent", value: $sleepQuality)
 
-                metricRow(title: "Life stress", low: "Low", high: "Very high", value: lifeStressBinding)
+                metricRow(title: "Life stress", low: "Low", high: "Very high", value: $lifeStress)
 
                 if weightTrackingEnabled {
                     sectionLabel("MORNING WEIGHT")
@@ -514,16 +490,13 @@ struct QuestionnaireView: View {
     }
 
     private func submit() {
-        guard let fatigue, let mood, let soreness, let sleepQuality,
-              let workStress, let relationshipStress, let overallLifeStress else { return }
+        guard let fatigue, let mood, let soreness, let sleepQuality, let lifeStress else { return }
         let answers = DayRepository.QuestionnaireAnswers(
             fatigue: fatigue,
             mood: mood,
             soreness: soreness,
             sleepQuality: sleepQuality,
-            workStress: workStress,
-            relationshipStress: relationshipStress,
-            overallLifeStress: overallLifeStress,
+            lifeStress: lifeStress,
             bodyWeightKg: weightTrackingEnabled ? sanitizedBodyWeightKg : viewModel.todayRecord?.bodyWeightKg,
             lastCaffeineAt: lastCaffeineAt,
             caffeineAmountMg: Double(caffeineAmountMg),

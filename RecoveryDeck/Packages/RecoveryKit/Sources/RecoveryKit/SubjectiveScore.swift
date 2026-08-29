@@ -5,16 +5,15 @@ import Foundation
 /// (plan Phase 10) — never part of a composite readiness score, just its own
 /// standalone row.
 ///
-/// **Polarity trap:** `fatigue`, `workStress`, `relationshipStress`, and
-/// `overallLifeStress` are stored as "amount" scales (1 = little/good, 7 = a
-/// lot/bad — see `DayRecord`'s doc comment in the app target). `mood`,
-/// `soreness`, and `sleepQuality` are already "higher = better." Averaging
-/// them together without flipping the four amount scales via `8 − x` first
-/// would silently invert the whole readout (a terrible week of fatigue=7
-/// would read as *good*). This type does the flip so callers never have to
-/// remember to.
+/// **Polarity trap:** `fatigue` and `lifeStress` are stored as "amount"
+/// scales (1 = little/good, 7 = a lot/bad — see `DayRecord`'s doc comment in
+/// the app target). `mood`, `soreness`, and `sleepQuality` are already
+/// "higher = better." Averaging them together without flipping the two
+/// amount scales via `8 − x` first would silently invert the whole readout
+/// (a terrible week of fatigue=7 would read as *good*). This type does the
+/// flip so callers never have to remember to.
 public enum SubjectiveScore {
-    /// Any subset of the 7 fields may be present (a day's questionnaire may
+    /// Any subset of the 5 fields may be present (a day's questionnaire may
     /// be incomplete); the average is over whatever is non-nil. `nil` if none
     /// are present at all.
     public static func dailyAverage(
@@ -22,18 +21,14 @@ public enum SubjectiveScore {
         mood: Int?,
         soreness: Int?,
         sleepQuality: Int?,
-        workStress: Int?,
-        relationshipStress: Int?,
-        overallLifeStress: Int?
+        lifeStress: Int?
     ) -> Double? {
         var values: [Double] = []
         if let fatigue { values.append(8 - Double(fatigue)) }
         if let mood { values.append(Double(mood)) }
         if let soreness { values.append(Double(soreness)) }
         if let sleepQuality { values.append(Double(sleepQuality)) }
-        if let workStress { values.append(8 - Double(workStress)) }
-        if let relationshipStress { values.append(8 - Double(relationshipStress)) }
-        if let overallLifeStress { values.append(8 - Double(overallLifeStress)) }
+        if let lifeStress { values.append(8 - Double(lifeStress)) }
         guard !values.isEmpty else { return nil }
         return values.reduce(0, +) / Double(values.count)
     }
