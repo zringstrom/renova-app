@@ -40,6 +40,9 @@ struct QuestionnaireView: View {
         self.viewModel = viewModel
         self.isEditing = isEditing
         let existing = isEditing ? viewModel.todayRecord : nil
+        // Caffeine/meal/weight all tend to repeat day to day, so default them
+        // to whatever was logged yesterday instead of starting blank.
+        let yesterday = viewModel.dayRecord(for: viewModel.today.adding(days: -1, timeZone: .current))
         _fatigue = State(initialValue: existing?.fatigue)
         _mood = State(initialValue: existing?.mood)
         _soreness = State(initialValue: existing?.soreness)
@@ -48,11 +51,8 @@ struct QuestionnaireView: View {
         _relationshipStress = State(initialValue: existing?.relationshipStress)
         _overallLifeStress = State(initialValue: existing?.overallLifeStress)
         let storedUnit = WeightUnit(rawValue: UserDefaults.standard.string(forKey: "weightUnit") ?? "") ?? .kg
-        _weightText = State(initialValue: existing?.bodyWeightKg.map { String(format: "%.1f", storedUnit.fromKg($0)) } ?? "")
-        // Caffeine/meal timing tends to repeat day to day, so default all
-        // three fields to whatever was logged yesterday instead of starting
-        // blank.
-        let yesterday = viewModel.dayRecord(for: viewModel.today.adding(days: -1, timeZone: .current))
+        _weightText = State(initialValue: (existing?.bodyWeightKg ?? yesterday?.bodyWeightKg)
+            .map { String(format: "%.1f", storedUnit.fromKg($0)) } ?? "")
         _lastCaffeineAt = State(initialValue: existing?.lastCaffeineAt ?? yesterday?.lastCaffeineAt)
         _caffeineAmountMg = State(initialValue: existing?.caffeineAmountMg.map { String(format: "%.0f", $0) }
             ?? yesterday?.caffeineAmountMg.map { String(format: "%.0f", $0) }
@@ -291,6 +291,8 @@ struct QuestionnaireView: View {
             }
             .background(CGTheme.surface2)
             .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.lineStrong, lineWidth: 1))
+
+            weightStepperRow
         }
         .padding(14)
         .background(CGTheme.surface)
@@ -298,6 +300,48 @@ struct QuestionnaireView: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 4)
         .background(CGTheme.surface)
+    }
+
+    /// Quick ±1 lb / ±0.5 lb nudges off whatever's currently in the field
+    /// (usually yesterday's weight, carried forward by `init`) — day-to-day
+    /// weight moves in small increments, so this beats retyping the whole
+    /// number. Always steps by a fixed pound amount regardless of the
+    /// display unit (`WeightUnit.lbsToKg` converts under the hood), since the
+    /// step size people actually think in is pounds even if they display kg.
+    private var weightStepperRow: some View {
+        HStack(spacing: 8) {
+            weightStepButton("−1", deltaLbs: -1)
+            weightStepButton("−½", deltaLbs: -0.5)
+            Spacer()
+            Text("LB STEPS").font(.system(size: 9, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
+            Spacer()
+            weightStepButton("+½", deltaLbs: 0.5)
+            weightStepButton("+1", deltaLbs: 1)
+        }
+    }
+
+    private func weightStepButton(_ label: String, deltaLbs: Double) -> some View {
+        let enabled = parsedWeightInput != nil
+        return Button {
+            adjustWeight(byLbs: deltaLbs)
+        } label: {
+            Text(label)
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .foregroundStyle(CGTheme.accent)
+                .frame(width: 36, height: 28)
+                .background(CGTheme.surface2)
+                .overlay(RoundedRectangle(cornerRadius: 0).stroke(CGTheme.lineStrong, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .opacity(enabled ? 1 : 0.35)
+        .disabled(!enabled)
+    }
+
+    private func adjustWeight(byLbs deltaLbs: Double) {
+        guard let current = parsedWeightInput else { return }
+        let newKg = max(0, currentWeightUnit.toKg(current) + WeightUnit.lbsToKg(deltaLbs))
+        weightText = String(format: "%.1f", currentWeightUnit.fromKg(newKg))
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 
     /// Re-expresses the currently typed value in the new unit rather than

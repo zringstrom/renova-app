@@ -29,4 +29,11 @@ enum WeightUnit: String, CaseIterable {
         case .lbs: value * Self.kgPerLb
         }
     }
+
+    /// `lbs` in kg — used by the questionnaire's ±1 lb / ±0.5 lb weight
+    /// stepper, which nudges by a fixed pound amount regardless of which
+    /// unit the user has chosen to display.
+    static func lbsToKg(_ lbs: Double) -> Double {
+        lbs * kgPerLb
+    }
 }
