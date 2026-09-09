@@ -302,30 +302,31 @@ struct QuestionnaireView: View {
         .background(CGTheme.surface)
     }
 
-    /// Quick ±1 lb / ±0.5 lb nudges off whatever's currently in the field
-    /// (usually yesterday's weight, carried forward by `init`) — day-to-day
-    /// weight moves in small increments, so this beats retyping the whole
-    /// number. Always steps by a fixed pound amount regardless of the
-    /// display unit (`WeightUnit.lbsToKg` converts under the hood), since the
-    /// step size people actually think in is pounds even if they display kg.
+    /// Quick nudges off whatever's currently in the field (usually
+    /// yesterday's weight, carried forward by `init`) — day-to-day weight
+    /// moves in small increments, so this beats retyping the whole number.
+    /// Step size is native to whichever unit is currently displayed
+    /// (`weightStepSizes`), not a fixed pound amount converted under the
+    /// hood — a lb-sized step looks wrong on a kg scale and vice versa.
     private var weightStepperRow: some View {
-        HStack(spacing: 8) {
-            weightStepButton("−1", deltaLbs: -1)
-            weightStepButton("−½", deltaLbs: -0.5)
+        let steps = currentWeightUnit.stepSizes
+        return HStack(spacing: 8) {
+            weightStepButton(-steps.large)
+            weightStepButton(-steps.small)
             Spacer()
-            Text("LB STEPS").font(.system(size: 9, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
+            Text("\(currentWeightUnit.label) STEPS").font(.system(size: 9, design: .monospaced)).foregroundStyle(CGTheme.inkFaint)
             Spacer()
-            weightStepButton("+½", deltaLbs: 0.5)
-            weightStepButton("+1", deltaLbs: 1)
+            weightStepButton(steps.small)
+            weightStepButton(steps.large)
         }
     }
 
-    private func weightStepButton(_ label: String, deltaLbs: Double) -> some View {
+    private func weightStepButton(_ delta: Double) -> some View {
         let enabled = parsedWeightInput != nil
         return Button {
-            adjustWeight(byLbs: deltaLbs)
+            adjustWeight(by: delta)
         } label: {
-            Text(label)
+            Text(Self.stepLabel(delta))
                 .font(.system(size: 13, weight: .bold, design: .monospaced))
                 .foregroundStyle(CGTheme.accent)
                 .frame(width: 36, height: 28)
@@ -337,10 +338,22 @@ struct QuestionnaireView: View {
         .disabled(!enabled)
     }
 
-    private func adjustWeight(byLbs deltaLbs: Double) {
+    /// "+1"/"−1" for whole amounts, "+0.5"/"−0.2" etc. otherwise — no
+    /// trailing ".0" on the whole-number steps.
+    private static func stepLabel(_ delta: Double) -> String {
+        let magnitude = abs(delta)
+        let magnitudeText = magnitude.truncatingRemainder(dividingBy: 1) == 0
+            ? String(format: "%.0f", magnitude)
+            : String(format: "%.1f", magnitude)
+        return (delta < 0 ? "−" : "+") + magnitudeText
+    }
+
+    /// Adjusts directly in whatever unit is currently displayed — no kg/lb
+    /// conversion needed since `weightText` is already in that unit.
+    private func adjustWeight(by delta: Double) {
         guard let current = parsedWeightInput else { return }
-        let newKg = max(0, currentWeightUnit.toKg(current) + WeightUnit.lbsToKg(deltaLbs))
-        weightText = String(format: "%.1f", currentWeightUnit.fromKg(newKg))
+        let newValue = max(0, current + delta)
+        weightText = String(format: "%.1f", newValue)
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 
